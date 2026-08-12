@@ -1,141 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Using Collections — sharp-runtime Tutorials</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use Collections Safely | Sharp Runtime</title>
+  <meta name="description" content="Choose Sharp Runtime collection components and preserve iterator/versioning semantics.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/use-collections.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Use Collections Safely | Sharp Runtime">
+  <meta property="og:description" content="Choose Sharp Runtime collection components and preserve iterator/versioning semantics.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/use-collections.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Use Collections Safely | Sharp Runtime">
+  <meta name="twitter:description" content="Choose Sharp Runtime collection components and preserve iterator/versioning semantics.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Use Collections Safely", "description": "Choose Sharp Runtime collection components and preserve iterator/versioning semantics.", "url": "https://sharpruntime.com/tutorials/use-collections.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Use Collections Safely", "item": "https://sharpruntime.com/tutorials/use-collections.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="index.html">Tutorials Index</a></li>
-    <li><a href="use-collections.html">Using Collections</a></li>
-    <li><a href="port-csharp-class.html">Porting a C# Class</a></li>
-    <li><a href="work-with-files.html">Working with Files</a></li>
-    <li><a href="use-events.html">Using Events</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Tutorials</a></span><span>Using Collections</span></div>
-    <div id="search-results"></div>
-    <h1>Using Collections</h1>
-    <p class="page-subtitle">How to use <code>List&lt;T&gt;</code>, <code>Dictionary&lt;K,V&gt;</code>, and other generic collections.</p>
-
-    <h2>Includes</h2>
-    <pre><code>#include &lt;System/Collections/Generic/List.hpp&gt;
-#include &lt;System/Collections/Generic/Dictionary.hpp&gt;
-#include &lt;System/Collections/Generic/HashSet.hpp&gt;
-#include &lt;System/Collections/Generic/Queue.hpp&gt;
-#include &lt;System/Collections/Generic/Stack.hpp&gt;</code></pre>
-
-    <h2>List&lt;T&gt;</h2>
-    <p>Wraps <code>std::vector&lt;T&gt;</code>. Use when you need a .NET-compatible resizable list.</p>
-    <pre><code>System::Collections::Generic::List&lt;std::string&gt; names;
-names.Add("Alice");
-names.Add("Bob");
-names.Add("Carol");
-
-// Access by index
-std::string first = names[0];           // "Alice"
-
-// Iterate (range-for supported)
-for (const auto&amp; name : names) {
-    std::cout &lt;&lt; name &lt;&lt; "\n";
-}
-
-// Remove
-names.Remove("Bob");
-
-// Contains
-bool has = names.Contains("Alice");     // true
-
-// Count
-int n = names.Count();                  // 2
-
-// Convert to std::vector
-std::vector&lt;std::string&gt; vec = names.ToVector();</code></pre>
-
-    <h2>Dictionary&lt;K,V&gt;</h2>
-    <p>Wraps <code>std::unordered_map&lt;K,V&gt;</code>.</p>
-    <pre><code>System::Collections::Generic::Dictionary&lt;std::string, int&gt; scores;
-scores["Alice"] = 100;
-scores["Bob"] = 85;
-
-// Access
-int s = scores["Alice"];                // 100
-
-// Check key exists
-bool has = scores.ContainsKey("Carol"); // false
-
-// Remove
-scores.Remove("Bob");
-
-// Iterate
-for (const auto&amp; [key, value] : scores) {
-    std::cout &lt;&lt; key &lt;&lt; ": " &lt;&lt; value &lt;&lt; "\n";
-}
-
-// TryGetValue
-int val;
-if (scores.TryGetValue("Alice", val)) {
-    std::cout &lt;&lt; "Found: " &lt;&lt; val &lt;&lt; "\n";
-}</code></pre>
-
-    <h2>HashSet&lt;T&gt;</h2>
-    <p>Wraps <code>std::unordered_set&lt;T&gt;</code>.</p>
-    <pre><code>System::Collections::Generic::HashSet&lt;int&gt; seen;
-seen.Add(1);
-seen.Add(2);
-seen.Add(1);  // duplicate — ignored
-
-bool contains = seen.Contains(2);       // true
-int count = seen.Count();               // 2</code></pre>
-
-    <h2>Queue&lt;T&gt;</h2>
-    <p>FIFO queue backed by <code>std::queue</code>.</p>
-    <pre><code>System::Collections::Generic::Queue&lt;std::string&gt; q;
-q.Enqueue("first");
-q.Enqueue("second");
-
-std::string front = q.Dequeue();        // "first"
-std::string peek  = q.Peek();           // "second" (doesn't remove)</code></pre>
-
-    <h2>Stack&lt;T&gt;</h2>
-    <p>LIFO stack backed by <code>std::stack</code>.</p>
-    <pre><code>System::Collections::Generic::Stack&lt;int&gt; stack;
-stack.Push(10);
-stack.Push(20);
-
-int top = stack.Pop();                  // 20
-int peek = stack.Peek();               // 10</code></pre>
-
-    <h2>Choosing the Right Collection</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# type</th><th>sharp-runtime type</th><th>Underlying</th></tr>
-      <tr><td><code>List&lt;T&gt;</code></td><td><code>List&lt;T&gt;</code></td><td><code>std::vector</code></td></tr>
-      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>std::unordered_map</code></td></tr>
-      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>HashSet&lt;T&gt;</code></td><td><code>std::unordered_set</code></td></tr>
-      <tr><td><code>Queue&lt;T&gt;</code></td><td><code>Queue&lt;T&gt;</code></td><td><code>std::queue</code></td></tr>
-      <tr><td><code>Stack&lt;T&gt;</code></td><td><code>Stack&lt;T&gt;</code></td><td><code>std::stack</code></td></tr>
-      <tr><td><code>SortedDictionary&lt;K,V&gt;</code></td><td><code>SortedDictionary&lt;K,V&gt;</code></td><td><code>std::map</code></td></tr>
-      <tr><td><code>LinkedList&lt;T&gt;</code></td><td><code>LinkedList&lt;T&gt;</code></td><td><code>std::list</code></td></tr>
-      <tr><td><code>T[]</code> (simple)</td><td><code>std::vector&lt;T&gt;</code></td><td>direct</td></tr>
-    </table>
-    </div>
-
-    <div class="nav-links">
-      <a class="prev" href="index.html">← Tutorials Index</a>
-      <a class="next" href="port-csharp-class.html">Porting a C# Class →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Use Collections Safely</span></nav><h1>Use Collections Safely</h1><p class="lead">Choose Sharp Runtime collection components and preserve iterator/versioning semantics.</p><div class="page-meta"><span>Intermediate</span><span>Tutorial</span></div>
+<h2 id="choose">Choose the family first</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Need</th><th scope="col">Component</th></tr></thead><tbody><tr><td>Synchronous lists, dictionaries, sets, queues</td><td><code>Collections.Core</code></td></tr><tr><td>Blocking producer/consumer queue</td><td><code>Collections.Blocking</code></td></tr><tr><td>Async enumeration contracts</td><td><code>Collections.Async</code></td></tr><tr><td>Observable/object-model collections</td><td><code>Collections.ObjectModel</code></td></tr></tbody></table></div>
+<h2 id="cmake">Select it</h2><pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Collections.Core)
+target_link_libraries(app PRIVATE SharpRuntime::Collections.Core)</code></pre>
+<h2 id="rules">Native rules still apply</h2><ul><li>Mutation invalidates version-sensitive enumerators; do not keep them across changes.</li><li>Container element ownership follows the chosen C++ value/pointer type.</li><li>Concurrent collections do not make the objects stored inside them thread-safe.</li><li>Floating keys need an intentional comparer policy, particularly for NaN and signed zero.</li></ul><div class="callout callout--warning"><div class="callout-title">Avoid transliteration by type name alone</div><p>A C# collection of managed objects and a C++ collection of values have different copy, identity and lifetime behavior. Decide the element model before selecting the container.</p></div><div class="next-links"><a href="index.html"><span class="next-label">Tutorial hub</span>All tutorials</a><a href="../components/index.html"><span class="next-label">Reference</span>Component catalogue</a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

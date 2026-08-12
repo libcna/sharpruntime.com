@@ -1,0 +1,19 @@
+name: Site integrity
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 tools/build_site.py
+      - run: git diff --exit-code
+      - run: python3 tools/validate_site.py
+      - run: node --check assets/script.js
+      - run: node --check assets/search.js

@@ -1,178 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Type System — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Type System and Core Values | Sharp Runtime</title>
+  <meta name="description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <link rel="canonical" href="https://sharpruntime.com/type-system.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Type System and Core Values | Sharp Runtime">
+  <meta property="og:description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <meta property="og:url" content="https://sharpruntime.com/type-system.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Type System and Core Values | Sharp Runtime">
+  <meta name="twitter:description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Type System and Core Values", "description": "Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.", "url": "https://sharpruntime.com/type-system.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Type System and Core Values", "item": "https://sharpruntime.com/type-system.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Type System</span></div>
-    <div id="search-results"></div>
-    <h1>Type System</h1>
-    <p class="page-subtitle">Object base class, primitive type aliases, numeric wrappers, and type helpers.</p>
-
-    <h2>System::Object — The Base Class</h2>
-    <p class="file-path">modules/core/include/System/Object.hpp</p>
-    <p>All complex types in sharp-runtime inherit from <code>System::Object</code>, mirroring .NET's universal base class. It provides:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Method</th><th>Description</th><th>Status</th></tr>
-      <tr><td><code>virtual std::string ToString() const</code></td><td>Returns the type name by default. Override to provide meaningful representation.</td><td><span class="badge badge-done">Implemented</span></td></tr>
-      <tr><td><code>virtual bool Equals(const Object*) const</code></td><td>Reference identity by default.</td><td><span class="badge badge-done">Implemented</span></td></tr>
-      <tr><td><code>static bool Equals(const Object*, const Object*)</code></td><td>Static null-safe equality helper.</td><td><span class="badge badge-done">Implemented</span></td></tr>
-      <tr><td><code>static bool ReferenceEquals(const Object*, const Object*)</code></td><td>Pointer comparison.</td><td><span class="badge badge-done">Implemented</span></td></tr>
-      <tr><td><code>virtual int GetHashCode() const</code></td><td>Hashes object identity (address) by default.</td><td><span class="badge badge-done">Implemented</span></td></tr>
-      <tr><td><code>virtual const std::string&amp; GetTypeName() const = 0</code></td><td>Pure virtual. Every concrete class must implement this.</td><td><span class="badge badge-done">Required</span></td></tr>
-    </table>
-    </div>
-
-    <h3>GetTypeName Macros</h3>
-    <p>Implementing <code>GetTypeName()</code> is boilerplate. Two macros reduce it:</p>
-    <pre><code>// In the class declaration (.hpp):
-class MyClass : public System::Object {
-    GetTypeNameHPP()  // declares the override
-};
-
-// In the implementation (.cpp):
-GetTypeNameCPP(MyClass, MyClass)
-// Expands to: const std::string&amp; MyClass::GetTypeName() const {
-//               static const std::string n = "MyClass"; return n; }</code></pre>
-
-    <h2>Primitive Type Aliases</h2>
-    <p class="file-path">modules/core/include/SharpRuntime/SharpRuntimeHelper.hpp</p>
-    <p>These aliases provide exact C# bit widths and allow ported code to read naturally:</p>
-    <pre><code>namespace SharpRuntime {
-    using sbytecs  = int8_t;    // C# sbyte
-    using bytecs   = uint8_t;   // C# byte
-    using shortcs  = int16_t;   // C# short
-    using ushortcs = uint16_t;  // C# ushort
-    using intcs    = int32_t;   // C# int
-    using uintcs   = uint32_t;  // C# uint
-    using longcs   = int64_t;   // C# long
-    using ulongcs  = uint64_t;  // C# ulong
-    using charcs   = char16_t;  // C# char (UTF-16)
-    using IntPtr   = std::uintptr_t;  // C# IntPtr
-}</code></pre>
-    <p>Also provides <code>.NET</code>-name aliases: <code>Int32</code>, <code>Int64</code>, <code>Byte</code>, <code>Single</code> (float), <code>String</code> (std::string).</p>
-    <p>Constant bounds: <code>INTCS_MAX</code>, <code>INTCS_MIN</code>, <code>BYTECS_MAX</code>, etc. via <code>std::numeric_limits</code>.</p>
-
-    <h2>Numeric Wrapper Types</h2>
-    <p>These header-only types exist primarily to provide static <code>MinValue</code> / <code>MaxValue</code> constants, mirroring C# boxed types:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Header</th><th>Purpose</th></tr>
-      <tr><td><code>modules/core/include/System/Int32.hpp</code></td><td>Int32::MaxValue, Int32::MinValue constants</td></tr>
-      <tr><td><code>modules/core/include/System/Int64.hpp</code></td><td>Int64::MaxValue, Int64::MinValue</td></tr>
-      <tr><td><code>modules/core/include/System/UInt32.hpp</code></td><td>UInt32 constants</td></tr>
-      <tr><td><code>modules/core/include/System/Byte.hpp</code></td><td>Byte::MaxValue (255)</td></tr>
-      <tr><td><code>modules/core/include/System/Single.hpp</code></td><td>float constants</td></tr>
-      <tr><td><code>modules/core/include/System/Double.hpp</code></td><td>double constants</td></tr>
-      <tr><td><code>modules/core/include/System/Char.hpp</code></td><td>Char utilities (IsDigit, IsLetter, etc.)</td></tr>
-      <tr><td><code>modules/core/include/System/Boolean.hpp</code></td><td>Boolean TrueString / FalseString constants</td></tr>
-    </table>
-    </div>
-
-    <h2>Nullable&lt;T&gt;</h2>
-    <p class="file-path">modules/core/include/System/Nullable.hpp</p>
-    <p>Maps to <code>std::optional&lt;T&gt;</code>. Provides <code>getHasValueProperty()</code>, <code>getValueProperty()</code>, <code>GetValueOrDefault()</code>.</p>
-    <pre><code>System::Nullable&lt;int&gt; n;           // null (no value)
-System::Nullable&lt;int&gt; m = 42;      // has value
-if (m.getHasValueProperty()) {
-    int v = m.getValueProperty();  // 42
-}
-int safe = n.GetValueOrDefault();   // 0</code></pre>
-
-    <h2>Interfaces</h2>
-    <p>Many .NET interface contracts have C++ equivalents as abstract base classes:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Interface Header</th><th>.NET Equivalent</th></tr>
-      <tr><td><code>System/IDisposable.hpp</code></td><td><code>IDisposable</code> — <code>Dispose()</code> method</td></tr>
-      <tr><td><code>System/IComparable.hpp</code></td><td><code>IComparable&lt;T&gt;</code> — <code>CompareTo()</code></td></tr>
-      <tr><td><code>System/IEquatable.hpp</code></td><td><code>IEquatable&lt;T&gt;</code> — <code>Equals(T)</code></td></tr>
-      <tr><td><code>System/ICloneable.hpp</code></td><td><code>ICloneable</code> — <code>Clone()</code></td></tr>
-      <tr><td><code>System/IFormattable.hpp</code></td><td><code>IFormattable</code> — <code>ToString(format)</code></td></tr>
-      <tr><td><code>System/Collections/Generic/IEnumerable.hpp</code></td><td><code>IEnumerable&lt;T&gt;</code></td></tr>
-      <tr><td><code>System/Collections/Generic/IList.hpp</code></td><td><code>IList&lt;T&gt;</code></td></tr>
-      <tr><td><code>System/Collections/Generic/IDictionary.hpp</code></td><td><code>IDictionary&lt;K,V&gt;</code></td></tr>
-    </table>
-    </div>
-
-    <h2>Type Codes</h2>
-    <p class="file-path">modules/core/include/System/TypeCode.hpp</p>
-    <p>An enum matching .NET <code>TypeCode</code> values: <code>Empty</code>, <code>Object</code>, <code>DBNull</code>, <code>Boolean</code>, <code>Char</code>, <code>SByte</code>, <code>Byte</code>, <code>Int16</code>, <code>UInt16</code>, <code>Int32</code>, <code>UInt32</code>, <code>Int64</code>, <code>UInt64</code>, <code>Single</code>, <code>Double</code>, <code>Decimal</code>, <code>DateTime</code>, <code>String</code>.</p>
-
-    <h2>Other Value Types</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Type</th><th>Header</th><th>Description</th></tr>
-      <tr><td><code>System::Decimal</code></td><td><code>System/Decimal.hpp</code></td><td>128-bit decimal with full arithmetic</td></tr>
-      <tr><td><code>System::Guid</code></td><td><code>System/Guid.hpp</code></td><td>RFC 4122 v4 GUID, NewGuid(), ToString()</td></tr>
-      <tr><td><code>System::DateTime</code></td><td><code>System/DateTime.hpp</code></td><td>Date and time, ISO-8601</td></tr>
-      <tr><td><code>System::TimeSpan</code></td><td><code>System/TimeSpan.hpp</code></td><td>Time interval</td></tr>
-      <tr><td><code>System::Version</code></td><td><code>System/Version.hpp</code></td><td>Major.Minor.Build.Revision, parse, compare</td></tr>
-      <tr><td><code>System::Uri</code></td><td><code>System/Uri.hpp</code></td><td>Full URL parsing</td></tr>
-      <tr><td><code>System::Span&lt;T&gt;</code></td><td><code>System/Span.hpp</code></td><td>Non-owning view with Slice, range-for, bounds check</td></tr>
-      <tr><td><code>System::Index</code></td><td><code>System/Index.hpp</code></td><td>Index from start or end</td></tr>
-      <tr><td><code>System::Range</code></td><td><code>System/Range.hpp</code></td><td>Range of indices</td></tr>
-      <tr><td><code>System::Tuple&lt;&gt;</code></td><td><code>System/Tuple.hpp</code></td><td>Tuple2/3/4 structs with Item1/Item2/...</td></tr>
-    </table>
-    </div>
-
-    <div class="page-nav">
-      <a class="prev" href="runtime-overview.html"><span class="page-nav-label">← Previous</span>Runtime Overview</a>
-      <a class="next" href="memory-management.html"><span class="page-nav-label">Next →</span>Memory Management</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html" aria-current="page">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Type System and Core Values</span></nav><h1>Type System and Core Values</h1><p class="lead">Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.</p><div class="page-meta"><span>Concepts</span><span>Source f827a6c5</span></div>
+<h2 id="categories">Type categories</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Category</th><th scope="col">Examples</th><th scope="col">Native consideration</th></tr></thead><tbody><tr><td>Primitive aliases</td><td><code>intcs</code>, <code>longcs</code>, byte/unsigned aliases</td><td>Fixed intent, but C++ overload/formatting rules apply</td></tr><tr><td>Wrappers</td><td>Numeric and value wrappers</td><td>Copyable native values with curated .NET-shaped APIs</td></tr><tr><td>Object / Type</td><td>Base identity and runtime type naming</td><td>Not a CLR metadata graph</td></tr><tr><td>Array / Span / Memory</td><td>Owned sequences and borrowed views</td><td>View lifetime must not exceed backing storage</td></tr><tr><td>Nullable / enums</td><td>Optional/value and enum compatibility helpers</td><td>Template and C++ enum semantics remain visible</td></tr><tr><td>Date/time</td><td>DateTime, DateOnly, TimeOnly, TimeSpan, TimeZoneInfo</td><td>Local-zone and platform data matter</td></tr></tbody></table></div>
+<h2 id="conversion">Conversion and validation</h2><p>Conversions and parsers are implemented per type. Edge behavior—including overflow, separators, culture and Try-output rules—has been an active compatibility-audit area; consult tests when contributing rather than copying an old overview count.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

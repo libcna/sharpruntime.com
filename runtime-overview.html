@@ -1,179 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Runtime Overview — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runtime Model | Sharp Runtime</title>
+  <meta name="description" content="Native type, object, string, array, delegate and exception architecture.">
+  <link rel="canonical" href="https://sharpruntime.com/runtime-overview.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Runtime Model | Sharp Runtime">
+  <meta property="og:description" content="Native type, object, string, array, delegate and exception architecture.">
+  <meta property="og:url" content="https://sharpruntime.com/runtime-overview.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Runtime Model | Sharp Runtime">
+  <meta name="twitter:description" content="Native type, object, string, array, delegate and exception architecture.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Runtime Model", "description": "Native type, object, string, array, delegate and exception architecture.", "url": "https://sharpruntime.com/runtime-overview.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Overview"}, {"@type": "ListItem", "position": 3, "name": "Runtime Model", "item": "https://sharpruntime.com/runtime-overview.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Runtime Overview</span></div>
-    <div id="search-results"></div>
-    <h1>Runtime Overview</h1>
-    <p class="page-subtitle">Core object model, type representation, memory model, and subsystem summaries.</p>
-
-    <h2>Core Object Model</h2>
-    <p>All non-primitive, non-template types in sharp-runtime derive from <code>System::Object</code>. This mirrors the .NET object hierarchy where every class ultimately derives from <code>System.Object</code>.</p>
-    <p class="file-path">modules/core/include/System/Object.hpp (public include: System/Object.hpp)</p>
-    <pre><code>class Object {
-public:
-    virtual ~Object();
-    virtual std::string ToString() const;
-    virtual bool Equals(const Object* obj) const;
-    static bool Equals(const Object* objA, const Object* objB);
-    static bool ReferenceEquals(const Object* objA, const Object* objB);
-    virtual int GetHashCode() const;
-    virtual const std::string&amp; GetTypeName() const = 0;  // pure virtual
-};</code></pre>
-
-    <h3>GetTypeName</h3>
-    <p>Every concrete class must override <code>GetTypeName()</code>. Macros are provided to reduce boilerplate:</p>
-    <pre><code>// In .hpp:
-class MyClass : public System::Object {
-    GetTypeNameHPP()  // expands to declaration
-};
-
-// In .cpp:
-GetTypeNameCPP(MyClass, MyClass)  // expands to implementation</code></pre>
-
-    <h2>Primitive Types</h2>
-    <p>C# primitive types map to C++ type aliases in the <code>SharpRuntime</code> namespace:</p>
-    <p class="file-path">modules/core/include/SharpRuntime/SharpRuntimeHelper.hpp (public include: SharpRuntime/SharpRuntimeHelper.hpp)</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# type</th><th>C++ alias</th><th>Underlying type</th></tr>
-      <tr><td><code>sbyte</code></td><td><code>SharpRuntime::sbytecs</code></td><td><code>int8_t</code></td></tr>
-      <tr><td><code>byte</code></td><td><code>SharpRuntime::bytecs</code></td><td><code>uint8_t</code></td></tr>
-      <tr><td><code>short</code></td><td><code>SharpRuntime::shortcs</code></td><td><code>int16_t</code></td></tr>
-      <tr><td><code>ushort</code></td><td><code>SharpRuntime::ushortcs</code></td><td><code>uint16_t</code></td></tr>
-      <tr><td><code>int</code></td><td><code>SharpRuntime::intcs</code></td><td><code>int32_t</code></td></tr>
-      <tr><td><code>uint</code></td><td><code>SharpRuntime::uintcs</code></td><td><code>uint32_t</code></td></tr>
-      <tr><td><code>long</code></td><td><code>SharpRuntime::longcs</code></td><td><code>int64_t</code></td></tr>
-      <tr><td><code>ulong</code></td><td><code>SharpRuntime::ulongcs</code></td><td><code>uint64_t</code></td></tr>
-      <tr><td><code>char</code></td><td><code>SharpRuntime::charcs</code></td><td><code>char16_t</code></td></tr>
-      <tr><td><code>float</code></td><td><code>float</code></td><td><code>float</code> (native)</td></tr>
-      <tr><td><code>double</code></td><td><code>double</code></td><td><code>double</code> (native)</td></tr>
-      <tr><td><code>bool</code></td><td><code>bool</code></td><td><code>bool</code> (native)</td></tr>
-      <tr><td><code>string</code></td><td><code>std::string</code></td><td><code>std::string</code></td></tr>
-    </table>
-    </div>
-
-    <h2>Component Boundaries</h2>
-    <p>The runtime is physically split into 40 components. The public namespaces above are stable; their implementation is selected through CMake targets. A few representative mappings are:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Public API area</th><th>Component target</th><th>Physical owner</th></tr>
-      <tr><td>Core object model, primitives, String, Array</td><td><code>SharpRuntime::Core.Base</code></td><td><code>modules/core</code></td></tr>
-      <tr><td>Collections</td><td><code>SharpRuntime::Collections.Core</code></td><td><code>modules/collections</code></td></tr>
-      <tr><td>Tasks</td><td><code>SharpRuntime::Threading.Tasks</code></td><td><code>modules/threading-tasks</code></td></tr>
-      <tr><td>JSON</td><td><code>SharpRuntime::Text.Json</code></td><td><code>modules/text-json</code></td></tr>
-      <tr><td>Compression</td><td><code>SharpRuntime::IO.Compression</code></td><td><code>modules/io-compression</code></td></tr>
-      <tr><td>WebSockets</td><td><code>SharpRuntime::Net.WebSockets</code></td><td><code>modules/net-websockets</code></td></tr>
-    </table>
-    </div>
-    <p>Link a direct target and let its public dependency closure propagate. Use <code>SharpRuntime::All</code> only when the complete surface is intended.</p>
-
-    <h2>Type Representation Summary</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# Concept</th><th>C++ Representation</th></tr>
-      <tr><td><code>string</code></td><td><code>std::string</code></td></tr>
-      <tr><td><code>T[]</code> (array)</td><td><code>std::vector&lt;T&gt;</code></td></tr>
-      <tr><td><code>List&lt;T&gt;</code></td><td><code>System::Collections::Generic::List&lt;T&gt;</code> (wraps <code>std::vector</code>)</td></tr>
-      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>System::Collections::Generic::Dictionary&lt;K,V&gt;</code> (wraps <code>std::unordered_map</code>)</td></tr>
-      <tr><td><code>Nullable&lt;T&gt;</code></td><td><code>System::Nullable&lt;T&gt;</code> (wraps <code>std::optional&lt;T&gt;</code>)</td></tr>
-      <tr><td><code>Action</code></td><td><code>System::Action = std::function&lt;void()&gt;</code></td></tr>
-      <tr><td><code>Action&lt;T&gt;</code></td><td><code>System::ActionT&lt;T&gt; = std::function&lt;void(T)&gt;</code></td></tr>
-      <tr><td><code>Func&lt;R&gt;</code></td><td><code>System::Func&lt;R&gt; = std::function&lt;R()&gt;</code></td></tr>
-      <tr><td><code>Predicate&lt;T&gt;</code></td><td><code>System::Predicate&lt;T&gt; = std::function&lt;bool(T)&gt;</code></td></tr>
-      <tr><td><code>event EventHandler&lt;T&gt;</code></td><td><code>System::EventHandler&lt;T&gt;</code> (combined delegate+event)</td></tr>
-    </table>
-    </div>
-
-    <h2>Memory Ownership Model</h2>
-    <p>No garbage collector. Memory is managed with C++ RAII:</p>
-    <ul>
-      <li>Stack-allocated for most value types</li>
-      <li><code>std::shared_ptr&lt;T&gt;</code> for shared ownership</li>
-      <li><code>std::unique_ptr&lt;T&gt;</code> for exclusive ownership</li>
-      <li>Raw pointers for non-owning references only</li>
-    </ul>
-    <p>See <a href="memory-management.html">Memory Management</a> for details.</p>
-
-    <h2>String Implementation</h2>
-    <p>Strings use <code>std::string</code>. <code>System::String</code> is a non-instantiable static utility class providing helpers like <code>Split</code>, <code>Format</code>, <code>IsNullOrEmpty</code>, <code>StartsWith</code>. See <a href="strings.html">Strings</a>.</p>
-
-    <h2>Array Implementation</h2>
-    <p>Arrays use <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> is a static template class providing <code>Sort</code>, <code>Copy</code>, <code>Resize</code>, <code>IndexOf</code>, <code>Reverse</code>, <code>Clear</code>. See <a href="arrays.html">Arrays</a>.</p>
-
-    <h2>Exception System</h2>
-    <p><code>System::Exception</code> extends <code>std::exception</code>. Exceptions are real C++ exceptions. See <a href="exceptions.html">Exceptions</a>.</p>
-
-    <h2>Delegate/Event System</h2>
-    <p>Built on <code>std::function</code>. <code>EventHandler&lt;T&gt;</code> combines delegate type + subscriber list. See <a href="delegates.html">Delegates &amp; Events</a>.</p>
-
-    <h2>Threading</h2>
-    <p>Uses C++ <code>&lt;thread&gt;</code>, <code>&lt;mutex&gt;</code>, <code>&lt;atomic&gt;</code>, and <code>&lt;condition_variable&gt;</code>. It provides .NET-like wrappers, plus task and channel components. C# language-level <code>async</code>/<code>await</code> syntax does not exist in C++; see <a href="threading.html">Threading</a>.</p>
-
-    <h2>I/O</h2>
-    <p>Backed by C++ standard I/O, POSIX APIs (guarded), ZLIB for compression, miniz for ZIP. See <a href="io.html">I/O</a>.</p>
-
-    <h2>Relationship to CNA</h2>
-    <p>CNA (C++ XNA 4.0 port) depends on sharp-runtime as its foundation layer. It selects the complete component surface through <code>SharpRuntime::All</code> and uses its <code>System::*</code> types. See <a href="cna-integration.html">CNA Integration</a>.</p>
-
-    <div class="page-nav">
-      <a class="prev" href="project-structure.html"><span class="page-nav-label">← Previous</span>Project Structure</a>
-      <a class="next" href="type-system.html"><span class="page-nav-label">Next →</span>Type System</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html" aria-current="page">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Overview</span><span>/</span><span aria-current="page">Runtime Model</span></nav><h1>Runtime Model</h1><p class="lead">Native type, object, string, array, delegate and exception architecture.</p><div class="page-meta"><span>Overview</span><span>Source f827a6c5</span></div>
+<h2 id="native">Native first</h2><p>Sharp Runtime types are ordinary C++ values and objects. Names and behavior aid porting, but ABI, ownership, copy/move and scheduling follow native rules.</p>
+<h2 id="foundations">Foundation surfaces</h2><div class="page-index"><a href="type-system.html">Type system<small>Object, Type, wrappers and conversion.</small></a><a href="strings.html">Strings<small>UTF-8 representation and formatting.</small></a><a href="arrays.html">Arrays and memory<small>Containers, Span and Memory concepts.</small></a><a href="exceptions.html">Exceptions<small>Hierarchy, HResult and causes.</small></a><a href="delegates.html">Delegates<small>Typed callbacks and events.</small></a><a href="reflection.html">Reflection<small>Basic type identity only.</small></a></div>
+<h2 id="boundaries">Managed-runtime boundaries</h2><p>No CLR service exists behind these types: no GC, JIT, managed metadata universe, assembly loader or general interop layer. Read <a href="compatibility.html">Compatibility Philosophy</a> before assuming managed-only behavior.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

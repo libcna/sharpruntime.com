@@ -1,126 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Running Tests — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testing and Verification | Sharp Runtime</title>
+  <meta name="description" content="How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.">
+  <link rel="canonical" href="https://sharpruntime.com/running-tests.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Testing and Verification | Sharp Runtime">
+  <meta property="og:description" content="How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.">
+  <meta property="og:url" content="https://sharpruntime.com/running-tests.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Testing and Verification | Sharp Runtime">
+  <meta name="twitter:description" content="How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Testing and Verification", "description": "How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.", "url": "https://sharpruntime.com/running-tests.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Getting Started"}, {"@type": "ListItem", "position": 3, "name": "Testing and Verification", "item": "https://sharpruntime.com/running-tests.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Running Tests</span></div>
-    <div id="search-results"></div>
-    <h1>Running Tests</h1>
-    <p class="page-subtitle">GoogleTest framework, test structure, and how to run specific test suites.</p>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html" aria-current="page">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Getting Started</span><span>/</span><span aria-current="page">Testing and Verification</span></nav><h1>Testing and verification</h1><p class="lead">The project uses layered checks: behavior tests, component isolation, negative consumers, integration tests and documentation drift detection.</p><div class="page-meta"><span>37 executables</span><span>16,341 current cases</span><span>Evidence-qualified</span></div>
+<h2 id="topology">Test topology</h2><p>There are 36 component test executables and one integration executable. <code>SharpRuntimeTests</code> is an aggregate build target, not one giant test binary. CTest discovers individual GoogleTest cases.</p><div class="table-wrap"><table class=""><thead><tr><th scope="col">Layer</th><th scope="col">What it proves</th></tr></thead><tbody><tr><td>Component executables</td><td>Behavior owned by one physical component</td></tr><tr><td>Integration executable</td><td>Genuinely cross-component behavior in an <code>All</code> build</td></tr><tr><td>Selective consumer fixtures</td><td>Requested targets configure, build and expose only declared surfaces</td></tr><tr><td>Negative fixtures</td><td>Private or sibling headers do not leak to consumers</td></tr><tr><td>Boundary validator</td><td>Unique ownership, declared edges, correct visibility and an acyclic production graph</td></tr><tr><td>Catalogue check</td><td>Generated component documentation matches CMake registration</td></tr><tr><td>Doxygen ceiling</td><td>Documentation warnings do not exceed the pinned baseline</td></tr></tbody></table></div>
+<h2 id="baseline">Current baseline, honestly stated</h2><p>At source SHA <code>f827a6c5349234d5ac938886788ed8eca8fe1c10</code>, current built executables discover <strong>16,341</strong> test cases. The latest controlled full-gate record before 31 final TimeZone additions ran 16,310 cases: 16,303 passed, one skipped and six failed. Five Ping failures were triggered by the host’s ping-group configuration but expose a real missing raw-ICMP receive fallback; one socket test depended on a missing IPv6 interface file.</p><div class="callout callout--warning"><div class="callout-title">Why the homepage does not say “16,000+ passing”</div><p>The current suite shape and the latest recorded full outcome refer to adjacent revisions. This site publishes them separately rather than inferring an unrecorded all-green result.</p></div>
+<h2 id="commands">Commands</h2><pre><code class="language-bash"># Build all test executables
+cmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All
+cmake --build build --target SharpRuntimeTests --parallel 2
 
-    <h2>Test Framework</h2>
-    <p>sharp-runtime uses <strong>GoogleTest</strong>. Tests are built per requested component when <code>SHARP_RUNTIME_BUILD_TESTS=ON</code> (the default). GoogleTest is provided by the <code>vendor/googletest/</code> Git submodule.</p>
+# Run the component-aware sequence
+scripts/run_component_tests.sh build
 
-    <h2>Run the Complete Suite</h2>
-    <pre><code>cmake -S . -B build \
-  -DSHARP_RUNTIME_COMPONENTS=All \
-  -DSHARP_RUNTIME_BUILD_TESTS=ON
-cmake --build build --target SharpRuntimeTests --parallel 4
-scripts/run_component_tests.sh build</code></pre>
-    <p><code>SharpRuntimeTests</code> is an aggregate build target. The runner script finds every selected component test executable, runs it, and prints a total after all executables pass.</p>
+# Full local integrity gate
+scripts/local_ci_check.sh build
 
-    <h2>Test One Component</h2>
-    <pre><code>cmake -S . -B build-json-tests \
-  '-DSHARP_RUNTIME_COMPONENTS=Text.Json' \
-  -DSHARP_RUNTIME_BUILD_TESTS=ON
-cmake --build build-json-tests --target SharpRuntimeTests --parallel 4
-scripts/run_component_tests.sh build-json-tests</code></pre>
-    <p>This builds and runs <code>SharpRuntimeTests_Text_Json</code>. It does not build test executables for unrelated components or for ordinary production dependencies.</p>
-
-    <h2>Run a Specific Test Suite</h2>
-    <pre><code># The executable name derives from the component name.
-./build-json-tests/SharpRuntimeTests_Text_Json \
-  --gtest_filter="Json*"
-
-# CTest can discover individual GoogleTest cases.
-ctest --test-dir build-json-tests --output-on-failure</code></pre>
-
-    <h2>Test Locations and Targets</h2>
-    <p>Each component owns its tests next to its public headers and implementation:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Component</th><th>Test source location</th><th>Test executable</th></tr>
-      <tr><td><code>Core.Base</code></td><td><code>modules/core/tests/</code></td><td><code>SharpRuntimeTests_Core_Base</code></td></tr>
-      <tr><td><code>Collections.Core</code></td><td><code>modules/collections/tests/</code></td><td><code>SharpRuntimeTests_Collections_Core</code></td></tr>
-      <tr><td><code>Text.Json</code></td><td><code>modules/text-json/tests/</code></td><td><code>SharpRuntimeTests_Text_Json</code></td></tr>
-      <tr><td><code>IO.Compression</code></td><td><code>modules/io-compression/tests/</code></td><td><code>SharpRuntimeTests_IO_Compression</code></td></tr>
-      <tr><td><code>Net.Sockets</code></td><td><code>modules/net-sockets/tests/</code></td><td><code>SharpRuntimeTests_Net_Sockets</code></td></tr>
-      <tr><td>Cross-component scenarios</td><td><code>tests/integration/</code></td><td><code>SharpRuntimeIntegrationTests</code></td></tr>
-    </table>
-    </div>
-
-    <h2>Adding a Test</h2>
-    <p>Add the source beneath the owning component's <code>tests/</code> directory. The component registration discovers and builds the test source; test-only production dependencies must be declared by that component, rather than being pulled in by the entire runtime.</p>
-    <pre><code>// modules/text-json/tests/System/Text/Json/MyNewTests.cpp
-#include &lt;gtest/gtest.h&gt;
-#include &lt;System/Text/Json/JsonDocument.hpp&gt;
-
-TEST(MyNewTests, ParsesExpectedInput) {
-    // ...
-}</code></pre>
-
-    <div class="callout note">
-      <div class="callout-title">ℹ Verification rule</div>
-      Run the tests for every selected component before committing. For a repository-wide change, configure <code>All</code> and run the complete component suite.
-    </div>
-
-    <div class="page-nav">
-      <a class="prev" href="build.html"><span class="page-nav-label">← Previous</span>Build</a>
-      <a class="next" href="architecture.html"><span class="page-nav-label">Next →</span>Architecture</a>
-    </div>
-  </main>
-</div>
+# Selective consumer matrix
+scripts/check_selective_components.sh</code></pre>
+<h2 id="ci">Current GitHub Actions</h2><p>The pinned workflow runs on pushes and pull requests. It has nine Ubuntu selective-component jobs, one Ubuntu full local gate and a Doxygen 1.9.8 warning-baseline job on Ubuntu 24.04. It does not currently run a Windows, macOS, Android or Emscripten matrix.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

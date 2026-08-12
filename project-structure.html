@@ -1,123 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Structure — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Structure | Sharp Runtime</title>
+  <meta name="description" content="Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.">
+  <link rel="canonical" href="https://sharpruntime.com/project-structure.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Project Structure | Sharp Runtime">
+  <meta property="og:description" content="Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.">
+  <meta property="og:url" content="https://sharpruntime.com/project-structure.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Project Structure | Sharp Runtime">
+  <meta name="twitter:description" content="Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Project Structure", "description": "Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.", "url": "https://sharpruntime.com/project-structure.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Project Structure", "item": "https://sharpruntime.com/project-structure.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Project Structure</span></div>
-    <div id="search-results"></div>
-    <h1>Project Structure</h1>
-    <p class="page-subtitle">Module ownership, stable public include paths, and the build-time dependency graph.</p>
-
-    <h2>Top-Level Layout</h2>
-    <pre><code>sharp-runtime/
-├── CMakeLists.txt          # Root component selection and build options
-├── cmake/                  # Component registration and boundary validation
-├── modules/                # 40 self-contained runtime modules
-├── tests/integration/      # Tests which genuinely span modules
-├── vendor/                 # Third-party dependencies
-├── scripts/                # Component checks and test runner
-├── docs/                   # Component guides and generated catalogue
-├── README.md               # Project overview and integration quick start
-├── CLAUDE.md               # Architecture and portability policy
-├── Doxyfile                # Doxygen configuration
-└── build/                  # Generated build artifacts (not committed)</code></pre>
-
-    <h2>modules/ — Runtime Ownership</h2>
-    <p>The physical layout is module-based. Every module owns its public headers, implementation sources, tests, and CMake declaration:</p>
-    <pre><code>modules/text-json/
-├── CMakeLists.txt
-├── README.md
-├── include/System/Text/Json/  # Consumer-facing header paths
-├── src/
-└── tests/System/Text/Json/</code></pre>
-    <p>Consumer include spellings are stable: code still writes <code>#include &lt;System/Text/Json/JsonDocument.hpp&gt;</code>. Linking the appropriate <code>SharpRuntime::*</code> target supplies the module include root.</p>
-
-    <h3>Module groups</h3>
-    <div class="table-wrap"><table>
-      <tr><th>Group</th><th>Physical modules</th></tr>
-      <tr><td>Foundation</td><td><code>core</code>, <code>console</code>, <code>uri</code>, <code>time-zone</code>, <code>runtime</code>, <code>storage</code></td></tr>
-      <tr><td>Collections and data</td><td><code>buffers</code>, <code>collections</code>, <code>collections-async</code>, <code>collections-object-model</code>, <code>component-model</code>, <code>numerics</code></td></tr>
-      <tr><td>Text and execution</td><td><code>text</code>, <code>text-json</code>, <code>text-regular-expressions</code>, <code>threading</code>, <code>threading-tasks</code>, <code>threading-channels</code>, <code>timers</code></td></tr>
-      <tr><td>I/O</td><td><code>io</code>, <code>io-compression</code>, <code>io-compression-zip</code>, <code>io-hashing</code>, <code>io-isolated-storage</code></td></tr>
-      <tr><td>Networking</td><td><code>net</code>, <code>net-sockets</code>, <code>net-http</code>, <code>net-http-headers</code>, <code>net-http-json</code>, <code>net-mime</code>, <code>net-network-information</code>, <code>net-security</code>, <code>net-websockets</code></td></tr>
-      <tr><td>Other domains</td><td><code>diagnostics</code>, <code>globalization</code>, <code>security</code>, <code>security-cryptography</code>, <code>security-cryptography-random</code>, <code>xml</code>, <code>xml-linq</code></td></tr>
-    </table></div>
-
-    <h2>Headers, Sources, and Tests</h2>
-    <p>Module ownership, rather than namespace prefixes, defines physical placement. A header may be included as <code>System/IO/Stream.hpp</code> while living in <code>modules/io/include/</code>. Header-only components have no implementation sources; static components keep their sources in the local <code>src/</code> directory.</p>
-    <p>There are 983 public headers and 369 component-owned test sources. Only cross-module scenarios live in <code>tests/integration/</code>.</p>
-
-    <h2>CMake and Dependency Boundaries</h2>
-    <p>Each module's <code>CMakeLists.txt</code> declares whether its dependencies are public, private, or test-only. Public dependencies propagate the necessary include roots to consumers; private dependencies do not. The component validator checks source ownership, include relationships, dependency visibility, and graph cycles.</p>
-    <p>See <a href="modules/index.html">Components &amp; Modules</a> for the public component catalogue and <a href="build.html">Build System</a> for selection examples.</p>
-
-    <h2>Third-Party Code</h2>
-    <div class="table-wrap"><table>
-      <tr><th>Dependency</th><th>Owner</th><th>Visibility</th></tr>
-      <tr><td>GoogleTest</td><td>Test build</td><td>Enabled only with <code>SHARP_RUNTIME_BUILD_TESTS</code></td></tr>
-      <tr><td>ZLIB</td><td><code>IO.Compression</code></td><td>Private</td></tr>
-      <tr><td>miniz</td><td><code>IO.Compression.Zip</code></td><td>Private</td></tr>
-      <tr><td>tinyxml2</td><td><code>Xml</code></td><td>Public, because XML headers expose its types</td></tr>
-      <tr><td>nlohmann/json</td><td><code>Text.Json</code></td><td>Vendored header dependency</td></tr>
-    </table></div>
-
-    <div class="page-nav">
-      <a class="prev" href="architecture.html"><span class="page-nav-label">← Previous</span>Architecture</a>
-      <a class="next" href="runtime-overview.html"><span class="page-nav-label">Next →</span>Runtime Overview</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html" aria-current="page">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Project Structure</span></nav><h1>Project Structure</h1><p class="lead">Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.</p><div class="page-meta"><span>Development</span><span>Source f827a6c5</span></div>
+<h2 id="layout">Repository map</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Path</th><th scope="col">Purpose</th></tr></thead><tbody><tr><td><code>modules/&lt;module&gt;/include</code></td><td>Public header ownership</td></tr><tr><td><code>modules/&lt;module&gt;/src</code></td><td>Compiled implementation for static components</td></tr><tr><td><code>modules/&lt;module&gt;/tests</code></td><td>Owning component’s GoogleTest sources</td></tr><tr><td><code>cmake/SharpRuntimeModules.cmake</code></td><td>Physical module enumeration</td></tr><tr><td><code>cmake/SharpRuntimeComponents.cmake</code></td><td>Registration and enablement engine</td></tr><tr><td><code>tests/integration</code></td><td>Cross-component test scenarios</td></tr><tr><td><code>test/consumers</code></td><td>Positive and negative consumer fixtures</td></tr><tr><td><code>scripts/</code></td><td>Catalogue, boundary and local-CI tooling</td></tr><tr><td><code>docs/</code></td><td>Generated catalogue plus engineering decisions/reviews</td></tr><tr><td><code>audit/</code></td><td>Historical/current audit evidence—not automatically public truth</td></tr><tr><td><code>vendor/</code></td><td>Vendored libraries and the GoogleTest submodule</td></tr></tbody></table></div>
+<h2 id="inventory">Pinned tracked inventory</h2><p>The current tree has 1,032 public module headers, 217 production translation units, 477 component test sources and nine integration test sources. These are audit facts, not a promise to keep mutable counts in every page.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

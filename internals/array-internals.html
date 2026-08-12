@@ -1,126 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Array Internals — sharp-runtime Internals</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Array and Memory Internals | Sharp Runtime</title>
+  <meta name="description" content="Owned buffers, spans, bounds and invalidation behavior.">
+  <link rel="canonical" href="https://sharpruntime.com/internals/array-internals.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Array and Memory Internals | Sharp Runtime">
+  <meta property="og:description" content="Owned buffers, spans, bounds and invalidation behavior.">
+  <meta property="og:url" content="https://sharpruntime.com/internals/array-internals.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Array and Memory Internals | Sharp Runtime">
+  <meta name="twitter:description" content="Owned buffers, spans, bounds and invalidation behavior.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Array and Memory Internals", "description": "Owned buffers, spans, bounds and invalidation behavior.", "url": "https://sharpruntime.com/internals/array-internals.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Internals"}, {"@type": "ListItem", "position": 3, "name": "Array and Memory Internals", "item": "https://sharpruntime.com/internals/array-internals.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li class="nav-section">Internals</li>
-    <li><a href="index.html">Internals Index</a></li>
-    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
-    <li><a href="property-macros.html">Property Macros</a></li>
-    <li><a href="string-internals.html">String Internals</a></li>
-    <li><a href="array-internals.html">Array Internals</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Internals</a></span><span>Array Internals</span></div>
-    <div id="search-results"></div>
-    <h1>Array Internals</h1>
-    <p class="page-subtitle">How C# arrays and collections map to <code>std::vector</code> and related types.</p>
-
-    <h2>The Core Mapping</h2>
-    <p>C# <code>T[]</code> (fixed-size, reference type, GC-managed) maps to <code>std::vector&lt;T&gt;</code>
-    (dynamic-size, value type by default, RAII-managed). This is the primary array type in sharp-runtime.</p>
-
-    <div class="table-wrap">
-    <table>
-      <tr><th>Property</th><th>C# T[]</th><th>sharp-runtime std::vector&lt;T&gt;</th></tr>
-      <tr><td>Type category</td><td>Reference type</td><td>Value type (copyable)</td></tr>
-      <tr><td>Size</td><td>Fixed after creation</td><td>Dynamic; can grow/shrink</td></tr>
-      <tr><td>Memory</td><td>GC-managed heap</td><td>RAII (freed when vector destroyed)</td></tr>
-      <tr><td>Null</td><td>Can be null</td><td>Cannot be null (empty vector by convention)</td></tr>
-      <tr><td>Length</td><td><code>arr.Length</code></td><td><code>vec.size()</code></td></tr>
-      <tr><td>Index</td><td><code>arr[i]</code></td><td><code>vec[i]</code> (same)</td></tr>
-      <tr><td>Bounds check</td><td>Always (throws IndexOutOfRangeException)</td><td><code>vec.at(i)</code> throws; <code>vec[i]</code> does not</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Array Role</h2>
-    <p><code>System::Array</code> provides static template methods for operating on
-    <code>std::vector&lt;T&gt;</code>. It has a deleted constructor — you cannot create an instance.
-    It acts as a namespace for algorithm helpers: <code>Sort</code>, <code>Copy</code>, <code>Resize</code>,
-    <code>IndexOf</code>, <code>Reverse</code>, <code>Clear</code>.</p>
-    <p class="file-path">modules/core/include/System/Array.hpp</p>
-
-    <h2>List&lt;T&gt; vs std::vector&lt;T&gt;</h2>
-    <p><code>System::Collections::Generic::List&lt;T&gt;</code> wraps <code>std::vector&lt;T&gt;</code>
-    and provides a richer API (Add, Remove, Contains, Find, ForEach, etc.) along with the
-    <code>IList&lt;T&gt;</code> interface. Choose between them:</p>
-    <ul>
-      <li>Use <code>std::vector&lt;T&gt;</code> for simple fixed-shape data and interop with standard library</li>
-      <li>Use <code>List&lt;T&gt;</code> when you need .NET-compatible API or pass the collection through interfaces</li>
-    </ul>
-    <p><code>List&lt;T&gt;</code> exposes <code>ToVector()</code> to extract the underlying <code>std::vector</code>.</p>
-
-    <h2>Immutable Collections</h2>
-    <p>Immutable collections in <code>System::Collections::Immutable</code> are backed by
-    <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>. This gives them value-copy semantics
-    with shared underlying storage — cheap to copy but they cannot be modified after creation.</p>
-    <pre><code>auto arr = System::Collections::Immutable::ImmutableArray&lt;int&gt;::Create({1, 2, 3});
-// arr is backed by shared_ptr&lt;const std::vector&lt;int&gt;&gt;
-auto arr2 = arr; // cheap copy (increments refcount)
-// arr2[0] is still 1</code></pre>
-
-    <h2>Ownership and Passing Arrays</h2>
-    <p>Because <code>std::vector&lt;T&gt;</code> is a value type, passing it by value copies all elements.
-    Pass by reference (<code>const std::vector&lt;T&gt;&amp;</code>) for read-only access, or by
-    (<code>std::vector&lt;T&gt;&amp;</code>) for mutable access.</p>
-    <pre><code>// Pass by const ref (no copy)
-void printAll(const std::vector&lt;int&gt;&amp; numbers) {
-    for (int n : numbers) std::cout &lt;&lt; n &lt;&lt; " ";
-}
-
-// Mutable ref (modifies caller's vector)
-void addOne(std::vector&lt;int&gt;&amp; numbers) {
-    for (int&amp; n : numbers) n++;
-}
-
-// Pass by value (caller keeps original)
-std::vector&lt;int&gt; sorted = sortCopy(numbers); // makes a copy</code></pre>
-
-    <div class="callout note">
-      <div class="callout-title">C# array reference semantics</div>
-      In C#, assigning an array variable copies the reference, not the data.
-      In sharp-runtime, assigning a <code>std::vector</code> variable copies all the data.
-      To get reference semantics, use <code>std::shared_ptr&lt;std::vector&lt;T&gt;&gt;</code>.
-    </div>
-
-    <h2>Bounds Checking</h2>
-    <p>C# always bounds-checks array access and throws <code>IndexOutOfRangeException</code>.
-    In C++:</p>
-    <ul>
-      <li><code>vec[i]</code> — undefined behavior if out of range (no check in release builds)</li>
-      <li><code>vec.at(i)</code> — throws <code>std::out_of_range</code> (not <code>IndexOutOfRangeException</code>)</li>
-    </ul>
-    <p>For ported code that relies on proper bounds exceptions, use <code>vec.at(i)</code>.</p>
-
-    <h2>Multi-dimensional Arrays</h2>
-    <p>C# multi-dimensional arrays (<code>T[,]</code> and <code>T[][]</code>) have no direct equivalent.
-    Use nested vectors for jagged arrays or flatten to 1D for rectangular arrays:</p>
-    <pre><code>// C# int[,] grid = new int[rows, cols]
-std::vector&lt;int&gt; grid(rows * cols, 0);
-// access: grid[row * cols + col]
-
-// C# int[][] jagged
-std::vector&lt;std::vector&lt;int&gt;&gt; jagged(rows);</code></pre>
-
-    <div class="nav-links">
-      <a class="prev" href="string-internals.html">← String Internals</a>
-      <a class="next" href="../tutorials/index.html">Tutorials →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Internals</span><span>/</span><span aria-current="page">Array and Memory Internals</span></nav><h1>Array and Memory Internals</h1><p class="lead">Owned buffers, spans, bounds and invalidation behavior.</p><div class="page-meta"><span>Internals</span><span>Source f827a6c5</span></div><p>Owned containers and borrowed views are deliberately distinct. Bounds use the declared native units, and mutation/reallocation can invalidate pointers, iterators and spans.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

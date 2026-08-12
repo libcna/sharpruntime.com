@@ -1,154 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Platform Layer — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Platforms and Portability | Sharp Runtime</title>
+  <meta name="description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <link rel="canonical" href="https://sharpruntime.com/platform-layer.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Platforms and Portability | Sharp Runtime">
+  <meta property="og:description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <meta property="og:url" content="https://sharpruntime.com/platform-layer.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Platforms and Portability | Sharp Runtime">
+  <meta name="twitter:description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Platforms and Portability", "description": "Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.", "url": "https://sharpruntime.com/platform-layer.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "Platforms and Portability", "item": "https://sharpruntime.com/platform-layer.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Platform Layer</span></div>
-    <div id="search-results"></div>
-    <h1>Platform Layer</h1>
-    <p class="page-subtitle">Platform support, POSIX-only subsystems, platform guards, and portability rules.</p>
-
-    <h2>Platform Support Overview</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Platform</th><th>Status</th><th>Notes</th></tr>
-      <tr><td>Linux</td><td><span class="badge badge-done">Full</span></td><td>Primary development platform. All tests pass.</td></tr>
-      <tr><td>macOS</td><td><span class="badge badge-done">Full</span></td><td>POSIX-compatible. Same as Linux.</td></tr>
-      <tr><td>Windows</td><td><span class="badge badge-partial">Partial</span></td><td>The <code>Net</code> component links <code>ws2_32</code> privately. POSIX-only subsystems remain known gaps.</td></tr>
-      <tr><td>Android</td><td><span class="badge badge-partial">Partial</span></td><td>The <code>Storage</code> component uses SDL3 when selected; SDL3 must be provided by the parent project first.</td></tr>
-      <tr><td>Emscripten</td><td><span class="badge badge-stub">Partial</span></td><td>Compiles cleanly. Some features throw <code>PlatformNotSupportedException</code> at runtime.</td></tr>
-    </table>
-    </div>
-
-    <h2>POSIX-Only Subsystems</h2>
-    <p>These subsystems currently use POSIX-specific APIs and are documented as <strong>known bugs</strong>, not completed features:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Subsystem</th><th>POSIX API Used</th><th>Status</th></tr>
-      <tr><td><code>System::Net::Sockets</code></td><td><code>&lt;sys/socket.h&gt;</code>, <code>&lt;unistd.h&gt;</code></td><td><span class="badge badge-posix">POSIX-only</span></td></tr>
-      <tr><td><code>System::IO::RandomAccess</code></td><td><code>pread</code>, <code>pwrite</code>, <code>fsync</code></td><td><span class="badge badge-done">Done</span> (has Win32 fallback)</td></tr>
-      <tr><td><code>System::AppDomain / AppContext</code></td><td><code>/proc/self/exe</code></td><td><span class="badge badge-posix">Linux-only</span></td></tr>
-      <tr><td><code>System::TimeZoneInfo</code></td><td><code>localtime_r</code>, <code>/usr/share/zoneinfo</code></td><td><span class="badge badge-posix">POSIX-only</span></td></tr>
-    </table>
-    </div>
-
-    <h2>Platform Guard Rules</h2>
-    <p>These rules are enforced project-wide (see <code>CLAUDE.md</code>):</p>
-    <ul>
-      <li>POSIX includes (<code>&lt;unistd.h&gt;</code>, <code>&lt;sys/socket.h&gt;</code>, etc.) must <strong>not</strong> appear in public <code>.hpp</code> headers.</li>
-      <li>Platform-specific code lives only in <code>.cpp</code> files.</li>
-      <li>Use <code>#ifdef _WIN32</code> / <code>#elif defined(__EMSCRIPTEN__)</code> / <code>#else</code> (POSIX) guards.</li>
-      <li>On unsupported platforms, throw <code>System::PlatformNotSupportedException</code> with a clear message.</li>
-      <li>Emscripten builds must compile without errors even when features are runtime-unavailable.</li>
-    </ul>
-
-    <h3>Example Guard Pattern</h3>
-    <pre><code>// In a .cpp file — platform-specific implementation
-#ifdef _WIN32
-    #include &lt;windows.h&gt;
-    // Win32 implementation
-#elif defined(__EMSCRIPTEN__)
-    throw System::PlatformNotSupportedException("Not available on Emscripten.");
-#else
-    #include &lt;unistd.h&gt;
-    // POSIX implementation
-#endif</code></pre>
-
-    <h2>Windows-Specific</h2>
-    <p>The <code>Net</code> component automatically links <code>ws2_32</code> privately on Windows. Consumers request <code>SharpRuntime::Net</code> or a higher-level networking component and do not link <code>ws2_32</code> themselves.</p>
-
-    <h2>Android-Specific</h2>
-    <p>On Android, <code>SharpRuntime::Storage::StoragePaths</code> uses SDL3 APIs to determine storage paths:</p>
-    <ul>
-      <li><code>SDL_GetPrefPath()</code> for the isolated storage root</li>
-      <li><code>SDL_GetAndroidInternalStoragePath()</code> as fallback</li>
-    </ul>
-    <p>SDL3 headers and library must be available via the parent project before <code>add_subdirectory(sharp-runtime)</code> is called when <code>Storage</code> is selected. The component accepts either <code>SDL3::SDL3</code> or <code>SDL3::SDL3-static</code>.</p>
-
-    <h2>Emscripten-Specific</h2>
-    <p>Emscripten (WebAssembly) support requires:</p>
-    <ul>
-      <li>All platform-guarded code must be guarded by <code>#elif defined(__EMSCRIPTEN__)</code></li>
-      <li>Features that cannot work in a browser should throw <code>PlatformNotSupportedException</code></li>
-      <li>The build must produce zero errors</li>
-    </ul>
-
-    <h2>StoragePaths</h2>
-    <p class="file-path">modules/storage/include/SharpRuntime/Storage/StoragePaths.hpp | modules/storage/src/SharpRuntime/Storage/StoragePaths.cpp</p>
-    <p>Provides platform-aware isolated storage paths:</p>
-    <pre><code>std::filesystem::path root = SharpRuntime::Storage::StoragePaths::GetIsolatedStorageRoot();</code></pre>
-    <p>Implementation varies by platform: uses <code>SDL_GetPrefPath</code> on Android, appropriate paths on other platforms.</p>
-
-    <h2>Network Sockets</h2>
-    <p class="file-path">modules/net-sockets/include/System/Net/Sockets/</p>
-    <p>Status: <span class="badge badge-posix">POSIX-only</span></p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th></tr>
-      <tr><td><code>TcpClient</code></td><td><code>System/Net/Sockets/TcpClient.hpp</code></td></tr>
-      <tr><td><code>UdpClient</code></td><td><code>System/Net/Sockets/UdpClient.hpp</code></td></tr>
-      <tr><td><code>NetworkStream</code></td><td><code>System/Net/Sockets/NetworkStream.hpp</code></td></tr>
-    </table>
-    </div>
-    <p>These use <code>&lt;sys/socket.h&gt;</code> and related POSIX headers. Windows and Emscripten support is incomplete.</p>
-
-    <div class="page-nav">
-      <a class="prev" href="threading.html"><span class="page-nav-label">← Previous</span>Threading</a>
-      <a class="next" href="csharp-compatibility.html"><span class="page-nav-label">Next →</span>C# Compatibility</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html" aria-current="page">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">Platforms and Portability</span></nav><h1>Platforms and portability</h1><p class="lead">Platform status is reported as validation depth—not a binary supported/unsupported badge.</p><div class="page-meta"><span>Pinned 2026-08-12</span><span>CI inspected</span><span>Conservative labels</span></div>
+<h2 id="matrix">Evidence matrix</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Platform/toolchain</th><th scope="col">Evidence</th><th scope="col">Important limits</th></tr></thead><tbody><tr><td>Linux / GCC</td><td><span class="badge badge--verified">Primary native validation</span></td><td>Only full native build/runtime-test baseline. The last controlled gate has the qualified failures documented on the Testing page.</td></tr><tr><td>Linux / Clang</td><td><span class="badge badge--partial">Source-supported</span></td><td>Compiler branches exist; no pinned Clang CI job in the current workflow.</td></tr><tr><td>Windows / MinGW-w64</td><td><span class="badge badge--build">Cross-compile verified</span></td><td>Library-only All and Text.Json cross-builds; tests were not compiled or run.</td></tr><tr><td>Windows / i686 MinGW</td><td><span class="badge badge--build">Compile/link boundary</span></td><td>Dedicated target excludes native-128 surfaces and disables tests.</td></tr><tr><td>Windows / MSVC</td><td><span class="badge badge--limited">Compiler-limited</span></td><td>CMake warning policy and platform links exist; lack of native <code>__int128</code> limits numeric surface completeness; no current CI/runtime result.</td></tr><tr><td>macOS / Apple Clang</td><td><span class="badge badge--partial">Downstream build evidence</span></td><td>Xcode 15.4 downstream builds drove fixes; no standalone full gate or current hosted job.</td></tr><tr><td>Emscripten</td><td><span class="badge badge--partial">Cross-compile verified</span></td><td>Library-only All and Text.Json cross-builds; no browser tests. DNS and several native facilities are unavailable.</td></tr><tr><td>Android</td><td><span class="badge badge--partial">Storage integration path</span></td><td>Storage paths can use a parent-provided SDL3 target; no whole-project Android build or device-suite result was produced.</td></tr></tbody></table></div>
+<h2 id="meanings">Evidence labels</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Label</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>Primary native validation</td><td>The repository’s only full native build/runtime-test baseline; read its exact outcome</td></tr><tr><td>Cross-compile verified</td><td>Library compilation completed for a recorded toolchain; runtime tests did not run</td></tr><tr><td>Downstream build evidence</td><td>A consumer build drove fixes, without a standalone runtime gate</td></tr><tr><td>Source-supported</td><td>Implementation branches exist; this audit did not prove a complete gate</td></tr><tr><td>Platform-limited</td><td>Some APIs intentionally throw, reduce behavior or depend on unavailable host facilities</td></tr><tr><td>Compiler-limited</td><td>A compiler capability prevents part of the intended surface</td></tr></tbody></table></div>
+<h2 id="api-caveats">Cross-platform caveats</h2><ul><li>Console cursor/color behavior uses ANSI sequences and is not a uniform terminal abstraction.</li><li>Ping and interface enumeration depend on host permissions and files; distinguish environment failures from library defects.</li><li>Emscripten DNS methods explicitly throw <code>PlatformNotSupportedException</code>.</li><li>Android storage’s SDL dependency must be provided by the parent build.</li><li>Operating-system version helpers largely report compile-time platform identity; version comparison is reduced.</li></ul><div class="callout callout--warning"><div class="callout-title">No overclaim</div><p>A source path or a successful cross-compile is not described as full runtime support. Add platform CI before strengthening these labels.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

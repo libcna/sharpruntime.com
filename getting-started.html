@@ -1,167 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Getting Started — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Getting Started | Sharp Runtime</title>
+  <meta name="description" content="Build a verified minimal Sharp Runtime C++23 consumer and select the CMake component you need.">
+  <link rel="canonical" href="https://sharpruntime.com/getting-started.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Getting Started | Sharp Runtime">
+  <meta property="og:description" content="Build a verified minimal Sharp Runtime C++23 consumer and select the CMake component you need.">
+  <meta property="og:url" content="https://sharpruntime.com/getting-started.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Getting Started | Sharp Runtime">
+  <meta name="twitter:description" content="Build a verified minimal Sharp Runtime C++23 consumer and select the CMake component you need.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Getting Started", "description": "Build a verified minimal Sharp Runtime C++23 consumer and select the CMake component you need.", "url": "https://sharpruntime.com/getting-started.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Getting Started", "item": "https://sharpruntime.com/getting-started.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Getting Started</span></div>
-    <div id="search-results"></div>
-    <h1>Getting Started</h1>
-    <p class="page-subtitle">How to obtain, build, and start using sharp-runtime in your project.</p>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html" aria-current="page">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html" aria-current="page">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span aria-current="page">Getting Started</span></nav><h1>Getting Started</h1><p class="lead">Build the runtime, select a narrow component and run a small native C++ program.</p><div class="page-meta"><span>Beginner</span><span>CMake</span><span>Verified example</span></div>
+<h2 id="requirements">Requirements</h2><ul><li>CMake 3.20 or newer</li><li>A compiler with the required C++23 features</li><li>Git; initialize the GoogleTest submodule only if building Sharp Runtime’s tests</li><li>ZLIB when selecting <code>IO.Compression</code> or <code>All</code></li></ul>
+<h2 id="layout">Create the consumer</h2><p>Place the Sharp Runtime checkout at <code>sharp-runtime/</code> beside these two files. The component list must be set before <code>add_subdirectory</code>.</p><pre><code class="language-cmake">cmake_minimum_required(VERSION 3.20)
+project(hello_sharp_runtime LANGUAGES CXX)
 
-    <h2>Prerequisites</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Tool</th><th>Required Version</th><th>Notes</th></tr>
-      <tr><td>CMake</td><td>≥ 3.20</td><td>Build system</td></tr>
-      <tr><td>C++ compiler</td><td>C++23 capable</td><td>GCC 13+, Clang 17+, MSVC 2022 17.5+</td></tr>
-      <tr><td>ZLIB</td><td>any modern</td><td>Needed only when selecting <code>IO.Compression</code></td></tr>
-      <tr><td>Git</td><td>any</td><td>For submodule initialization</td></tr>
-    </table>
-    </div>
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-    <p>On Debian/Ubuntu, install dependencies:</p>
-    <pre><code>sudo apt-get install cmake g++ zlib1g-dev</code></pre>
+set(SHARP_RUNTIME_COMPONENTS Console)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL &quot;&quot; FORCE)
+add_subdirectory(sharp-runtime)
 
-    <h2>Step 1: Clone with Submodules</h2>
-    <p>sharp-runtime uses git submodules for vendored dependencies (GoogleTest). Always clone with <code>--recurse-submodules</code>:</p>
-    <pre><code>git clone --recurse-submodules https://github.com/openeggbert/sharp-runtime.git
-cd sharp-runtime</code></pre>
-    <p>If you already cloned without submodules, run:</p>
-    <pre><code>git submodule update --init --recursive</code></pre>
+add_executable(hello main.cpp)
+target_link_libraries(hello PRIVATE SharpRuntime::Console)</code></pre><pre><code class="language-cpp">#include &lt;System/Console.hpp&gt;
 
-    <h2>Step 2: Build</h2>
-    <pre><code># Configure the complete runtime (the standalone default is also All)
-cmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All
-
-# Build the selected component targets
-cmake --build build --parallel 4</code></pre>
-    <p>Each selected implementation component has its own CMake target and archive. The public aggregate target for the complete runtime is <code>SharpRuntime::All</code>.</p>
-
-    <h2>Step 3: Run Tests</h2>
-    <pre><code>cmake --build build --target SharpRuntimeTests --parallel 4
-scripts/run_component_tests.sh build</code></pre>
-    <p>The aggregate build target builds the component test executables. The script runs each selected executable and returns a non-zero status if any test fails.</p>
-
-    <h2>Step 4: Use in Your Project</h2>
-    <p>If your project uses CMake, select the components it uses before adding sharp-runtime as a subdirectory:</p>
-    <pre><code># In your CMakeLists.txt
-set(SHARP_RUNTIME_COMPONENTS
+int main()
+{
+    System::Console::WriteLine(&quot;Hello from native C++23.&quot;);
+    return 0;
+}</code></pre>
+<h2 id="build">Configure and run</h2><pre><code class="language-bash">cmake -S . -B build
+cmake --build build --parallel 2
+./build/hello</code></pre>
+<h2 id="components">Select more components</h2><p>List direct needs using semicolons. Sharp Runtime resolves their transitive closure, so an application does not repeat dependencies.</p><pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS
     Text.Json
     IO.Hashing
 )
-set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(vendor/sharp-runtime)
-target_link_libraries(MyApp PRIVATE
+target_link_libraries(my_app PRIVATE
     SharpRuntime::Text.Json
     SharpRuntime::IO.Hashing
-)</code></pre>
-    <p>You list direct components only. Their public dependency closure is enabled and linked automatically.</p>
-    <p>Then include headers:</p>
-    <pre><code>#include "System/String.hpp"
-#include "System/Collections/Generic/List.hpp"
-#include "System/Exception.hpp"
-#include "SharpRuntime/SharpRuntimeHelper.hpp"
-
-using namespace System;
-using SharpRuntime::intcs;
-
-int main() {
-    intcs x = 42;
-    std::string s = "hello";
-    auto parts = String::Split(s + " world", ' ');
-    return 0;
-}</code></pre>
-
-    <div class="callout note">
-      <div class="callout-title">ℹ Stable include spelling</div>
-      Public headers are physically owned by their components under <code>modules/*/include/</code>,
-      but consumer include spellings remain unchanged: use paths such as
-      <code>System/String.hpp</code> and <code>SharpRuntime/SharpRuntimeHelper.hpp</code>.
-      The linked <code>SharpRuntime::*</code> target supplies the required include roots.
-    </div>
-
-    <h2>Build Options</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Option</th><th>Default</th><th>Description</th></tr>
-      <tr><td><code>SHARP_RUNTIME_COMPONENTS</code></td><td><code>All</code> for a standalone build</td><td>Semicolon-separated component list. Set this explicitly in a parent project.</td></tr>
-      <tr><td><code>SHARP_RUNTIME_BUILD_TESTS</code></td><td>ON</td><td>Build test executables for the selected components.</td></tr>
-      <tr><td><code>SHARP_RUNTIME_BUILD_BENCHMARKS</code></td><td>OFF</td><td>Build standalone micro-benchmarks; this enables all components.</td></tr>
-    </table>
-    </div>
-    <pre><code># A lean standalone configuration
-cmake -S . -B build-json \
-  -DSHARP_RUNTIME_BUILD_TESTS=OFF \
-  '-DSHARP_RUNTIME_COMPONENTS=Text.Json'
-cmake --build build-json --parallel 4</code></pre>
-
-    <h2>Next Steps</h2>
-    <div class="card-grid">
-      <a class="card" href="build.html"><h3>Build Details</h3><p>CMake options, compiler flags, platform notes.</p></a>
-      <a class="card" href="modules/index.html"><h3>Component Catalogue</h3><p>Choose narrow targets and see their dependency closures.</p></a>
-      <a class="card" href="architecture.html"><h3>Architecture</h3><p>Understand how the library is structured.</p></a>
-      <a class="card" href="development/porting-csharp-code.html"><h3>Porting Guide</h3><p>How to port C# code using sharp-runtime.</p></a>
-      <a class="card" href="tutorials/index.html"><h3>Tutorials</h3><p>Step-by-step examples.</p></a>
-    </div>
-
-    <div class="page-nav">
-      <a class="prev" href="overview.html"><span class="page-nav-label">← Previous</span>Overview</a>
-      <a class="next" href="build.html"><span class="page-nav-label">Next →</span>Build</a>
-    </div>
-  </main>
-</div>
+)</code></pre><div class="callout"><div class="callout-title">Embed explicitly</div><p>A standalone Sharp Runtime build defaults to <code>All</code>. An embedding application should always set <code>SHARP_RUNTIME_COMPONENTS</code> explicitly and normally disable the runtime’s own tests.</p></div>
+<h2 id="tests">Build the runtime tests</h2><pre><code class="language-bash">cmake -S sharp-runtime -B runtime-build \
+  -DSHARP_RUNTIME_COMPONENTS=All \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON
+cmake --build runtime-build --target SharpRuntimeTests --parallel 2
+sharp-runtime/scripts/run_component_tests.sh runtime-build</code></pre>
+<h2 id="next">Next steps</h2><div class="page-index"><a href="components/index.html">Component selection<small>Targets, closures and compatibility umbrellas.</small></a><a href="build.html">Build reference<small>Options, dependencies and consumer modes.</small></a><a href="tutorials/first-consumer.html">First consumer tutorial<small>A more detailed project walkthrough.</small></a><a href="guides/porting-csharp.html">Port C#<small>Translate managed concepts deliberately.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

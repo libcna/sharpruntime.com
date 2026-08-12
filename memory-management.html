@@ -1,174 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memory Management — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory and Ownership | Sharp Runtime</title>
+  <meta name="description" content="How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.">
+  <link rel="canonical" href="https://sharpruntime.com/memory-management.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Memory and Ownership | Sharp Runtime">
+  <meta property="og:description" content="How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.">
+  <meta property="og:url" content="https://sharpruntime.com/memory-management.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Memory and Ownership | Sharp Runtime">
+  <meta name="twitter:description" content="How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Memory and Ownership", "description": "How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.", "url": "https://sharpruntime.com/memory-management.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "Memory and Ownership", "item": "https://sharpruntime.com/memory-management.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Memory Management</span></div>
-    <div id="search-results"></div>
-    <h1>Memory Management</h1>
-    <p class="page-subtitle">RAII, ownership rules, no garbage collector, smart pointers, and lifetime patterns.</p>
-
-    <div class="callout warning">
-      <div class="callout-title">⚠ No Garbage Collector</div>
-      sharp-runtime does <strong>not</strong> implement a garbage collector.
-      Memory is managed entirely through C++ RAII, destructors, and smart pointers.
-      The <code>System::GC</code> class exists as a stub/no-op compatibility header only.
-    </div>
-
-    <h2>Core Principle: RAII</h2>
-    <p>
-      All resource management in sharp-runtime follows C++ RAII (Resource Acquisition Is Initialization):
-      resources are acquired in constructors and released in destructors. When a value goes out of scope
-      or a smart pointer's reference count drops to zero, its destructor runs automatically.
-    </p>
-    <p>This differs fundamentally from .NET, where the garbage collector handles deallocation.</p>
-
-    <h2>Ownership Rules</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Pattern</th><th>C++ Tool</th><th>When to Use</th></tr>
-      <tr><td>Exclusive ownership</td><td><code>std::unique_ptr&lt;T&gt;</code></td><td>One clear owner; ownership can be transferred</td></tr>
-      <tr><td>Shared ownership</td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Multiple owners (e.g., immutable collections)</td></tr>
-      <tr><td>Non-owning reference</td><td>raw pointer <code>T*</code> or reference <code>T&amp;</code></td><td>Observing only; caller guarantees lifetime</td></tr>
-      <tr><td>Value semantics</td><td>by-value (stack)</td><td>Most primitive types, structs</td></tr>
-    </table>
-    </div>
-
-    <h2>Immutable Collections</h2>
-    <p>Immutable collection types use <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>:</p>
-    <pre><code>// ImmutableArray&lt;T&gt; is backed by shared_ptr to const vector
-auto arr = ImmutableArray&lt;int&gt;::Create({1, 2, 3});</code></pre>
-
-    <h2>No GC — Practical Consequences</h2>
-    <ul>
-      <li><strong>No cycles via naked pointers.</strong> Use <code>std::weak_ptr</code> to break ownership cycles.</li>
-      <li><strong>Object lifetime is deterministic.</strong> Destructors run immediately when scope exits.</li>
-      <li><strong>No finalizers.</strong> Use RAII destructors instead of <code>~Object()</code> finalizers.</li>
-      <li><strong>IDisposable pattern:</strong> <code>System::IDisposable</code> exists but there is no <code>using</code> statement. Call <code>Dispose()</code> explicitly or use RAII wrappers.</li>
-    </ul>
-
-    <h2>Null Handling</h2>
-    <p>
-      C# references can be <code>null</code>; C++ pointers can be <code>nullptr</code>.
-      In sharp-runtime code:
-    </p>
-    <ul>
-      <li>Raw pointer parameters that can be null are typically <code>const Object*</code> — callers can pass <code>nullptr</code>.</li>
-      <li><code>System::Nullable&lt;T&gt;</code> (backed by <code>std::optional</code>) is used for nullable value types.</li>
-      <li>Dereferencing a null pointer is undefined behaviour — no NullReferenceException is automatically thrown. Sharp-runtime may throw <code>System::NullReferenceException</code> where defensive checks exist.</li>
-    </ul>
-
-    <h2>Copy and Move Semantics</h2>
-    <p>
-      Most value types in sharp-runtime (structs, primitives) follow standard C++ copy/move semantics.
-      Large types like <code>System::Text::StringBuilder</code> store an internal <code>std::string</code> buffer and
-      support move construction and assignment.
-    </p>
-    <p>
-      Class types that inherit from <code>System::Object</code> typically have virtual destructors.
-      They are generally heap-allocated and accessed via pointer or smart pointer.
-    </p>
-
-    <h2>Destructor and Cleanup Patterns</h2>
-    <pre><code>// Pattern 1: RAII — stack-allocated value type
-{
-    System::Text::StringBuilder sb;
-    sb.Append("hello");
-    // sb is destroyed when it goes out of scope
-}
-
-// Pattern 2: shared_ptr for heap-allocated Objects
-auto stream = std::make_shared&lt;System::IO::MemoryStream&gt;();
-stream-&gt;Write(buffer, 0, len);
-// Destroyed when all shared_ptrs go out of scope
-
-// Pattern 3: unique_ptr for exclusive ownership
-auto reader = std::make_unique&lt;System::IO::BinaryReader&gt;(stream);
-// Destroyed when reader goes out of scope</code></pre>
-
-    <h2>Differences from .NET / C# Behavior</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# / .NET</th><th>sharp-runtime / C++</th></tr>
-      <tr><td>GC collects unreachable objects</td><td>No GC — RAII + smart pointers</td></tr>
-      <tr><td>Finalizers run asynchronously</td><td>Destructors run synchronously at scope exit</td></tr>
-      <tr><td><code>using</code> statement calls <code>Dispose()</code></td><td>No <code>using</code> — call <code>Dispose()</code> manually or use RAII</td></tr>
-      <tr><td>Reference cycles handled by GC</td><td>Use <code>std::weak_ptr</code> to break cycles</td></tr>
-      <tr><td>All objects are heap-allocated</td><td>Value types can be stack-allocated</td></tr>
-      <tr><td>Null reference throws <code>NullReferenceException</code></td><td>Null dereference is UB — some places throw explicitly</td></tr>
-    </table>
-    </div>
-
-    <h2>Known Risks</h2>
-    <ul>
-      <li>Dangling pointers when raw pointer observers outlive the owning object</li>
-      <li>Double-free if ownership is transferred without clearing the source pointer</li>
-      <li>Reference cycles via <code>shared_ptr</code> — use <code>weak_ptr</code></li>
-      <li>Use-after-free when passing raw <code>this</code> to background threads (fixed in <code>Threading::Timer</code> via <code>shared_ptr&lt;State&gt;</code>)</li>
-    </ul>
-
-    <div class="callout needs-verification">
-      <div class="callout-title">Needs verification</div>
-      The exact ownership conventions used by each subsystem (e.g., whether Stream callers own the buffer or the stream owns it) should be verified per-class from the source headers.
-    </div>
-
-    <div class="page-nav">
-      <a class="prev" href="type-system.html"><span class="page-nav-label">← Previous</span>Type System</a>
-      <a class="next" href="exceptions.html"><span class="page-nav-label">Next →</span>Exceptions</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html" aria-current="page">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">Memory and Ownership</span></nav><h1>Memory and ownership</h1><p class="lead">There is no garbage collector. Native lifetime is part of the program’s correctness model.</p><div class="page-meta"><span>Core concept</span><span>C# porting</span></div>
+<h2 id="model">The native model</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">C# intuition</th><th scope="col">Sharp Runtime / C++ reality</th></tr></thead><tbody><tr><td>Managed reference</td><td>Usually an explicitly chosen smart pointer or a reference with a proven lifetime</td></tr><tr><td>Value type</td><td>Ordinary stack/member value with C++ copy and move behavior</td></tr><tr><td>GC lifetime</td><td>Scope, owner destruction and RAII</td></tr><tr><td>Shared graph</td><td><code>std::shared_ptr</code> only when ownership is genuinely shared; cycles must be avoided or broken</td></tr><tr><td>Borrowed parameter</td><td>Reference or pointer whose lifetime is not extended</td></tr></tbody></table></div>
+<h2 id="rules">Porting rules</h2><ul><li>Start with one clear owner; add shared ownership only when the domain requires it.</li><li>Prefer stack values and direct members for value-like types.</li><li>Treat callback captures as lifetime decisions; avoid capturing raw <code>this</code> past owner teardown.</li><li>Do not assume collection insertion or event subscription copies a managed object graph.</li><li>Read class-specific documentation for copy/move reductions and non-owning links.</li></ul>
+<h2 id="raii">RAII and resources</h2><p>Streams, locks, sockets and other native resources should be scoped so destructors provide cleanup. Explicit <code>Dispose</code>-shaped APIs may exist for source compatibility, but C++ destruction remains the safety net.</p>
+<h2 id="differences">Differences from .NET</h2><ul><li>No tracing collector means reference cycles can leak.</li><li>Destruction timing is normally deterministic rather than collection-dependent.</li><li>Copy and move can duplicate or transfer state; check each type’s semantics.</li><li>A reference can dangle if the owner ends; the runtime cannot repair ordinary C++ lifetime errors.</li></ul><div class="callout callout--warning"><div class="callout-title">Design ownership before transliteration</div><p>A mechanical replacement of every C# reference with <code>shared_ptr</code> obscures ownership and can create cycles. Port the lifetime model, not just the syntax.</p></div><div class="page-index"><a href="guides/porting-csharp.html">Porting guide<small>A systematic C#-to-C++ workflow.</small></a><a href="internals/object-lifecycle.html">Object lifecycle<small>Runtime internals and virtual behavior.</small></a><a href="delegates.html">Delegates and events<small>Callback lifetime and composition.</small></a><a href="io.html">Streams<small>Resource ownership in I/O.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

@@ -1,142 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reflection — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reflection and Runtime Type Identity | Sharp Runtime</title>
+  <meta name="description" content="What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.">
+  <link rel="canonical" href="https://sharpruntime.com/reflection.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Reflection and Runtime Type Identity | Sharp Runtime">
+  <meta property="og:description" content="What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.">
+  <meta property="og:url" content="https://sharpruntime.com/reflection.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Reflection and Runtime Type Identity | Sharp Runtime">
+  <meta name="twitter:description" content="What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Reflection and Runtime Type Identity", "description": "What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.", "url": "https://sharpruntime.com/reflection.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Reflection and Runtime Type Identity", "item": "https://sharpruntime.com/reflection.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Reflection</span></div>
-    <div id="search-results"></div>
-    <h1>Reflection</h1>
-    <p class="page-subtitle">Limited runtime type information, GetTypeName, Type class, and attributes.</p>
-
-    <div class="callout warning">
-      <div class="callout-title">⚠ Very limited reflection</div>
-      sharp-runtime provides <strong>no real .NET-style reflection</strong>. C++ does not have a CLR metadata system.
-      Only very basic runtime type name retrieval is available.
-    </div>
-
-    <h2>Runtime Type Name via GetTypeName()</h2>
-    <p class="file-path">modules/core/include/System/Object.hpp</p>
-    <p>
-      Every <code>System::Object</code> subclass must implement the pure virtual <code>GetTypeName()</code>.
-      This returns a static string with the type name — it is the closest analog to
-      <code>GetType().Name</code> in .NET.
-    </p>
-    <pre><code>System::Object* obj = new MyClass();
-const std::string&amp; name = obj-&gt;GetTypeName();  // "MyClass"</code></pre>
-    <p>Implementation is assisted by macros:</p>
-    <pre><code>// In .hpp:
-GetTypeNameHPP()
-// expands to: [[nodiscard]] virtual const std::string&amp; GetTypeName() const override;
-
-// In .cpp:
-GetTypeNameCPP(MyClass, MyClass)
-// expands to: const std::string&amp; MyClass::GetTypeName() const {
-//               const static std::string type_name = "MyClass";
-//               return type_name; }</code></pre>
-
-    <h2>System::Type</h2>
-    <p class="file-path">modules/core/include/System/Type.hpp</p>
-    <p>
-      A partial stub for the .NET <code>System.Type</code> class. C++ cannot provide full runtime type metadata
-      (member enumeration, method invocation by name, assembly metadata, etc.).
-      The stub exists for compatibility — code that references <code>System::Type</code> will compile, but
-      most functionality is not implemented.
-    </p>
-    <div class="callout needs-verification">
-      <div class="callout-title">Needs verification</div>
-      The exact API surface of <code>System::Type</code> in sharp-runtime needs review from the header file.
-      It is expected to be a minimal stub.
-    </div>
-
-    <h2>Attribute Classes</h2>
-    <p>sharp-runtime provides many attribute header files for API compatibility. These are empty or near-empty stub classes — they allow code to compile but do not implement runtime attribute inspection:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Attribute</th><th>Header</th></tr>
-      <tr><td><code>System::Attribute</code></td><td><code>System/Attribute.hpp</code></td></tr>
-      <tr><td><code>ObsoleteAttribute</code></td><td><code>System/ObsoleteAttribute.hpp</code></td></tr>
-      <tr><td><code>FlagsAttribute</code></td><td><code>System/FlagsAttribute.hpp</code></td></tr>
-      <tr><td><code>SerializableAttribute</code></td><td><code>System/SerializableAttribute.hpp</code></td></tr>
-      <tr><td><code>CLSCompliantAttribute</code></td><td><code>System/CLSCompliantAttribute.hpp</code></td></tr>
-      <tr><td><code>AttributeUsageAttribute</code></td><td><code>System/AttributeUsageAttribute.hpp</code></td></tr>
-      <tr><td><code>Diagnostics::ConditionalAttribute</code></td><td><code>System/Diagnostics/ConditionalAttribute.hpp</code></td></tr>
-      <tr><td><code>Runtime::CompilerServices::MethodImplAttribute</code></td><td><code>System/Runtime/CompilerServices/MethodImplAttribute.hpp</code></td></tr>
-    </table>
-    </div>
-
-    <h2>No Dynamic Invocation</h2>
-    <p>
-      .NET <code>Activator.CreateInstance()</code>, <code>MethodInfo.Invoke()</code>, and similar
-      reflection-based dynamic invocation are <strong>not available</strong>.
-      These are listed as <code>❌ IGNORE</code> in the porting plan, as they require managed runtime support
-      that cannot be replicated in C++.
-    </p>
-
-    <h2>What to Use Instead</h2>
-    <ul>
-      <li>Use virtual dispatch (virtual functions) instead of reflection-based dispatch</li>
-      <li>Use <code>dynamic_cast&lt;T*&gt;</code> for runtime type checking</li>
-      <li>Use <code>typeid</code> for C++ RTTI if needed</li>
-      <li>Use factory functions or <code>std::function</code> instead of <code>Activator.CreateInstance()</code></li>
-    </ul>
-
-    <div class="page-nav">
-      <a class="prev" href="delegates.html"><span class="page-nav-label">← Previous</span>Delegates &amp; Events</a>
-      <a class="next" href="io.html"><span class="page-nav-label">Next →</span>I/O</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html" aria-current="page">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Reflection and Runtime Type Identity</span></nav><h1>Reflection and Runtime Type Identity</h1><p class="lead">What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.</p><div class="page-meta"><span>Concepts</span><span>Source f827a6c5</span></div>
+<h2 id="provided">Provided</h2><ul><li>Basic runtime type identity and names</li><li><code>Object</code>/<code>Type</code>-shaped compatibility</li><li>Macros/helpers used by the project’s native object model</li><li>Selected runtime attributes and marker types</li></ul>
+<h2 id="not-provided">Not provided</h2><ul><li>A CLR metadata universe</li><li>Assembly discovery/loading</li><li>General member enumeration</li><li>Late-bound construction or method invocation</li><li>DynamicInvoke</li><li>Reflection-driven BinaryFormatter or universal JSON serialization</li></ul><div class="callout callout--warning"><div class="callout-title">Porting implication</div><p>Replace reflection-heavy C# designs with explicit registries, templates, variants or typed factories. Do not build new code around marker APIs as if full reflection will appear behind them.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

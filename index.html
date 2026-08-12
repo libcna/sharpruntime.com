@@ -1,157 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sharp-runtime Documentation</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sharp Runtime — Practical .NET System.* APIs for Native C++23</title>
+  <meta name="description" content="Sharp Runtime is a componentized C++23 implementation of a practical subset of .NET System.* APIs for native source ports.">
+  <link rel="canonical" href="https://sharpruntime.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Sharp Runtime — Practical .NET System.* APIs for Native C++23">
+  <meta property="og:description" content="Sharp Runtime is a componentized C++23 implementation of a practical subset of .NET System.* APIs for native source ports.">
+  <meta property="og:url" content="https://sharpruntime.com/">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sharp Runtime — Practical .NET System.* APIs for Native C++23">
+  <meta name="twitter:description" content="Sharp Runtime is a componentized C++23 implementation of a practical subset of .NET System.* APIs for native source ports.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "SoftwareSourceCode", "name": "Sharp Runtime — Practical .NET System.* APIs for Native C++23", "description": "Sharp Runtime is a componentized C++23 implementation of a practical subset of .NET System.* APIs for native source ports.", "url": "https://sharpruntime.com/", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search">
-    <input type="text" placeholder="Search docs…" id="search-input" autocomplete="off">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html" aria-current="page">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content">
+<section class="hero"><div class="container hero-grid">
+  <div class="hero-copy">
+    <div class="eyebrow">Familiar APIs. Native C++.</div>
+    <h1>Bring practical <span>System.*</span> APIs to C++23.</h1>
+    <p class="hero-lead">Sharp Runtime is a componentized native C++ implementation of a practical subset of .NET’s <code>System.*</code> surface—built for source ports that need familiar types and behavior without a managed runtime.</p>
+    <div class="hero-actions">
+      <a class="button button--primary" href="getting-started.html">Get started</a>
+      <a class="button" href="components/index.html">Explore components</a>
+      <a class="button" href="https://github.com/openeggbert/sharp-runtime">View on GitHub</a>
+    </div>
+    <p class="hero-note">MIT licensed · CMake 3.20+ · C++23 · source facts pinned to <code>f827a6c5</code></p>
   </div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar">
-    <nav>
-      <ul>
-        <li class="nav-section">Getting Started</li>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="overview.html">Overview</a></li>
-        <li><a href="getting-started.html">Getting Started</a></li>
-        <li><a href="build.html">Build</a></li>
-        <li><a href="running-tests.html">Running Tests</a></li>
-        <li class="nav-section">Architecture</li>
-        <li><a href="architecture.html">Architecture</a></li>
-        <li><a href="project-structure.html">Project Structure</a></li>
-        <li><a href="runtime-overview.html">Runtime Overview</a></li>
-        <li class="nav-section">Core Runtime</li>
-        <li><a href="type-system.html">Type System</a></li>
-        <li><a href="memory-management.html">Memory Management</a></li>
-        <li><a href="exceptions.html">Exceptions</a></li>
-        <li><a href="strings.html">Strings</a></li>
-        <li><a href="arrays.html">Arrays</a></li>
-        <li><a href="delegates.html">Delegates &amp; Events</a></li>
-        <li><a href="reflection.html">Reflection</a></li>
-        <li><a href="io.html">I/O</a></li>
-        <li><a href="threading.html">Threading</a></li>
-        <li><a href="platform-layer.html">Platform Layer</a></li>
-        <li class="nav-section">Compatibility</li>
-        <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-        <li><a href="cna-integration.html">CNA Integration</a></li>
-        <li class="nav-section">Reference</li>
-        <li><a href="modules/index.html">Modules</a></li>
-        <li><a href="classes/index.html">Classes</a></li>
-        <li><a href="api/index.html">API Reference</a></li>
-        <li><a href="internals/index.html">Internals</a></li>
-        <li class="nav-section">Tutorials</li>
-        <li><a href="tutorials/index.html">All Tutorials</a></li>
-        <li class="nav-section">Developer Guide</li>
-        <li><a href="development/index.html">Overview</a></li>
-        <li><a href="development/coding-style.html">Coding Style</a></li>
-        <li><a href="development/debugging.html">Debugging</a></li>
-        <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-        <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-        <li><a href="development/known-limitations.html">Known Limitations</a></li>
-      </ul>
-    </nav>
-  </aside>
-  <main class="content">
-    <div id="search-results"></div>
-    <h1>sharp-runtime Documentation</h1>
-    <p class="page-subtitle">A C++23 implementation of a practical subset of the .NET <code>System.*</code> namespace, available as focused CMake components.</p>
+  <div class="terminal" aria-label="Minimal Sharp Runtime consumer example">
+    <div class="terminal-bar"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-title">CMakeLists.txt + main.cpp</span></div>
+    <pre><code><span class="code-comment"># Select only what this app needs</span>
+<span class="code-key">set</span>(SHARP_RUNTIME_COMPONENTS Console)
+<span class="code-key">add_subdirectory</span>(sharp-runtime)
+<span class="code-key">target_link_libraries</span>(hello PRIVATE
+  SharpRuntime::Console)
 
-    <div class="callout note">
-      <div class="callout-title">ℹ About this project</div>
-      sharp-runtime is <strong>not</strong> a full .NET runtime or CLR implementation.
-      It is a pragmatic C++23 library that provides <code>System::*</code> API compatibility
-      so that ported C#/XNA game code compiles with minimal changes. Applications can select
-      only the components they need; existing all-in integration remains available. It powers
-      <strong>CNA</strong> (C++ port of XNA 4.0) and <strong>mobile-eggbert</strong>.
-    </div>
+<span class="code-key">#include</span> &lt;System/Console.hpp&gt;
 
-    <h2>Quick Start</h2>
-    <pre><code># Clone the repository (with submodules)
-git clone --recurse-submodules https://github.com/openeggbert/sharp-runtime.git
-cd sharp-runtime
-
-# Configure, build, and run the complete test suite
-cmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All
-cmake --build build --target SharpRuntimeTests --parallel 4
-scripts/run_component_tests.sh build</code></pre>
-
-    <h2>Explore the Documentation</h2>
-    <div class="card-grid">
-      <a class="card" href="overview.html">
-        <h3>Project Overview</h3>
-        <p>What sharp-runtime is, its goals, status, and relationship to CNA.</p>
-      </a>
-      <a class="card" href="getting-started.html">
-        <h3>Getting Started</h3>
-        <p>How to build, test, and integrate the complete runtime or selected components.</p>
-      </a>
-      <a class="card" href="architecture.html">
-        <h3>Architecture</h3>
-        <p>Runtime layers, namespace design, key architectural decisions.</p>
-      </a>
-      <a class="card" href="csharp-compatibility.html">
-        <h3>C# Compatibility</h3>
-        <p>Mapping table from C# constructs to C++ sharp-runtime equivalents.</p>
-      </a>
-      <a class="card" href="type-system.html">
-        <h3>Type System</h3>
-        <p>Primitive types, Object base class, SharpRuntimeHelper.</p>
-      </a>
-      <a class="card" href="exceptions.html">
-        <h3>Exceptions</h3>
-        <p>Exception hierarchy, throwing patterns, C# to C++ mapping.</p>
-      </a>
-      <a class="card" href="strings.html">
-        <h3>Strings</h3>
-        <p>std::string usage, System::String helpers, StringBuilder.</p>
-      </a>
-      <a class="card" href="io.html">
-        <h3>I/O Subsystem</h3>
-        <p>Stream, File, Directory, Compression, IsolatedStorage.</p>
-      </a>
-      <a class="card" href="modules/index.html">
-        <h3>Components &amp; Modules</h3>
-        <p>Browse the component catalogue, public targets, and subsystem reference.</p>
-      </a>
-      <a class="card" href="development/porting-csharp-code.html">
-        <h3>Porting C# Code</h3>
-        <p>Practical guide for porting C# classes to C++ using sharp-runtime.</p>
-      </a>
-      <a class="card" href="tutorials/index.html">
-        <h3>Tutorials</h3>
-        <p>Step-by-step guides for common tasks.</p>
-      </a>
-      <a class="card" href="development/known-limitations.html">
-        <h3>Known Limitations</h3>
-        <p>What is not implemented, POSIX-only subsystems, known gaps.</p>
-      </a>
-    </div>
-
-    <h2>Status Summary</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Metric</th><th>Value</th></tr>
-      <tr><td>Physical modules</td><td><strong>40</strong> independently selectable components</td></tr>
-      <tr><td>Public headers</td><td><strong>983</strong> headers across the module include roots</td></tr>
-      <tr><td>Test sources</td><td><strong>369</strong> module-owned GoogleTest source files</td></tr>
-      <tr><td>C++ standard</td><td>C++23</td></tr>
-      <tr><td>Build output</td><td>Selected component targets, with <code>SharpRuntime::All</code> for the complete runtime</td></tr>
-      <tr><td>Build system</td><td>CMake ≥ 3.20</td></tr>
-      <tr><td>Primary platform</td><td>Linux / macOS</td></tr>
-      <tr><td>Additional platforms</td><td>Windows (partial), Android (SDL3), Emscripten (partial)</td></tr>
-      <tr><td>License</td><td>MIT</td></tr>
-    </table>
-    </div>
-  </main>
-</div>
+int main() {
+  System::Console::WriteLine(
+    <span class="code-value">"Native. Familiar. Focused."</span>);
+}</code></pre>
+  </div>
+</div></section>
+<section class="stat-strip"><div class="container stats">
+  <div class="stat"><span class="stat-value">41</span><span class="stat-label">physical CMake components</span></div>
+  <div class="stat"><span class="stat-value">16,341</span><span class="stat-label">current discovered test cases</span></div>
+  <div class="stat"><span class="stat-value">C++23</span><span class="stat-label">required language standard</span></div>
+  <div class="stat"><span class="stat-value">MIT</span><span class="stat-label">open-source license</span></div>
+</div></section>
+<section class="section"><div class="container">
+  <div class="section-heading"><div class="eyebrow">Scope with boundaries</div><h2>A compatibility library—not a CLR.</h2><p>Sharp Runtime preserves useful API organization and porting patterns while remaining ordinary native C++. It does not execute managed assemblies and does not try to reproduce the managed execution environment.</p></div>
+  <div class="split">
+    <div><div class="callout callout--success"><div class="callout-title">What it provides</div><ul><li>Native C++ types in familiar <code>System::*</code> namespaces</li><li>Core types, collections, text, JSON, XML, I/O, networking, numerics, threading, tasks, channels and more</li><li>Fine-grained CMake targets with transitive dependency closure</li><li>A pragmatic base for C#/.NET-to-C++ ports and <a href="cna-integration.html">CNA</a></li></ul></div></div>
+    <div><div class="callout callout--warning"><div class="callout-title">What it does not provide</div><ul><li>A CLR, JIT compiler, garbage collector, or managed assembly loader</li><li>General metadata reflection, <code>DynamicInvoke</code>, P/Invoke, remoting, or BinaryFormatter-style serialization</li><li>C# language <code>async</code>/<code>await</code> syntax in C++</li><li>TLS, certificates, <code>SslStream</code>, or <code>wss://</code> transport</li></ul></div></div>
+  </div>
+</div></section>
+<section class="section section--tint"><div class="container">
+  <div class="section-heading"><div class="eyebrow">Practical breadth</div><h2>Use one focused surface—or the complete runtime.</h2><p>Each physical component owns its public headers, implementation, tests and declared dependencies. Request direct needs; CMake enables the dependency closure.</p></div>
+  <div class="cards"><a class="card" href="components/core.html"><span class="card-kicker">Foundation</span><h3>Core & collections</h3><p>Object and Type, strings and wrappers, arrays and memory, delegates, exceptions, generic, concurrent and observable collections.</p></a><a class="card" href="components/text-data.html"><span class="card-kicker">Data</span><h3>Text, JSON & XML</h3><p>Encoding and formatting, StringBuilder, regex, nlohmann-backed JSON, tinyxml2-backed XML and LINQ-style XML.</p></a><a class="card" href="components/io-storage.html"><span class="card-kicker">Systems</span><h3>I/O & storage</h3><p>Streams, files and directories, compression, ZIP, hashing, isolated storage and platform storage paths.</p></a><a class="card" href="components/networking.html"><span class="card-kicker">Connectivity</span><h3>Networking</h3><p>DNS, addresses, sockets, HTTP, headers, HTTP JSON, MIME, network information and WebSockets—with explicit TLS boundaries.</p></a><a class="card" href="components/concurrency.html"><span class="card-kicker">Concurrency</span><h3>Threading & tasks</h3><p>Threads, synchronization, cancellation, thread pool, tasks, continuations, channels and timers using native C++ machinery.</p></a><a class="card" href="components/numerics-globalization.html"><span class="card-kicker">Computation</span><h3>Numerics & globalization</h3><p>Vectors, matrices, quaternion, BigInteger, numeric wrappers, culture data, parsing and formatting—with compiler caveats documented.</p></a></div>
+  <div class="hero-actions"><a class="button button--primary" href="components/index.html">Browse all 41 components</a><a class="button" href="architecture.html">Understand the architecture</a></div>
+</div></section>
+<section class="section"><div class="container split">
+  <div><div class="eyebrow">Verification</div><h2>Evidence, not a vanity counter.</h2><p>The pinned source registers 37 test executables and currently exposes 16,341 GoogleTest cases. The last controlled full-gate record before the final TimeZone additions ran 16,310: 16,303 passed, one skipped and six failed for two known network-related causes.</p><p>The repository also validates component boundaries, selective consumers, negative include/link fixtures, catalogue drift, integration behavior and Doxygen warning regressions.</p><a class="button" href="running-tests.html">Read the verification model</a></div>
+  <div class="status-list">
+    <div class="status-row"><span class="badge badge--verified">Validated</span><span><strong>Component graph</strong><br>41 physical modules and 92 declared direct production edges; no allow-list exceptions.</span></div>
+    <div class="status-row"><span class="badge badge--verified">Measured</span><span><strong>Current suite shape</strong><br>36 component executables plus one integration executable.</span></div>
+    <div class="status-row"><span class="badge badge--partial">Qualified</span><span><strong>Full gate</strong><br>Five host-triggered Ping failures expose a real fallback gap; one IPv6-interface failure is environmental. Neither is hidden.</span></div>
+  </div>
+</div></section>
+<section class="section section--tint"><div class="container">
+  <div class="section-heading"><div class="eyebrow">Portability</div><h2>Platform claims carry evidence labels.</h2><p>The current CI is Linux/Ubuntu. Other platforms have implementation and toolchain paths, but the website distinguishes source support, cross-compile evidence and runtime validation.</p></div>
+  <div class="table-wrap"><table class=""><thead><tr><th scope="col">Platform</th><th scope="col">Evidence label</th><th scope="col">What that means</th></tr></thead><tbody><tr><td>Linux / GCC</td><td><span class="badge badge--verified">Primary native validation</span></td><td>Push/PR jobs target Ubuntu; the last controlled full gate is qualified below rather than described as green.</td></tr><tr><td>Windows / MinGW</td><td><span class="badge badge--build">Cross-compile verified</span></td><td>Library-only All and Text.Json cross-build evidence exists; GoogleTest was not built or run.</td></tr><tr><td>Windows / MSVC</td><td><span class="badge badge--limited">Compiler-limited</span></td><td>Build logic exists, but native <code>__int128</code>-dependent numeric surfaces constrain current completeness.</td></tr><tr><td>macOS / Apple Clang</td><td><span class="badge badge--partial">Downstream build evidence</span></td><td>Xcode 15.4 downstream builds drove fixes; no standalone full-suite result or current macOS CI job exists.</td></tr><tr><td>Emscripten / Web</td><td><span class="badge badge--partial">Cross-compile verified</span></td><td>Library-only cross-build evidence exists; DNS and several native facilities are unavailable or reduced, and no browser suite ran.</td></tr><tr><td>Android</td><td><span class="badge badge--partial">Integration path</span></td><td>Storage can consume parent-provided SDL3; this audit did not run a device suite.</td></tr></tbody></table></div>
+  <a class="button" href="platform-layer.html">Platform matrix and caveats</a>
+</div></section>
+<section class="section"><div class="container split">
+  <div><div class="eyebrow">Ecosystem</div><h2>The System.* layer under CNA.</h2><p><a href="https://libcna.com/">CNA</a>, the sibling C++23 reimplementation of the XNA 4.0 API, builds on Sharp Runtime for familiar .NET base-library patterns. CNA owns the game framework; Sharp Runtime stays focused on the <code>System.*</code> compatibility layer.</p><a class="button" href="cna-integration.html">How CNA integrates it</a></div>
+  <div><div class="eyebrow">Start a path</div><h2>From evaluation to contribution.</h2><div class="page-index"><a href="getting-started.html">Integrate the library<small>Build a minimal component consumer.</small></a><a href="guides/porting-csharp.html">Port C# patterns<small>Translate ownership, properties, delegates and errors.</small></a><a href="components/index.html">Choose components<small>Understand targets and dependency closure.</small></a><a href="development/adding-runtime-features.html">Extend the runtime<small>Add APIs and components without breaking boundaries.</small></a></div></div>
+</div></section>
+</main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

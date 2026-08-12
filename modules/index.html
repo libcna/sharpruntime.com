@@ -1,149 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Components &amp; Modules — sharp-runtime</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module Reference (Compatibility URL) | Sharp Runtime</title>
+  <meta name="description" content="Compatibility entry point for the complete current Sharp Runtime component catalogue.">
+  <link rel="canonical" href="https://sharpruntime.com/modules/index.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Module Reference (Compatibility URL) | Sharp Runtime">
+  <meta property="og:description" content="Compatibility entry point for the complete current Sharp Runtime component catalogue.">
+  <meta property="og:url" content="https://sharpruntime.com/modules/index.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Module Reference (Compatibility URL) | Sharp Runtime">
+  <meta name="twitter:description" content="Compatibility entry point for the complete current Sharp Runtime component catalogue.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Module Reference (Compatibility URL)", "description": "Compatibility entry point for the complete current Sharp Runtime component catalogue.", "url": "https://sharpruntime.com/modules/index.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Components"}, {"@type": "ListItem", "position": 3, "name": "Module Reference (Compatibility URL)", "item": "https://sharpruntime.com/modules/index.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li><a href="../overview.html">Overview</a></li>
-    <li><a href="../getting-started.html">Getting Started</a></li>
-    <li><a href="../build.html">Build</a></li>
-    <li><a href="../running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="../architecture.html">Architecture</a></li>
-    <li><a href="../project-structure.html">Project Structure</a></li>
-    <li><a href="../runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="../type-system.html">Type System</a></li>
-    <li><a href="../memory-management.html">Memory Management</a></li>
-    <li><a href="../exceptions.html">Exceptions</a></li>
-    <li><a href="../strings.html">Strings</a></li>
-    <li><a href="../arrays.html">Arrays</a></li>
-    <li><a href="../delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="../reflection.html">Reflection</a></li>
-    <li><a href="../io.html">I/O</a></li>
-    <li><a href="../threading.html">Threading</a></li>
-    <li><a href="../platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="../csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="../cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="index.html">Components &amp; Modules</a></li>
-    <li><a href="../classes/index.html">Classes</a></li>
-    <li><a href="../api/index.html">API Reference</a></li>
-    <li><a href="../internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="../tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="../development/index.html">Overview</a></li>
-    <li><a href="../development/coding-style.html">Coding Style</a></li>
-    <li><a href="../development/debugging.html">Debugging</a></li>
-    <li><a href="../development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="../development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="../development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span>Components &amp; Modules</span></div>
-    <div id="search-results"></div>
-    <h1>Components &amp; Modules</h1>
-    <p class="page-subtitle">40 opt-in CMake components, stable <code>System/*</code> include paths, and a focused dependency closure for every consumer.</p>
-
-    <div class="callout note">
-      <div class="callout-title">ℹ Selecting components</div>
-      New applications request the components they use and link their direct targets. sharp-runtime resolves public dependencies automatically. The complete runtime remains available through <code>SharpRuntime::All</code>.
-    </div>
-
-    <pre><code>set(SHARP_RUNTIME_COMPONENTS
-    Net.WebSockets
-    Text.Json
-)
-set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(sharp-runtime)
-
-target_link_libraries(MyApp PRIVATE
-    SharpRuntime::Net.WebSockets
-    SharpRuntime::Text.Json
-)</code></pre>
-
-    <h2>Physical Component Catalogue</h2>
-    <p>Static components compile implementation sources. Interface components contribute headers and their dependency closure without producing a separate archive.</p>
-    <div class="table-wrap"><table>
-      <tr><th>Component</th><th>Kind</th><th>Physical module</th><th>Scope</th></tr>
-      <tr><td><code>Core.Base</code></td><td>Static</td><td><code>core</code></td><td>Foundation types and core System APIs</td></tr>
-      <tr><td><code>Console</code></td><td>Static</td><td><code>console</code></td><td>Console APIs</td></tr>
-      <tr><td><code>Uri</code></td><td>Static</td><td><code>uri</code></td><td>URI and URI builder APIs</td></tr>
-      <tr><td><code>TimeZone</code></td><td>Static</td><td><code>time-zone</code></td><td>Time zone APIs</td></tr>
-      <tr><td><code>Buffers</code></td><td>Interface</td><td><code>buffers</code></td><td>Span, memory, pools, sequences, and binary helpers</td></tr>
-      <tr><td><code>Collections.Core</code></td><td>Interface</td><td><code>collections</code></td><td>Synchronous, immutable, concurrent, and specialized collections</td></tr>
-      <tr><td><code>Collections.Async</code></td><td>Interface</td><td><code>collections-async</code></td><td>Async enumerable interfaces</td></tr>
-      <tr><td><code>Collections.ObjectModel</code></td><td>Interface</td><td><code>collections-object-model</code></td><td>Observable and object-model collections</td></tr>
-      <tr><td><code>ComponentModel</code></td><td>Interface</td><td><code>component-model</code></td><td>Component-model attributes and notifications</td></tr>
-      <tr><td><code>Diagnostics</code></td><td>Static</td><td><code>diagnostics</code></td><td>Diagnostics and code-analysis APIs</td></tr>
-      <tr><td><code>Globalization</code></td><td>Static</td><td><code>globalization</code></td><td>Cultures, calendars, and formatting</td></tr>
-      <tr><td><code>Numerics</code></td><td>Static</td><td><code>numerics</code></td><td>Vectors, matrices, BigInteger, and numeric helpers</td></tr>
-      <tr><td><code>Runtime</code></td><td>Static</td><td><code>runtime</code></td><td>Runtime compatibility APIs</td></tr>
-      <tr><td><code>Text</code></td><td>Static</td><td><code>text</code></td><td>Encodings, StringBuilder, and text primitives</td></tr>
-      <tr><td><code>Text.Json</code></td><td>Static</td><td><code>text-json</code></td><td>JSON APIs</td></tr>
-      <tr><td><code>Text.RegularExpressions</code></td><td>Interface</td><td><code>text-regular-expressions</code></td><td>Regular-expression compatibility APIs</td></tr>
-      <tr><td><code>Threading</code></td><td>Static</td><td><code>threading</code></td><td>Threads, synchronization, and cancellation</td></tr>
-      <tr><td><code>Threading.Tasks</code></td><td>Static</td><td><code>threading-tasks</code></td><td>Task and ValueTask APIs</td></tr>
-      <tr><td><code>Threading.Channels</code></td><td>Interface</td><td><code>threading-channels</code></td><td>Channel APIs</td></tr>
-      <tr><td><code>Timers</code></td><td>Static</td><td><code>timers</code></td><td>System::Timers APIs</td></tr>
-      <tr><td><code>IO</code></td><td>Static</td><td><code>io</code></td><td>Streams, files, directories, and binary I/O</td></tr>
-      <tr><td><code>IO.Compression</code></td><td>Static</td><td><code>io-compression</code></td><td>Compression streams; owns ZLIB</td></tr>
-      <tr><td><code>IO.Compression.Zip</code></td><td>Static</td><td><code>io-compression-zip</code></td><td>ZIP APIs; owns miniz</td></tr>
-      <tr><td><code>IO.Hashing</code></td><td>Static</td><td><code>io-hashing</code></td><td>Checksums and hashing</td></tr>
-      <tr><td><code>Storage</code></td><td>Static</td><td><code>storage</code></td><td>Platform storage paths</td></tr>
-      <tr><td><code>IO.IsolatedStorage</code></td><td>Static</td><td><code>io-isolated-storage</code></td><td>Isolated storage APIs</td></tr>
-      <tr><td><code>Net</code></td><td>Static</td><td><code>net</code></td><td>Common network types</td></tr>
-      <tr><td><code>Net.Sockets</code></td><td>Static</td><td><code>net-sockets</code></td><td>Socket clients and streams</td></tr>
-      <tr><td><code>Net.Http</code></td><td>Static</td><td><code>net-http</code></td><td>HTTP client and content APIs</td></tr>
-      <tr><td><code>Net.Http.Headers</code></td><td>Static</td><td><code>net-http-headers</code></td><td>HTTP header value types</td></tr>
-      <tr><td><code>Net.Http.Json</code></td><td>Interface</td><td><code>net-http-json</code></td><td>HTTP JSON extensions</td></tr>
-      <tr><td><code>Net.Mime</code></td><td>Static</td><td><code>net-mime</code></td><td>MIME content types</td></tr>
-      <tr><td><code>Net.NetworkInformation</code></td><td>Static</td><td><code>net-network-information</code></td><td>Network information APIs</td></tr>
-      <tr><td><code>Net.Security</code></td><td>Interface</td><td><code>net-security</code></td><td>Network-security compatibility types</td></tr>
-      <tr><td><code>Net.WebSockets</code></td><td>Static</td><td><code>net-websockets</code></td><td>WebSocket client APIs</td></tr>
-      <tr><td><code>Security</code></td><td>Interface</td><td><code>security</code></td><td>Security compatibility types</td></tr>
-      <tr><td><code>Security.Cryptography</code></td><td>Static</td><td><code>security-cryptography</code></td><td>Hashing and cryptography compatibility APIs</td></tr>
-      <tr><td><code>Security.Cryptography.Random</code></td><td>Static</td><td><code>security-cryptography-random</code></td><td>Cryptographic random-number APIs</td></tr>
-      <tr><td><code>Xml</code></td><td>Static</td><td><code>xml</code></td><td>XML APIs; owns tinyxml2</td></tr>
-      <tr><td><code>Xml.Linq</code></td><td>Static</td><td><code>xml-linq</code></td><td>LINQ-to-XML APIs</td></tr>
-    </table></div>
-
-    <h2>Compatibility Components</h2>
-    <p>These targets preserve broad historical surfaces. New code should use a narrow component from the table above.</p>
-    <div class="table-wrap"><table>
-      <tr><th>Component</th><th>Meaning</th></tr>
-      <tr><td><code>Core</code></td><td>Compatibility umbrella for <code>Core.Base</code>, <code>Console</code>, <code>Uri</code>, and <code>TimeZone</code>.</td></tr>
-      <tr><td><code>Collections</code></td><td>Compatibility umbrella for all three collections components.</td></tr>
-      <tr><td><code>Xml.XPath</code></td><td>Alias of the <code>Xml</code> component.</td></tr>
-      <tr><td><code>All</code></td><td>Aggregate of every physical component, exposed as <code>SharpRuntime::All</code>.</td></tr>
-      <tr><td><code>SHARP_RUNTIME</code></td><td>Legacy target which forwards to <code>SharpRuntime::All</code> only when <code>All</code> is selected.</td></tr>
-    </table></div>
-
-    <h2>Subsystem Reference</h2>
-    <div class="card-grid">
-      <a class="card" href="collections.html"><h3>Collections</h3><p>List, Dictionary, immutable, concurrent, and object-model collections.</p></a>
-      <a class="card" href="numerics.html"><h3>Numerics</h3><p>Vectors, matrices, quaternion, BigInteger, and colors.</p></a>
-      <a class="card" href="text.html"><h3>Text &amp; Encoding</h3><p>StringBuilder, encodings, JSON, XML, and regex.</p></a>
-      <a class="card" href="globalization.html"><h3>Globalization</h3><p>CultureInfo, calendars, and date/time formatting.</p></a>
-      <a class="card" href="diagnostics.html"><h3>Diagnostics</h3><p>Debug, trace, stopwatch, stack trace, and attributes.</p></a>
-      <a class="card" href="net.html"><h3>Networking</h3><p>Common networking, sockets, HTTP, and WebSockets.</p></a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Components</span><span>/</span><span aria-current="page">Module Reference (Compatibility URL)</span></nav><h1>Module Reference (Compatibility URL)</h1><p class="lead">Compatibility entry point for the complete current Sharp Runtime component catalogue.</p><div class="page-meta"><span>Components</span><span>Source f827a6c5</span></div>
+<h2 id="moved">The module catalogue has expanded</h2><p>The old page described a small subset. The definitive catalogue now covers every current physical CMake component, its kind, representative public header, direct dependencies and external/platform attachment.</p><div class="page-index"><a href="../components/index.html">Complete component catalogue<small>All 41 physical components.</small></a><a href="../components/core.html">Core and collections<small>Foundation family.</small></a><a href="../components/text-data.html">Text and data<small>Text, JSON and XML.</small></a><a href="../components/io-storage.html">I/O and storage<small>Streams, archives and storage.</small></a><a href="../components/networking.html">Networking<small>Sockets through WebSockets.</small></a><a href="../components/concurrency.html">Concurrency<small>Threads, tasks and timers.</small></a></div><div class="callout"><div class="callout-title">URL preserved</div><p>This public URL remains useful for existing inbound links; canonical discovery continues through the complete catalogue.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

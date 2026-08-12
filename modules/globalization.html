@@ -1,89 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Globalization Module — sharp-runtime</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Globalization Module | Sharp Runtime</title>
+  <meta name="description" content="Culture, parsing, formatting and portability boundaries in Sharp Runtime.">
+  <link rel="canonical" href="https://sharpruntime.com/modules/globalization.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Globalization Module | Sharp Runtime">
+  <meta property="og:description" content="Culture, parsing, formatting and portability boundaries in Sharp Runtime.">
+  <meta property="og:url" content="https://sharpruntime.com/modules/globalization.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Globalization Module | Sharp Runtime">
+  <meta name="twitter:description" content="Culture, parsing, formatting and portability boundaries in Sharp Runtime.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Globalization Module", "description": "Culture, parsing, formatting and portability boundaries in Sharp Runtime.", "url": "https://sharpruntime.com/modules/globalization.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Components"}, {"@type": "ListItem", "position": 3, "name": "Globalization Module", "item": "https://sharpruntime.com/modules/globalization.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li class="nav-section">Modules</li>
-    <li><a href="index.html">Modules Index</a></li>
-    <li><a href="collections.html">Collections</a></li>
-    <li><a href="numerics.html">Numerics</a></li>
-    <li><a href="text.html">Text</a></li>
-    <li><a href="globalization.html">Globalization</a></li>
-    <li><a href="diagnostics.html">Diagnostics</a></li>
-    <li><a href="net.html">Net.Sockets</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Globalization</span></div>
-    <div id="search-results"></div>
-    <h1>Globalization Module</h1>
-    <p class="page-subtitle">Culture info, calendars, DateTime formatting, and locale utilities.</p>
-
-    <p class="file-path">Globalization: SharpRuntime::Globalization → modules/globalization/ | time zones: SharpRuntime::TimeZone → modules/time-zone/</p>
-
-    <h2>Core Types</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Type</th><th>Header</th><th>Status</th><th>Description</th></tr>
-      <tr><td><code>CultureInfo</code></td><td><code>System/Globalization/CultureInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Culture-specific formatting info. CurrentCulture, InvariantCulture.</td></tr>
-      <tr><td><code>DateTimeFormatInfo</code></td><td><code>System/Globalization/DateTimeFormatInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>DateTime format patterns per culture.</td></tr>
-      <tr><td><code>NumberFormatInfo</code></td><td><code>System/Globalization/NumberFormatInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Number format symbols (decimal separator, thousands separator).</td></tr>
-      <tr><td><code>CompareInfo</code></td><td><code>System/Globalization/CompareInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Culture-aware string comparison.</td></tr>
-      <tr><td><code>TextInfo</code></td><td><code>System/Globalization/TextInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>TextElementEnumerator, casing.</td></tr>
-      <tr><td><code>StringInfo</code></td><td><code>System/Globalization/StringInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Text element enumeration for Unicode strings.</td></tr>
-      <tr><td><code>IdnMapping</code></td><td><code>System/Globalization/IdnMapping.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Internationalized Domain Names encoding (Punycode).</td></tr>
-      <tr><td><code>RegionInfo</code></td><td><code>System/Globalization/RegionInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Region/country information.</td></tr>
-      <tr><td><code>CharUnicodeInfo</code></td><td><code>System/Globalization/CharUnicodeInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Unicode category information.</td></tr>
-    </table>
-    </div>
-
-    <h2>Calendar Types</h2>
-    <p>All calendar implementations share the base class <code>System::Globalization::Calendar</code>.</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Calendar</th><th>Header</th><th>Status</th></tr>
-      <tr><td><code>GregorianCalendar</code></td><td><code>System/Globalization/GregorianCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>HebrewCalendar</code></td><td><code>System/Globalization/HebrewCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>HijriCalendar</code></td><td><code>System/Globalization/HijriCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>UmAlQuraCalendar</code></td><td><code>System/Globalization/UmAlQuraCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>JulianCalendar</code></td><td><code>System/Globalization/JulianCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>JapaneseCalendar</code></td><td><code>System/Globalization/JapaneseCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>KoreanCalendar</code></td><td><code>System/Globalization/KoreanCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>TaiwanCalendar</code></td><td><code>System/Globalization/TaiwanCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>PersianCalendar</code></td><td><code>System/Globalization/PersianCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ThaiBuddhistCalendar</code></td><td><code>System/Globalization/ThaiBuddhistCalendar.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>Enumerations</h2>
-    <ul>
-      <li><code>CalendarAlgorithmType</code> — SolarCalendar, LunarCalendar, LunisolarCalendar, etc.</li>
-      <li><code>CalendarWeekRule</code> — FirstDay, FirstFourDayWeek, FirstFullWeek</li>
-      <tr><td><code>CompareOptions</code></td></tr>
-      <li><code>CultureTypes</code> — AllCultures, NeutralCultures, SpecificCultures, etc.</li>
-      <li><code>DateTimeStyles</code> — formatting parse flags</li>
-      <li><code>NumberStyles</code> — integer/float parse options</li>
-      <li><code>UnicodeCategory</code> — Unicode general categories</li>
-    </ul>
-
-    <h2>TimeZoneInfo</h2>
-    <p class="file-path">modules/time-zone/include/System/TimeZoneInfo.hpp</p>
-    <p>Status: <span class="badge badge-done">Done</span> but <span class="badge badge-posix">POSIX-only</span></p>
-    <p>Uses <code>localtime_r</code> and <code>/usr/share/zoneinfo</code>. Not portable to Windows without platform guards.</p>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Components</span><span>/</span><span aria-current="page">Globalization Module</span></nav><h1>Globalization Module</h1><p class="lead">Culture, parsing, formatting and portability boundaries in Sharp Runtime.</p><div class="page-meta"><span>Components</span><span>Source f827a6c5</span></div><p>Globalization provides a curated culture/calendar/Unicode/number surface. Locale data, collation and grapheme behavior must be evaluated per API and platform.</p><div class="page-index"><a href="../components/numerics-globalization.html">Numerics/globalization family<small>Targets and current boundaries.</small></a><a href="../platform-layer.html">Platforms<small>Platform validation depth.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

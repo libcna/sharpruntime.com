@@ -1,189 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Porting C# Code — sharp-runtime Developer Guide</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Porting C# Code (Compatibility URL) | Sharp Runtime</title>
+  <meta name="description" content="Compatibility entry point for the current Sharp Runtime C# porting guide.">
+  <link rel="canonical" href="https://sharpruntime.com/development/porting-csharp-code.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Porting C# Code (Compatibility URL) | Sharp Runtime">
+  <meta property="og:description" content="Compatibility entry point for the current Sharp Runtime C# porting guide.">
+  <meta property="og:url" content="https://sharpruntime.com/development/porting-csharp-code.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Porting C# Code (Compatibility URL) | Sharp Runtime">
+  <meta name="twitter:description" content="Compatibility entry point for the current Sharp Runtime C# porting guide.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Porting C# Code (Compatibility URL)", "description": "Compatibility entry point for the current Sharp Runtime C# porting guide.", "url": "https://sharpruntime.com/development/porting-csharp-code.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "Porting C# Code (Compatibility URL)", "item": "https://sharpruntime.com/development/porting-csharp-code.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Development</li>
-    <li><a href="index.html">Developer Guide</a></li>
-    <li><a href="coding-style.html">Coding Style</a></li>
-    <li><a href="debugging.html">Debugging</a></li>
-    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Porting C# Code</span></div>
-    <div id="search-results"></div>
-    <h1>Porting C# Code</h1>
-    <p class="page-subtitle">Systematic guide to porting .NET code to sharp-runtime.</p>
-
-    <h2>Type Mappings</h2>
-
-    <h3>Primitive Types</h3>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# type</th><th>sharp-runtime alias</th><th>Underlying C++ type</th></tr>
-      <tr><td><code>int</code></td><td><code>intcs</code></td><td><code>int32_t</code></td></tr>
-      <tr><td><code>long</code></td><td><code>longcs</code></td><td><code>int64_t</code></td></tr>
-      <tr><td><code>short</code></td><td><code>shortcs</code></td><td><code>int16_t</code></td></tr>
-      <tr><td><code>byte</code></td><td><code>bytecs</code></td><td><code>uint8_t</code></td></tr>
-      <tr><td><code>sbyte</code></td><td><code>sbytecs</code></td><td><code>int8_t</code></td></tr>
-      <tr><td><code>uint</code></td><td><code>uintcs</code></td><td><code>uint32_t</code></td></tr>
-      <tr><td><code>ulong</code></td><td><code>ulongcs</code></td><td><code>uint64_t</code></td></tr>
-      <tr><td><code>ushort</code></td><td><code>ushortcs</code></td><td><code>uint16_t</code></td></tr>
-      <tr><td><code>float</code></td><td><code>float</code></td><td><code>float</code></td></tr>
-      <tr><td><code>double</code></td><td><code>double</code></td><td><code>double</code></td></tr>
-      <tr><td><code>bool</code></td><td><code>bool</code></td><td><code>bool</code></td></tr>
-      <tr><td><code>char</code></td><td><code>charcs</code></td><td><code>char16_t</code></td></tr>
-      <tr><td><code>string</code></td><td><code>std::string</code></td><td><code>std::string</code></td></tr>
-      <tr><td><code>object</code></td><td><code>System::Object*</code></td><td>pointer</td></tr>
-    </table>
-    </div>
-    <p>Include <code>&lt;SharpRuntime/SharpRuntimeHelper.hpp&gt;</code> for the aliases.</p>
-
-    <h3>Collections</h3>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# type</th><th>sharp-runtime type</th></tr>
-      <tr><td><code>T[]</code></td><td><code>std::vector&lt;T&gt;</code></td></tr>
-      <tr><td><code>List&lt;T&gt;</code></td><td><code>System::Collections::Generic::List&lt;T&gt;</code></td></tr>
-      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>System::Collections::Generic::Dictionary&lt;K,V&gt;</code></td></tr>
-      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>System::Collections::Generic::HashSet&lt;T&gt;</code></td></tr>
-      <tr><td><code>Queue&lt;T&gt;</code></td><td><code>System::Collections::Generic::Queue&lt;T&gt;</code></td></tr>
-      <tr><td><code>Stack&lt;T&gt;</code></td><td><code>System::Collections::Generic::Stack&lt;T&gt;</code></td></tr>
-    </table>
-    </div>
-
-    <h2>Memory Management</h2>
-    <div class="callout warning">
-      <div class="callout-title">Most Critical Difference</div>
-      C# has garbage collection. sharp-runtime does not. Every object must have an explicit owner.
-      Failing to handle ownership leads to memory leaks or use-after-free bugs.
-    </div>
-
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# pattern</th><th>sharp-runtime equivalent</th></tr>
-      <tr><td><code>new MyClass()</code></td><td><code>std::make_unique&lt;MyClass&gt;()</code> (single owner)</td></tr>
-      <tr><td>Shared reference</td><td><code>std::make_shared&lt;MyClass&gt;()</code></td></tr>
-      <tr><td><code>using (var x = ...)</code></td><td>Destructor runs at scope end (RAII)</td></tr>
-      <tr><td><code>x = null</code></td><td><code>ptr.reset()</code> or let scope end</td></tr>
-      <tr><td><code>x == null</code></td><td><code>ptr == nullptr</code> or <code>!ptr</code></td></tr>
-    </table>
-    </div>
-
-    <h2>Properties</h2>
-    <pre><code>// C#
-public int Width { get; set; }
-public int Area => Width * Height;  // computed
-
-// sharp-runtime
-// In .hpp:
-DDATA(int, Width)
-DGETTER(int, Area)
-
-// In .cpp:
-IDATA(MyClass, int, Width)
-IGETTER(MyClass, int, Area, width_ * height_)</code></pre>
-
-    <h2>Events</h2>
-    <pre><code>// C#
-public event EventHandler&lt;MyArgs&gt; Changed;
-Changed?.Invoke(this, new MyArgs());
-
-// sharp-runtime
-System::EventHandler&lt;MyArgs&gt; Changed;
-if (!Changed.Empty()) Changed.Raise(this, MyArgs{});</code></pre>
-
-    <h2>String Interpolation</h2>
-    <pre><code>// C#
-string msg = $"Hello {name}, you are {age} years old.";
-
-// sharp-runtime (option 1: String::Format)
-std::string msg = System::String::Format("Hello {0}, you are {1} years old.", name, age);
-
-// sharp-runtime (option 2: std::string concatenation)
-std::string msg = "Hello " + name + ", you are " + std::to_string(age) + " years old.";</code></pre>
-
-    <h2>Null Coalescing</h2>
-    <pre><code>// C#
-string name = input ?? "default";
-int val = n ?? 0;
-
-// sharp-runtime
-std::string name = input.empty() ? "default" : input;
-int val = n.GetValueOrDefault(0); // for Nullable&lt;int&gt; n</code></pre>
-
-    <h2>foreach and LINQ</h2>
-    <pre><code>// C# foreach
-foreach (var item in items) { ... }
-
-// sharp-runtime (range-for on std::vector or List&lt;T&gt;)
-for (const auto&amp; item : items) { ... }
-
-// C# LINQ — no direct equivalent
-// Use std::algorithm or manual loops
-var names = players.Where(p =&gt; p.Score &gt; 0).Select(p =&gt; p.Name).ToList();
-
-// sharp-runtime equivalent
-std::vector&lt;std::string&gt; names;
-for (const auto&amp; p : players) {
-    if (p.getScoreProperty() &gt; 0)
-        names.push_back(p.getNameProperty());
-}</code></pre>
-
-    <h2>Async/Await</h2>
-    <p>C# async/await has no direct equivalent in sharp-runtime. Options:</p>
-    <ul>
-      <li>Use <code>std::thread</code> and <code>System::Threading::Thread</code></li>
-      <li>Use <code>System::Threading::Tasks::Task</code> (partial implementation — needs verification)</li>
-      <li>Refactor to synchronous code where possible</li>
-    </ul>
-
-    <h2>Interfaces</h2>
-    <pre><code>// C#
-public interface IDrawable { void Draw(); }
-public class Sprite : IDrawable { public void Draw() { ... } }
-
-// sharp-runtime (pure abstract base class)
-class IDrawable {
-public:
-    virtual ~IDrawable() = default;
-    virtual void Draw() = 0;
-};
-class Sprite : public IDrawable {
-public:
-    void Draw() override { ... }
-};</code></pre>
-
-    <h2>Exception Handling</h2>
-    <pre><code>// C# — works the same in sharp-runtime
-try {
-    doSomething();
-} catch (System::ArgumentException&amp; e) {
-    std::cerr &lt;&lt; e.what() &lt;&lt; "\n";
-} catch (System::Exception&amp; e) {
-    std::cerr &lt;&lt; "Error: " &lt;&lt; e.what() &lt;&lt; "\n";
-}</code></pre>
-    <p>Note: In C++, catch by reference (<code>&amp;</code>). In C#, catch by type without <code>&amp;</code>.</p>
-
-    <div class="nav-links">
-      <a class="prev" href="debugging.html">← Debugging</a>
-      <a class="next" href="adding-runtime-features.html">Adding Features →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html">Adding features</a><a href="debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">Porting C# Code (Compatibility URL)</span></nav><h1>Porting C# Code (Compatibility URL)</h1><p class="lead">Compatibility entry point for the current Sharp Runtime C# porting guide.</p><div class="page-meta"><span>Guides</span><span>Source f827a6c5</span></div><p>The porting guide now separates managed assumptions, native ownership, component selection and behavioral verification.</p><div class="page-index"><a href="../guides/porting-csharp.html">Current porting guide<small>End-to-end workflow.</small></a><a href="../csharp-compatibility.html">Pattern map<small>Quick compatibility mapping.</small></a><a href="../tutorials/port-csharp-class.html">Port a class tutorial<small>A bounded practical exercise.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

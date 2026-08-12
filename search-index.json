@@ -1,0 +1,918 @@
+[
+  {
+    "title": "Sharp Runtime — Practical .NET System.* APIs for Native C++23",
+    "url": "/",
+    "description": "Sharp Runtime is a componentized C++23 implementation of a practical subset of .NET System.* APIs for native source ports.",
+    "tags": [
+      ".net",
+      "c++23",
+      "cmake",
+      "home",
+      "native",
+      "system"
+    ],
+    "category": "Home"
+  },
+  {
+    "title": "What is Sharp Runtime?",
+    "url": "/overview.html",
+    "description": "Goals, non-goals, audiences and verified scope of the Sharp Runtime C++23 compatibility library.",
+    "tags": [
+      "overview"
+    ],
+    "category": "Overview"
+  },
+  {
+    "title": "Getting Started",
+    "url": "/getting-started.html",
+    "description": "Build a verified minimal Sharp Runtime C++23 consumer and select the CMake component you need.",
+    "tags": [
+      "getting started"
+    ],
+    "category": "Getting Started"
+  },
+  {
+    "title": "Build and Consumer Integration",
+    "url": "/build.html",
+    "description": "Verified CMake options, targets, dependencies and selective build patterns for Sharp Runtime.",
+    "tags": [
+      "getting started"
+    ],
+    "category": "Getting Started"
+  },
+  {
+    "title": "Testing and Verification",
+    "url": "/running-tests.html",
+    "description": "How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.",
+    "tags": [
+      "getting started"
+    ],
+    "category": "Getting Started"
+  },
+  {
+    "title": "Architecture",
+    "url": "/architecture.html",
+    "description": "Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.",
+    "tags": [
+      "overview"
+    ],
+    "category": "Overview"
+  },
+  {
+    "title": "Compatibility Philosophy",
+    "url": "/compatibility.html",
+    "description": "What Sharp Runtime means by .NET compatibility, and the deliberate boundaries of its native C++ model.",
+    "tags": [
+      "guides"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Platforms and Portability",
+    "url": "/platform-layer.html",
+    "description": "Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.",
+    "tags": [
+      "guides"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Memory and Ownership",
+    "url": "/memory-management.html",
+    "description": "How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.",
+    "tags": [
+      "guides"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "CNA Integration",
+    "url": "/cna-integration.html",
+    "description": "How CNA uses Sharp Runtime and where Sharp Runtime documentation stops and libcna.com begins.",
+    "tags": [
+      "guides"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Sharp Runtime Components",
+    "url": "/components/index.html",
+    "description": "Complete generated catalogue of all Sharp Runtime physical CMake components, targets and dependency closures.",
+    "tags": [
+      "Buffers",
+      "Collections.Async",
+      "Collections.Blocking",
+      "Collections.Core",
+      "Collections.ObjectModel",
+      "ComponentModel",
+      "Console",
+      "Core.Base",
+      "Diagnostics",
+      "Globalization",
+      "IO",
+      "IO.Compression",
+      "IO.Compression.Zip",
+      "IO.Hashing",
+      "IO.IsolatedStorage",
+      "Net",
+      "Net.Http",
+      "Net.Http.Headers",
+      "Net.Http.Json",
+      "Net.Mime",
+      "Net.NetworkInformation",
+      "Net.Security",
+      "Net.Sockets",
+      "Net.WebSockets",
+      "Numerics",
+      "Runtime",
+      "Security",
+      "Security.Cryptography",
+      "Security.Cryptography.Random",
+      "Storage",
+      "Text",
+      "Text.Json",
+      "Text.RegularExpressions",
+      "Threading",
+      "Threading.Channels",
+      "Threading.Tasks",
+      "TimeZone",
+      "Timers",
+      "Uri",
+      "Xml",
+      "Xml.Linq",
+      "catalogue",
+      "cmake",
+      "components",
+      "targets"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Core and Collections Components",
+    "url": "/components/core.html",
+    "description": "Foundation types, console, URI, time zones, buffers, collections and component model.",
+    "tags": [
+      "buffers",
+      "cmake",
+      "collections.async",
+      "collections.blocking",
+      "collections.core",
+      "collections.objectmodel",
+      "componentmodel",
+      "components",
+      "console",
+      "core.base",
+      "timezone",
+      "uri"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Text, JSON and XML Components",
+    "url": "/components/text-data.html",
+    "description": "Encoding, StringBuilder, regular expressions, JSON, XML and LINQ-style XML.",
+    "tags": [
+      "cmake",
+      "components",
+      "text",
+      "text.json",
+      "text.regularexpressions",
+      "xml",
+      "xml.linq"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "I/O, Compression and Storage Components",
+    "url": "/components/io-storage.html",
+    "description": "Streams, files, directories, compression, ZIP, hashing, storage and isolated storage.",
+    "tags": [
+      "cmake",
+      "components",
+      "io",
+      "io.compression",
+      "io.compression.zip",
+      "io.hashing",
+      "io.isolatedstorage",
+      "storage"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Networking Components",
+    "url": "/components/networking.html",
+    "description": "DNS, endpoints, sockets, HTTP, headers, HTTP JSON, MIME, network information, security markers and WebSockets.",
+    "tags": [
+      "cmake",
+      "components",
+      "net",
+      "net.http",
+      "net.http.headers",
+      "net.http.json",
+      "net.mime",
+      "net.networkinformation",
+      "net.security",
+      "net.sockets",
+      "net.websockets"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Threading, Tasks, Channels and Timers",
+    "url": "/components/concurrency.html",
+    "description": "Native threading, synchronization, cancellation, tasks, continuations, channels and timer behavior.",
+    "tags": [
+      "cmake",
+      "components",
+      "threading",
+      "threading.channels",
+      "threading.tasks",
+      "timers"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Numerics, Globalization and Runtime Utilities",
+    "url": "/components/numerics-globalization.html",
+    "description": "Cultures, numeric types, vectors, matrices, diagnostics and runtime helper components.",
+    "tags": [
+      "cmake",
+      "components",
+      "diagnostics",
+      "globalization",
+      "numerics",
+      "runtime",
+      "security",
+      "security.cryptography",
+      "security.cryptography.random"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Sharp Runtime Tutorials",
+    "url": "/tutorials/index.html",
+    "description": "Practical Sharp Runtime learning paths for integration, C# porting, data, I/O, concurrency and component development.",
+    "tags": [
+      "learning path",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Build a First Consumer",
+    "url": "/tutorials/first-consumer.html",
+    "description": "Create a minimal CMake application that links only SharpRuntime::Console.",
+    "tags": [
+      "a",
+      "beginner",
+      "build",
+      "consumer",
+      "first",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Select CMake Components",
+    "url": "/tutorials/select-components.html",
+    "description": "Combine multiple Sharp Runtime targets and inspect dependency closure.",
+    "tags": [
+      "beginner",
+      "cmake",
+      "components",
+      "select",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Port a C# Class",
+    "url": "/tutorials/port-csharp-class.html",
+    "description": "Translate a small C# class to native C++ with explicit ownership, properties and exceptions.",
+    "tags": [
+      "a",
+      "c#",
+      "class",
+      "intermediate",
+      "port",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Use Collections Safely",
+    "url": "/tutorials/use-collections.html",
+    "description": "Choose Sharp Runtime collection components and preserve iterator/versioning semantics.",
+    "tags": [
+      "collections",
+      "intermediate",
+      "safely",
+      "tutorial",
+      "tutorials",
+      "use"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Use Delegates and Events",
+    "url": "/tutorials/use-events.html",
+    "description": "Compose typed callbacks while controlling capture and subscription lifetime.",
+    "tags": [
+      "and",
+      "delegates",
+      "events",
+      "intermediate",
+      "tutorial",
+      "tutorials",
+      "use"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Work with Files and Streams",
+    "url": "/tutorials/work-with-files.html",
+    "description": "Use Sharp Runtime I/O with RAII, capability checks and explicit platform error handling.",
+    "tags": [
+      "and",
+      "files",
+      "intermediate",
+      "streams",
+      "tutorial",
+      "tutorials",
+      "with",
+      "work"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Strings and StringBuilder",
+    "url": "/tutorials/strings-and-builder.html",
+    "description": "Use UTF-8 Sharp Runtime text APIs without assuming .NET UTF-16 indexing.",
+    "tags": [
+      "and",
+      "intermediate",
+      "stringbuilder",
+      "strings",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Work with JSON",
+    "url": "/tutorials/json.html",
+    "description": "Select Text.Json and use its curated native serialization surface.",
+    "tags": [
+      "intermediate",
+      "json",
+      "tutorial",
+      "tutorials",
+      "with",
+      "work"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Parse XML with XML LINQ",
+    "url": "/tutorials/xml-linq.html",
+    "description": "Select Xml.Linq and work with names, elements and documents within the implemented subset.",
+    "tags": [
+      "intermediate",
+      "linq",
+      "parse",
+      "tutorial",
+      "tutorials",
+      "with",
+      "xml"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Compression, ZIP and Hashing",
+    "url": "/tutorials/compression-hashing.html",
+    "description": "Choose the right Sharp Runtime I/O component for compression, archives or checksums.",
+    "tags": [
+      "and",
+      "compression,",
+      "hashing",
+      "intermediate",
+      "tutorial",
+      "tutorials",
+      "zip"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Use HTTP Within Its Transport Boundaries",
+    "url": "/tutorials/http.html",
+    "description": "Select Sharp Runtime HTTP components and avoid assuming TLS or browser networking parity.",
+    "tags": [
+      "advanced",
+      "boundaries",
+      "http",
+      "its",
+      "transport",
+      "tutorial",
+      "tutorials",
+      "use",
+      "within"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Tasks, Continuations and Cancellation",
+    "url": "/tutorials/tasks-cancellation.html",
+    "description": "Port async-shaped code to Sharp Runtime with explicit native scheduling and lifetime.",
+    "tags": [
+      "advanced",
+      "and",
+      "cancellation",
+      "continuations",
+      "tasks,",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Add a New Component",
+    "url": "/tutorials/add-component.html",
+    "description": "Contributor workflow for Sharp Runtime module ownership, CMake registration, tests and validation.",
+    "tags": [
+      "a",
+      "add",
+      "advanced",
+      "component",
+      "new",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Debug Component Selection",
+    "url": "/tutorials/debug-components.html",
+    "description": "Diagnose unknown targets, transitive closure, leaked headers and selective test behavior.",
+    "tags": [
+      "advanced",
+      "component",
+      "debug",
+      "selection",
+      "tutorial",
+      "tutorials"
+    ],
+    "category": "Tutorials"
+  },
+  {
+    "title": "Runtime Model",
+    "url": "/runtime-overview.html",
+    "description": "Native type, object, string, array, delegate and exception architecture.",
+    "tags": [
+      "model",
+      "overview",
+      "runtime"
+    ],
+    "category": "Overview"
+  },
+  {
+    "title": "Type System and Core Values",
+    "url": "/type-system.html",
+    "description": "Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.",
+    "tags": [
+      "and",
+      "concepts",
+      "core",
+      "system",
+      "type",
+      "values"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Strings and Text",
+    "url": "/strings.html",
+    "description": "Sharp Runtime UTF-8 strings, formatting, StringBuilder, encodings and Base64 behavior.",
+    "tags": [
+      "and",
+      "concepts",
+      "strings",
+      "text"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Arrays, Spans and Memory",
+    "url": "/arrays.html",
+    "description": "Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.",
+    "tags": [
+      "and",
+      "arrays,",
+      "concepts",
+      "memory",
+      "spans"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Delegates, Events and Callables",
+    "url": "/delegates.html",
+    "description": "Typed Action, Func, Predicate and EventHandler behavior in native C++.",
+    "tags": [
+      "and",
+      "callables",
+      "concepts",
+      "delegates,",
+      "events"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Exceptions and Error Semantics",
+    "url": "/exceptions.html",
+    "description": "Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.",
+    "tags": [
+      "and",
+      "concepts",
+      "error",
+      "exceptions",
+      "semantics"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Reflection and Runtime Type Identity",
+    "url": "/reflection.html",
+    "description": "What Sharp Runtime Type and type-name helpers provide—and what full CLR reflection it omits.",
+    "tags": [
+      "and",
+      "concepts",
+      "identity",
+      "reflection",
+      "runtime",
+      "type"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "I/O, Files and Streams",
+    "url": "/io.html",
+    "description": "Sharp Runtime streams, files, directories, readers/writers and filesystem portability.",
+    "tags": [
+      "and",
+      "concepts",
+      "files",
+      "i/o,",
+      "streams"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Threading, Tasks and Timers",
+    "url": "/threading.html",
+    "description": "Native threads, synchronization, cancellation, tasks, channels and timer behavior.",
+    "tags": [
+      "and",
+      "concepts",
+      "tasks",
+      "threading,",
+      "timers"
+    ],
+    "category": "Concepts"
+  },
+  {
+    "title": "Porting C# Patterns",
+    "url": "/csharp-compatibility.html",
+    "description": "Quick mapping from C# managed concepts to deliberate native C++ Sharp Runtime patterns.",
+    "tags": [
+      "c#",
+      "guides",
+      "patterns",
+      "porting"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Porting C# to Native C++",
+    "url": "/guides/porting-csharp.html",
+    "description": "A systematic workflow for porting C# code with Sharp Runtime while respecting native ownership and compatibility boundaries.",
+    "tags": [
+      "c#",
+      "c++",
+      "guides",
+      "native",
+      "porting",
+      "to"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Project Structure",
+    "url": "/project-structure.html",
+    "description": "Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.",
+    "tags": [
+      "development",
+      "project",
+      "structure"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "API Discovery",
+    "url": "/api/index.html",
+    "description": "Curated Sharp Runtime API navigation by concepts, components and low-level source reference.",
+    "tags": [
+      "api",
+      "discovery"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "Module Reference (Compatibility URL)",
+    "url": "/modules/index.html",
+    "description": "Compatibility entry point for the complete current Sharp Runtime component catalogue.",
+    "tags": [
+      "(compatibility",
+      "components",
+      "module",
+      "reference",
+      "url)"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Collections Module Family",
+    "url": "/modules/collections.html",
+    "description": "Compatibility URL for current Sharp Runtime collection components and semantics.",
+    "tags": [
+      "collections",
+      "components",
+      "family",
+      "module"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Text Module Family",
+    "url": "/modules/text.html",
+    "description": "Compatibility URL for Text, Regex, JSON and XML documentation.",
+    "tags": [
+      "components",
+      "family",
+      "module",
+      "text"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Networking Module Family",
+    "url": "/modules/net.html",
+    "description": "Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.",
+    "tags": [
+      "components",
+      "family",
+      "module",
+      "networking"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Globalization Module",
+    "url": "/modules/globalization.html",
+    "description": "Culture, parsing, formatting and portability boundaries in Sharp Runtime.",
+    "tags": [
+      "components",
+      "globalization",
+      "module"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Numerics Module",
+    "url": "/modules/numerics.html",
+    "description": "Vectors, matrices, quaternion, BigInteger, Decimal and compiler capability boundaries.",
+    "tags": [
+      "components",
+      "module",
+      "numerics"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Diagnostics Module",
+    "url": "/modules/diagnostics.html",
+    "description": "Sharp Runtime diagnostic/code-analysis and process-oriented surfaces.",
+    "tags": [
+      "components",
+      "diagnostics",
+      "module"
+    ],
+    "category": "Components"
+  },
+  {
+    "title": "Core Class Reference",
+    "url": "/classes/index.html",
+    "description": "Curated reference for important foundational Sharp Runtime types.",
+    "tags": [
+      "api",
+      "class",
+      "core",
+      "reference"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "System::Object",
+    "url": "/classes/object.html",
+    "description": "Native base identity and object-model boundaries.",
+    "tags": [
+      "api",
+      "system::object"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "System::String Helpers",
+    "url": "/classes/string.html",
+    "description": "UTF-8 string helpers, formatting and compatibility differences.",
+    "tags": [
+      "api",
+      "helpers",
+      "system::string"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "System::Array Helpers",
+    "url": "/classes/array.html",
+    "description": "Curated array operations and native ownership considerations.",
+    "tags": [
+      "api",
+      "helpers",
+      "system::array"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "Nullable Values",
+    "url": "/classes/nullable.html",
+    "description": "Optional value compatibility patterns in Sharp Runtime.",
+    "tags": [
+      "api",
+      "nullable",
+      "values"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "System::Exception",
+    "url": "/classes/exception.html",
+    "description": "Base exception behavior, messages, HResult and causal exceptions.",
+    "tags": [
+      "api",
+      "system::exception"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "EventHandler",
+    "url": "/classes/eventhandler.html",
+    "description": "Typed event callback behavior and native capture lifetime.",
+    "tags": [
+      "api",
+      "eventhandler"
+    ],
+    "category": "API"
+  },
+  {
+    "title": "Development Guide",
+    "url": "/development/index.html",
+    "description": "Contribute APIs and components while preserving Sharp Runtime behavior, boundaries and portability.",
+    "tags": [
+      "development",
+      "guide"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "Known Limitations",
+    "url": "/development/known-limitations.html",
+    "description": "Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.",
+    "tags": [
+      "development",
+      "known",
+      "limitations"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "Adding Runtime Features",
+    "url": "/development/adding-runtime-features.html",
+    "description": "Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.",
+    "tags": [
+      "adding",
+      "development",
+      "features",
+      "runtime"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "Debugging Sharp Runtime",
+    "url": "/development/debugging.html",
+    "description": "Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.",
+    "tags": [
+      "debugging",
+      "development",
+      "runtime",
+      "sharp"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "Coding and Documentation Style",
+    "url": "/development/coding-style.html",
+    "description": "Sharp Runtime naming, component boundaries, portability and evidence conventions.",
+    "tags": [
+      "and",
+      "coding",
+      "development",
+      "documentation",
+      "style"
+    ],
+    "category": "Development"
+  },
+  {
+    "title": "Porting C# Code (Compatibility URL)",
+    "url": "/development/porting-csharp-code.html",
+    "description": "Compatibility entry point for the current Sharp Runtime C# porting guide.",
+    "tags": [
+      "(compatibility",
+      "c#",
+      "code",
+      "guides",
+      "porting",
+      "url)"
+    ],
+    "category": "Guides"
+  },
+  {
+    "title": "Sharp Runtime Internals",
+    "url": "/internals/index.html",
+    "description": "Component boundaries, object lifecycle, strings, arrays and property helper internals.",
+    "tags": [
+      "internals",
+      "runtime",
+      "sharp"
+    ],
+    "category": "Internals"
+  },
+  {
+    "title": "Object Lifecycle Internals",
+    "url": "/internals/object-lifecycle.html",
+    "description": "Construction, virtual destruction, native ownership and compatibility-shaped disposal.",
+    "tags": [
+      "internals",
+      "lifecycle",
+      "object"
+    ],
+    "category": "Internals"
+  },
+  {
+    "title": "Array and Memory Internals",
+    "url": "/internals/array-internals.html",
+    "description": "Owned buffers, spans, bounds and invalidation behavior.",
+    "tags": [
+      "and",
+      "array",
+      "internals",
+      "memory"
+    ],
+    "category": "Internals"
+  },
+  {
+    "title": "String Internals",
+    "url": "/internals/string-internals.html",
+    "description": "UTF-8 representation, byte indexing and Unicode-aware iteration boundaries.",
+    "tags": [
+      "internals",
+      "string"
+    ],
+    "category": "Internals"
+  },
+  {
+    "title": "Property Helpers and Macros",
+    "url": "/internals/property-macros.html",
+    "description": "How Sharp Runtime expresses C#-shaped properties in native C++.",
+    "tags": [
+      "and",
+      "helpers",
+      "internals",
+      "macros",
+      "property"
+    ],
+    "category": "Internals"
+  }
+]

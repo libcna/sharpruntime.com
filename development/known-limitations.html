@@ -1,152 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Known Limitations — sharp-runtime Developer Guide</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Known Limitations | Sharp Runtime</title>
+  <meta name="description" content="Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.">
+  <link rel="canonical" href="https://sharpruntime.com/development/known-limitations.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Known Limitations | Sharp Runtime">
+  <meta property="og:description" content="Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.">
+  <meta property="og:url" content="https://sharpruntime.com/development/known-limitations.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Known Limitations | Sharp Runtime">
+  <meta name="twitter:description" content="Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Known Limitations", "description": "Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.", "url": "https://sharpruntime.com/development/known-limitations.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Known Limitations", "item": "https://sharpruntime.com/development/known-limitations.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Development</li>
-    <li><a href="index.html">Developer Guide</a></li>
-    <li><a href="coding-style.html">Coding Style</a></li>
-    <li><a href="debugging.html">Debugging</a></li>
-    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Known Limitations</span></div>
-    <div id="search-results"></div>
-    <h1>Known Limitations</h1>
-    <p class="page-subtitle">Platform gaps, missing features, stub-only classes, and known differences from .NET.</p>
-
-    <h2>No Garbage Collector</h2>
-    <p>sharp-runtime has no garbage collector. <code>System::GC</code> is a stub that does nothing.
-    All memory management is explicit C++ RAII. This is intentional — GC adds complexity and latency
-    that is unacceptable in game runtime code (the primary use case via CNA).</p>
-    <p><strong>Impact:</strong> Circular reference cycles with <code>shared_ptr</code> cause memory leaks.
-    Code that assumes GC will clean up must be refactored to use RAII patterns.</p>
-
-    <h2>POSIX-only Subsystems</h2>
-    <p>The following subsystems work on Linux, macOS, and Android (via NDK) only:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Subsystem</th><th>Reason</th><th>Windows/Emscripten status</th></tr>
-      <tr><td><code>System::Net::Sockets</code></td><td>Uses POSIX socket APIs</td><td>Not implemented</td></tr>
-      <tr><td><code>System::IO::RandomAccess</code></td><td>Uses <code>pread</code>/<code>pwrite</code></td><td>Has Win32 fallback (<span class="badge badge-needs-verification">needs verification</span>)</td></tr>
-      <tr><td><code>System::AppDomain</code></td><td>Uses POSIX process/env APIs</td><td>Not fully implemented</td></tr>
-      <tr><td><code>System::AppContext</code></td><td>Uses POSIX paths</td><td>Not fully implemented</td></tr>
-      <tr><td><code>System::TimeZoneInfo</code></td><td>Uses <code>localtime_r</code>, <code>/usr/share/zoneinfo</code></td><td>Not portable</td></tr>
-    </table>
-    </div>
-
-    <h2>No Reflection</h2>
-    <p><code>System::Type</code> is a stub. There is no runtime type metadata, no dynamic method invocation,
-    no <code>Activator.CreateInstance</code>, and no attribute inspection at runtime.
-    Only <code>GetTypeName()</code> (returns a string) is available for type identification.
-    See <a href="../reflection.html">Reflection</a>.</p>
-
-    <h2>Stub-only Classes</h2>
-    <p>These classes exist as headers for API compatibility but have minimal or no implementation:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Notes</th></tr>
-      <tr><td><code>System::GC</code></td><td>No garbage collection; all methods are no-ops</td></tr>
-      <tr><td><code>System::Type</code></td><td>No runtime type metadata</td></tr>
-      <tr><td><code>System::Activator</code></td><td>CreateInstance not implementable without reflection</td></tr>
-      <tr><td><code>System::Threading::SynchronizationContext</code></td><td>Stub; <code>Progress&lt;T&gt;</code> calls handlers synchronously</td></tr>
-      <tr><td><code>System::Diagnostics::StackTrace</code></td><td>No stack capture</td></tr>
-      <tr><td><code>System::Diagnostics::StackFrame</code></td><td>No frame info</td></tr>
-      <tr><td>Attribute classes (all)</td><td>Exist for syntax, no runtime effect</td></tr>
-    </table>
-    </div>
-
-    <h2>HttpClient — No TLS / HTTPS</h2>
-    <p><code>System::Net::Http::HttpClient</code> is implemented but supports <strong>plain HTTP only</strong>.
-    HTTPS (TLS/SSL) is not implemented. Do not use for production HTTPS requests.
-    A future improvement would require linking an SSL library (e.g., OpenSSL or mbedTLS) which has not been approved as a dependency yet.</p>
-
-    <h2>Regex Limitations</h2>
-    <p><code>System::Text::RegularExpressions::Regex</code> uses <code>std::regex</code> as its backend.
-    Known limitations compared to .NET Regex:</p>
-    <ul>
-      <li>No named capture groups (<code>(?&lt;name&gt;...)</code>)</li>
-      <li>No lookbehind assertions</li>
-      <li><code>std::regex</code> can be significantly slower than .NET's regex engine for complex patterns</li>
-    </ul>
-
-    <h2>No LINQ</h2>
-    <p>There is no LINQ implementation. C# code using <code>.Where()</code>, <code>.Select()</code>,
-    <code>.GroupBy()</code>, etc. must be rewritten as explicit loops or use C++ standard algorithm
-    functions (<code>std::find_if</code>, <code>std::transform</code>, etc.).</p>
-
-    <h2>No C# async/await Syntax</h2>
-    <p>C# async/await coroutines have no direct language equivalent in C++. Task and ValueTask APIs are provided by the <code>SharpRuntime::Threading.Tasks</code> component, but they do not reproduce the full C# awaitable pattern. Ported asynchronous code may need threads, callbacks, or a C++-native asynchronous design.</p>
-
-    <h2>SynchronizationContext</h2>
-    <p><code>System::Threading::SynchronizationContext</code> is a stub.
-    <code>Progress&lt;T&gt;</code> calls its handlers synchronously rather than marshalling them to a context.
-    For single-threaded game use (the primary use case) this is the correct behavior.</p>
-
-    <h2>AppDomain — Linux-only getBaseDirectory</h2>
-    <p><code>AppDomain::getBaseDirectoryProperty()</code> reads <code>/proc/self/exe</code> to determine
-    the executable path. This works on Linux but not on macOS (which uses <code>_NSGetExecutablePath</code>)
-    or Windows. The method may return an incorrect or empty path on non-Linux platforms.</p>
-    <p>Additionally, <code>extern char** environ</code> in <code>Environment.cpp</code> must remain at
-    file scope (not inside <code>namespace System</code>) — moving it causes a PIE relocation error.</p>
-
-    <h2>String Encoding Differences</h2>
-    <ul>
-      <li>C# <code>string</code> is UTF-16; sharp-runtime <code>std::string</code> is UTF-8 by convention</li>
-      <li>C# <code>char</code> is 16-bit; <code>charcs</code> = <code>char16_t</code> in sharp-runtime</li>
-      <li>String <code>Length</code> in .NET = UTF-16 code units; <code>size()</code> in C++ = bytes</li>
-      <li>Multi-byte UTF-8 characters will have <code>size()</code> &gt; character count</li>
-    </ul>
-
-    <h2>No String Null</h2>
-    <p>In C#, a <code>string</code> variable can be <code>null</code>. In sharp-runtime,
-    <code>std::string</code> cannot be null — the convention is to use empty string (<code>""</code>)
-    where C# would use <code>null</code>.</p>
-
-    <h2>Array Fixed Size</h2>
-    <p>C# arrays are fixed-size after creation. <code>std::vector&lt;T&gt;</code> is dynamic.
-    While this is more flexible, code that relies on array length staying constant must be careful
-    not to accidentally resize the vector.</p>
-
-    <h2>No Checked Arithmetic</h2>
-    <p>C# has <code>checked</code> / <code>unchecked</code> contexts for integer overflow detection.
-    C++ has no equivalent. Integer overflow is undefined behavior for signed types in C++ —
-    use <code>OverflowException</code> manually if overflow detection is needed.</p>
-
-    <h2>Thread Safety</h2>
-    <p>Thread safety of individual classes is not guaranteed unless explicitly documented.
-    The standard collections (<code>List&lt;T&gt;</code>, <code>Dictionary&lt;K,V&gt;</code>, etc.)
-    are not thread-safe for concurrent writes — use <code>System::Collections::Concurrent</code>
-    types or external synchronization.</p>
-
-    <h2>WeakReference Generic Form</h2>
-    <p><code>WeakReferenceT&lt;T&gt;</code> is the generic form (not <code>WeakReference&lt;T&gt;</code>)
-    because C++ cannot have a class template and a plain class with the same name in the same namespace.
-    Replace <code>WeakReference&lt;T&gt;</code> with <code>WeakReferenceT&lt;T&gt;</code> when porting.</p>
-
-    <h2>Emscripten Build</h2>
-    <p>Emscripten (WebAssembly) compilation has never been CI-tested in this repository.
-    Platform guards exist but are not validated. POSIX-only subsystems would fail to link.</p>
-
-    <div class="nav-links">
-      <a class="prev" href="adding-runtime-features.html">← Adding Features</a>
-      <a class="next" href="../index.html">Home →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html" aria-current="page">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html">Adding features</a><a href="debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Known Limitations</span></nav><h1>Known Limitations</h1><p class="lead">Current non-goals, partial APIs, platform limits and known verification gaps at the pinned Sharp Runtime revision.</p><div class="page-meta"><span>Development</span><span>Source f827a6c5</span></div>
+<h2 id="non-goals">Deliberate non-goals</h2><ul><li>CLR/JIT/GC and arbitrary managed assembly execution</li><li>General reflection/member enumeration and DynamicInvoke</li><li>P/Invoke, remoting and AppDomain assembly infrastructure</li><li>BinaryFormatter-style general serialization</li><li>C# language async/await in C++</li></ul>
+<h2 id="partial">Important partial or reduced surfaces</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Area</th><th scope="col">Current boundary</th></tr></thead><tbody><tr><td>Text</td><td>UTF-8 storage means some indices/lengths differ from .NET UTF-16; StringInfo lacks general grapheme segmentation</td></tr><tr><td>Reflection</td><td>Basic type identity, not member metadata or dynamic invocation</td></tr><tr><td>OperatingSystem</td><td>Platform identity is available; real OS version detection/comparison is reduced</td></tr><tr><td>TimeZoneInfo</td><td>Serialized-string round trip is not implemented</td></tr><tr><td>Networking</td><td>Some base virtuals intentionally throw; Emscripten DNS unavailable; WebProxy default lookup follows platform-limited behavior</td></tr><tr><td>WebSockets</td><td><code>ws://</code> only; <code>wss://</code> throws</td></tr><tr><td>XML/XPath</td><td>Curated XPath subset; variables/custom functions/extension context absent</td></tr><tr><td>LocalDataStoreSlot</td><td>Thread-local per-slot semantics remain a stub</td></tr><tr><td>Guid</td><td>Rare X/Open and Microsoft variant normalization is not implemented</td></tr></tbody></table></div>
+<h2 id="security">Security boundary</h2><p>Implemented hashing, HMAC, PBKDF2 and secure random are not a complete cryptographic platform. Encryption algorithms, certificates, TLS, HTTPS, WSS and <code>SslStream</code> are not part of the current public promise.</p>
+<h2 id="platform">Platform/compiler limits</h2><ul><li>Current hosted CI validates Ubuntu only.</li><li>MSVC lacks the native <code>__int128</code> capability used by some numeric surfaces.</li><li>Emscripten cannot provide several native DNS/network/process/filesystem facilities.</li><li>Android storage expects SDL3 from the parent build.</li><li>Console cursor/color behavior is ANSI-terminal oriented.</li></ul>
+<h2 id="high-impact">High-impact current limitations</h2><ul><li><strong>Network transport:</strong> HTTP is buffered plain HTTP/1.1 over TCP; no redirects or TLS. WebSockets support <code>ws://</code>, not <code>wss://</code>.</li><li><strong>Async lifetime:</strong> several socket, HTTP and WebSocket task wrappers capture raw owners or caller buffers; keep them alive until completion.</li><li><strong>Text/globalization:</strong> Unicode normalization is effectively ASCII/no-op beyond the reduced surface; several encoding indices count UTF-8 bytes; culture, collation, casing and grapheme behavior are limited.</li><li><strong>Time zones:</strong> Windows/POSIX paths exist, but the model largely uses fixed current offsets with no transition rules, ambiguity/invalid-time model or serialized form.</li><li><strong>Storage:</strong> isolated storage is organizational, not a security sandbox. Use trusted relative paths; absolute paths, <code>..</code> and symlink confinement are not comprehensively contained.</li><li><strong>Platform APIs:</strong> FileSystemWatcher and NetworkInterface are Linux-specific; Process is POSIX-only; Emscripten threading requires pthreads and whole-program/browser configuration.</li><li><strong>Compiler boundary:</strong> Decimal/Int128/UInt128 surfaces require native <code>__int128</code>, limiting current MSVC/i686 coverage.</li></ul>
+<h2 id="known-tests">Known full-gate conditions</h2><p>The latest controlled recorded full gate had six failed: five Ping cases were triggered by <code>ping_group_range</code> and expose a real missing raw-ICMP receive fallback; one socket/interface case depended on a missing <code>/proc/net/if_inet6</code>. The current pinned source adds 31 passing TimeZone cases after that record; no post-merge controlled full-gate result is claimed.</p><div class="callout"><div class="callout-title">A limitation page, not an audit-ticket dump</div><p>Internal audit findings are translated into user-facing behavior here. Fixed findings and project-management identifiers are not published as if they were current defects.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

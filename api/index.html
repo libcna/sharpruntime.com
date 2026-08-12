@@ -1,350 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Reference — sharp-runtime</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API Discovery | Sharp Runtime</title>
+  <meta name="description" content="Curated Sharp Runtime API navigation by concepts, components and low-level source reference.">
+  <link rel="canonical" href="https://sharpruntime.com/api/index.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="API Discovery | Sharp Runtime">
+  <meta property="og:description" content="Curated Sharp Runtime API navigation by concepts, components and low-level source reference.">
+  <meta property="og:url" content="https://sharpruntime.com/api/index.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="API Discovery | Sharp Runtime">
+  <meta name="twitter:description" content="Curated Sharp Runtime API navigation by concepts, components and low-level source reference.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "API Discovery", "description": "Curated Sharp Runtime API navigation by concepts, components and low-level source reference.", "url": "https://sharpruntime.com/api/index.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "API Discovery", "item": "https://sharpruntime.com/api/index.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li><a href="../overview.html">Overview</a></li>
-    <li><a href="../getting-started.html">Getting Started</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="../modules/index.html">Modules</a></li>
-    <li><a href="../classes/index.html">Classes</a></li>
-    <li><a href="index.html">API Reference</a></li>
-    <li><a href="../internals/index.html">Internals</a></li>
-    <li class="nav-section">Development</li>
-    <li><a href="../development/index.html">Developer Guide</a></li>
-    <li><a href="../tutorials/index.html">Tutorials</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span>API Reference</span></div>
-    <div id="search-results"></div>
-    <h1>API Reference</h1>
-    <p class="page-subtitle">All public namespaces and classes grouped by namespace.</p>
-
-    <div class="callout note">
-      <div class="callout-title">About this Reference</div>
-      This page lists all known public classes grouped by namespace, with links to their
-      header files. For detailed documentation on individual classes, see the
-      <a href="../classes/index.html">Classes</a> section.
-      Status badges reflect the implementation state from Doxygen comments in source files.
-      Public <code>System/*</code> include spellings are stable; the paths below identify the physical
-      module owner where one namespace has a single owner. See <a href="../modules/index.html">Components &amp; Modules</a>
-      when an API area spans multiple components.
-    </div>
-
-    <h2>System</h2>
-    <p class="file-path">modules/core/include/System/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class / Type</th><th>Header</th><th>Status</th><th>Notes</th></tr>
-      <tr><td><code>Object</code></td><td><code>Object.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Base class, pure virtual GetTypeName</td></tr>
-      <tr><td><code>Exception</code></td><td><code>Exception.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Inherits std::exception</td></tr>
-      <tr><td><code>SystemException</code></td><td><code>SystemException.hpp</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>String</code></td><td><code>String.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Static utilities only; actual type is std::string</td></tr>
-      <tr><td><code>Array</code></td><td><code>Array.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Static helpers; actual type is std::vector&lt;T&gt;</td></tr>
-      <tr><td><code>EventArgs</code></td><td><code>EventArgs.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Base event args class</td></tr>
-      <tr><td><code>EventHandler&lt;T&gt;</code></td><td><code>EventHandler.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Subscriber list + delegate</td></tr>
-      <tr><td><code>Nullable&lt;T&gt;</code></td><td><code>Nullable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Wraps std::optional</td></tr>
-      <tr><td><code>Math</code></td><td><code>Math.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Static math functions</td></tr>
-      <tr><td><code>MathF</code></td><td><code>MathF.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Float overloads of Math</td></tr>
-      <tr><td><code>Random</code></td><td><code>Random.hpp</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Convert</code></td><td><code>Convert.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Type conversion utilities</td></tr>
-      <tr><td><code>BitConverter</code></td><td><code>BitConverter.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Byte ↔ numeric conversions</td></tr>
-      <tr><td><code>Console</code></td><td><code>Console.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>stdin/stdout/stderr wrappers</td></tr>
-      <tr><td><code>Environment</code></td><td><code>Environment.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Process environment, exit, paths</td></tr>
-      <tr><td><code>GC</code></td><td><code>GC.hpp</code></td><td><span class="badge badge-stub">Stub</span></td><td>No garbage collector; stub only</td></tr>
-      <tr><td><code>Type</code></td><td><code>Type.hpp</code></td><td><span class="badge badge-stub">Stub</span></td><td>Minimal reflection stub</td></tr>
-      <tr><td><code>DateTime</code></td><td><code>DateTime.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Date and time value</td></tr>
-      <tr><td><code>DateTimeOffset</code></td><td><code>DateTimeOffset.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td></td></tr>
-      <tr><td><code>DateOnly</code></td><td><code>DateOnly.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Date without time</td></tr>
-      <tr><td><code>TimeOnly</code></td><td><code>TimeOnly.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Time without date</td></tr>
-      <tr><td><code>TimeSpan</code></td><td><code>TimeSpan.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Duration value</td></tr>
-      <tr><td><code>TimeZoneInfo</code></td><td><code>TimeZoneInfo.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>POSIX-only</td></tr>
-      <tr><td><code>TimeProvider</code></td><td><code>TimeProvider.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Abstractable clock source</td></tr>
-      <tr><td><code>Guid</code></td><td><code>Guid.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>128-bit UUID</td></tr>
-      <tr><td><code>Version</code></td><td><code>Version.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Major.Minor.Patch version</td></tr>
-      <tr><td><code>Uri</code></td><td><code>Uri.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td></td></tr>
-      <tr><td><code>Decimal</code></td><td><code>Decimal.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td></td></tr>
-      <tr><td><code>Half</code></td><td><code>Half.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>16-bit floating point</td></tr>
-      <tr><td><code>Int128</code></td><td><code>Int128.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>128-bit signed integer</td></tr>
-      <tr><td><code>UInt128</code></td><td><code>UInt128.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>128-bit unsigned integer</td></tr>
-      <tr><td><code>HashCode</code></td><td><code>HashCode.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Hash code combiner</td></tr>
-      <tr><td><code>AppDomain</code></td><td><code>AppDomain.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>Linux-only (reads /proc/self/exe)</td></tr>
-      <tr><td><code>AppContext</code></td><td><code>AppContext.hpp</code></td><td><span class="badge badge-partial">Partial</span></td><td>POSIX-only</td></tr>
-      <tr><td><code>DBNull</code></td><td><code>DBNull.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Null DB value; implements IConvertible</td></tr>
-      <tr><td><code>Void</code></td><td><code>Void.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Empty struct</td></tr>
-      <tr><td><code>WeakReference</code></td><td><code>WeakReference.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Weak reference wrapper</td></tr>
-      <tr><td><code>WeakReferenceT&lt;T&gt;</code></td><td><code>WeakReferenceT.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Generic weak reference (note: WeakReferenceT not WeakReference&lt;T&gt;)</td></tr>
-      <tr><td><code>Action</code></td><td><code>Action.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>std::function&lt;void()&gt; alias</td></tr>
-      <tr><td><code>Func&lt;T&gt;</code></td><td><code>Func.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>std::function alias</td></tr>
-      <tr><td><code>Predicate&lt;T&gt;</code></td><td><code>Predicate.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>std::function&lt;bool(T)&gt; alias</td></tr>
-      <tr><td><code>Delegate</code></td><td><code>Delegate.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Base delegate type</td></tr>
-      <tr><td><code>IProgress&lt;T&gt;</code></td><td><code>IProgress.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Progress reporting interface</td></tr>
-      <tr><td><code>Progress&lt;T&gt;</code></td><td><code>Progress.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Progress reporting (synchronous; no SynchronizationContext)</td></tr>
-      <tr><td><code>Lazy&lt;T&gt;</code></td><td><code>Lazy.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Lazy initialization</td></tr>
-      <tr><td><code>IObservable&lt;T&gt;</code></td><td><code>IObservable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Observable pattern interface</td></tr>
-      <tr><td><code>IObserver&lt;T&gt;</code></td><td><code>IObserver.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Observer pattern interface</td></tr>
-      <tr><td><code>Span&lt;T&gt;</code></td><td><code>Span.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Non-owning mutable memory view</td></tr>
-      <tr><td><code>ReadOnlySpan&lt;T&gt;</code></td><td><code>ReadOnlySpan.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Non-owning read-only memory view</td></tr>
-      <tr><td><code>Memory&lt;T&gt;</code></td><td><code>Memory.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Owned/borrowed heap memory</td></tr>
-      <tr><td><code>ReadOnlyMemory&lt;T&gt;</code></td><td><code>ReadOnlyMemory.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Read-only heap memory</td></tr>
-      <tr><td><code>MemoryExtensions</code></td><td><code>MemoryExtensions.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>AsSpan, ContainsAny, BinarySearch, Trim, Overlaps…</td></tr>
-      <tr><td><code>TypeCode</code></td><td><code>TypeCode.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Enum of type codes</td></tr>
-      <tr><td><code>IComparable&lt;T&gt;</code></td><td><code>IComparable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Interface</td></tr>
-      <tr><td><code>IEquatable&lt;T&gt;</code></td><td><code>IEquatable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Interface</td></tr>
-      <tr><td><code>IDisposable</code></td><td><code>IDisposable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Interface: Dispose()</td></tr>
-      <tr><td><code>ICloneable</code></td><td><code>ICloneable.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Interface: Clone()</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Collections::Generic</h2>
-    <p class="file-path">modules/collections/include/System/Collections/Generic/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th><th>Status</th></tr>
-      <tr><td><code>List&lt;T&gt;</code></td><td><code>List.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>Dictionary.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>HashSet.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SortedSet&lt;T&gt;</code></td><td><code>SortedSet.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Queue&lt;T&gt;</code></td><td><code>Queue.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Stack&lt;T&gt;</code></td><td><code>Stack.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SortedDictionary&lt;K,V&gt;</code></td><td><code>SortedDictionary.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SortedList&lt;K,V&gt;</code></td><td><code>SortedList.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>LinkedList&lt;T&gt;</code></td><td><code>LinkedList.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>PriorityQueue&lt;T,P&gt;</code></td><td><code>PriorityQueue.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ReadOnlyCollection&lt;T&gt;</code></td><td><code>ReadOnlyCollection.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ArraySegment&lt;T&gt;</code></td><td><code>ArraySegment.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IEnumerable&lt;T&gt;</code></td><td><code>IEnumerable.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IEnumerator&lt;T&gt;</code></td><td><code>IEnumerator.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IList&lt;T&gt;</code></td><td><code>IList.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IDictionary&lt;K,V&gt;</code></td><td><code>IDictionary.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ICollection&lt;T&gt;</code></td><td><code>ICollection.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IReadOnlyList&lt;T&gt;</code></td><td><code>IReadOnlyList.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>KeyValuePair&lt;K,V&gt;</code></td><td><code>KeyValuePair.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Collections (non-generic)</h2>
-    <p class="file-path">modules/collections/include/System/Collections/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th><th>Notes</th></tr>
-      <tr><td><code>Hashtable</code></td><td><span class="badge badge-done">Done</span></td><td>Non-generic hash table</td></tr>
-      <tr><td><code>ArrayList</code></td><td><span class="badge badge-done">Done</span></td><td>Non-generic list</td></tr>
-      <tr><td><code>BitArray</code></td><td><span class="badge badge-done">Done</span></td><td>Compact bit vector</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Collections::Immutable</h2>
-    <p class="file-path">modules/collections/include/System/Collections/Immutable/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th><th>Notes</th></tr>
-      <tr><td><code>ImmutableArray&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td><td>shared_ptr&lt;const std::vector&lt;T&gt;&gt;</td></tr>
-      <tr><td><code>ImmutableList&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>ImmutableDictionary&lt;K,V&gt;</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>ImmutableHashSet&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>ImmutableQueue&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>ImmutableStack&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-    </table>
-    </div>
-
-    <h2>System::IO</h2>
-    <p class="file-path">modules/io/include/System/IO/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th><th>Status</th></tr>
-      <tr><td><code>Stream</code></td><td><code>Stream.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>MemoryStream</code></td><td><code>MemoryStream.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>FileStream</code></td><td><code>FileStream.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>StreamReader</code></td><td><code>StreamReader.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>StreamWriter</code></td><td><code>StreamWriter.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>BinaryReader</code></td><td><code>BinaryReader.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>BinaryWriter</code></td><td><code>BinaryWriter.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>StringReader</code></td><td><code>StringReader.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>StringWriter</code></td><td><code>StringWriter.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>File</code></td><td><code>File.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Directory</code></td><td><code>Directory.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Path</code></td><td><code>Path.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>FileInfo</code></td><td><code>FileInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>DirectoryInfo</code></td><td><code>DirectoryInfo.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>RandomAccess</code></td><td><code>RandomAccess.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>IOException</code></td><td><code>IOException.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::IO::Compression</h2>
-    <p class="file-path">modules/io-compression/include/System/IO/Compression/ and modules/io-compression-zip/include/System/IO/Compression/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>GZipStream</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>DeflateStream</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ZipArchive</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ZipArchiveEntry</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::IO::Hashing</h2>
-    <p class="file-path">modules/io-hashing/include/System/IO/Hashing/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>XxHash32</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>XxHash64</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Crc32</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Text</h2>
-    <p class="file-path">modules/text/include/System/Text/ (JSON and regex have dedicated components)</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th><th>Status</th></tr>
-      <tr><td><code>StringBuilder</code></td><td><code>StringBuilder.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Encoding</code></td><td><code>Encoding.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>UTF8Encoding</code></td><td><code>UTF8Encoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ASCIIEncoding</code></td><td><code>ASCIIEncoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Latin1Encoding</code></td><td><code>Latin1Encoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Rune</code></td><td><code>Rune.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Text::Json</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>JsonDocument</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>JsonElement</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>JsonSerializer</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>JsonSerializerOptions</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Utf8JsonReader</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Utf8JsonWriter</code></td><td><span class="badge badge-done">Done</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Numerics</h2>
-    <p class="file-path">modules/numerics/include/System/Numerics/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>Vector2</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Vector3</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Vector4</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Matrix3x2</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Matrix4x4</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Quaternion</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Plane</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>BigInteger</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Complex</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Threading</h2>
-    <p class="file-path">modules/threading/include/System/Threading/ (Tasks and Channels have dedicated components)</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>Thread</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>ThreadPool</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Mutex</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Monitor</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Lock</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Semaphore</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SemaphoreSlim</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ManualResetEvent</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ManualResetEventSlim</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>AutoResetEvent</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SpinLock</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SpinWait</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ReaderWriterLockSlim</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Interlocked</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Barrier</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>CountdownEvent</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>CancellationToken</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>CancellationTokenSource</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Timer</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>PeriodicTimer</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ITimer</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>AsyncLocal&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>ThreadLocal&lt;T&gt;</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>LazyInitializer</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>SynchronizationContext</code></td><td><span class="badge badge-stub">Stub</span></td></tr>
-      <tr><td><code>Tasks::Task</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Tasks::Task&lt;T&gt;</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Tasks::ValueTask</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Tasks::ValueTask&lt;T&gt;</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Tasks::TaskCompletionSource&lt;T&gt;</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-      <tr><td><code>Tasks::Parallel</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Net</h2>
-    <p class="file-path">modules/net/include/System/Net/ (HTTP, sockets, and WebSockets have dedicated components)</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th><th>Notes</th></tr>
-      <tr><td><code>IPAddress</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>IPEndPoint</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>HttpStatusCode</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>WebUtility</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Http::HttpClient</code></td><td><span class="badge badge-partial">Partial</span></td><td>Plain HTTP only — no TLS</td></tr>
-      <tr><td><code>Http::HttpMethod</code></td><td><span class="badge badge-done">Done</span></td><td>GET, POST, PUT, DELETE…</td></tr>
-      <tr><td><code>Http::HttpRequestMessage</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Http::HttpResponseMessage</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Http::HttpContent</code></td><td><span class="badge badge-done">Done</span></td><td>Abstract base</td></tr>
-      <tr><td><code>Http::StringContent</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Http::ByteArrayContent</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Http::FormUrlEncodedContent</code></td><td><span class="badge badge-done">Done</span></td><td></td></tr>
-      <tr><td><code>Sockets::TcpClient</code></td><td><span class="badge badge-partial">Partial</span></td><td>POSIX-only</td></tr>
-      <tr><td><code>Sockets::UdpClient</code></td><td><span class="badge badge-partial">Partial</span></td><td>POSIX-only</td></tr>
-      <tr><td><code>Sockets::NetworkStream</code></td><td><span class="badge badge-partial">Partial</span></td><td>POSIX-only</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Diagnostics</h2>
-    <p class="file-path">modules/diagnostics/include/System/Diagnostics/</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Status</th></tr>
-      <tr><td><code>Debug</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Trace</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Stopwatch</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Debugger</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>DiagnosticListener</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>Activity</code></td><td><span class="badge badge-done">Done</span></td></tr>
-      <tr><td><code>StackTrace</code></td><td><span class="badge badge-stub">Stub</span></td></tr>
-      <tr><td><code>StackFrame</code></td><td><span class="badge badge-stub">Stub</span></td></tr>
-    </table>
-    </div>
-
-    <h2>System::Globalization</h2>
-    <p>See <a href="../modules/globalization.html">Globalization Module</a> for the full list.</p>
-
-    <h2>SharpRuntime</h2>
-    <p class="file-path">modules/core/include/SharpRuntime/ (StoragePaths is owned by modules/storage/)</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Header</th><th>Purpose</th></tr>
-      <tr><td><code>SharpRuntimeHelper.hpp</code></td><td>Primitive type aliases (intcs, bytecs, charcs…)</td></tr>
-      <tr><td><code>Prop.hpp</code></td><td>DDATA/DGETTER/DGETTERSTATIC property macros</td></tr>
-      <tr><td><code>Storage/StoragePaths.hpp</code></td><td>GetIsolatedStorageRoot() platform paths</td></tr>
-    </table>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="index.html" aria-current="page">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">API Discovery</span></nav><h1>API Discovery</h1><p class="lead">Curated Sharp Runtime API navigation by concepts, components and low-level source reference.</p><div class="page-meta"><span>API</span><span>Source f827a6c5</span></div>
+<h2 id="strategy">Layered reference strategy</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Layer</th><th scope="col">Use it for</th></tr></thead><tbody><tr><td>Concept guides</td><td>Ownership, compatibility and subsystem behavior</td></tr><tr><td>Component family pages</td><td>Targets, dependencies and capability boundaries</td></tr><tr><td>Class pages</td><td>High-value foundational types</td></tr><tr><td>Source/Doxygen</td><td>Exact signatures and member-level details at the pinned revision</td></tr></tbody></table></div>
+<h2 id="browse">Browse curated reference</h2><div class="page-index"><a href="../components/index.html">Components<small>All 41 physical targets.</small></a><a href="../classes/index.html">Core classes<small>Object, String, Array, Nullable and exceptions.</small></a><a href="../type-system.html">Type system<small>Values and runtime identity.</small></a><a href="../io.html">I/O<small>Streams and filesystem.</small></a><a href="../components/networking.html">Networking<small>HTTP, sockets and transport limits.</small></a><a href="../threading.html">Concurrency<small>Threads, tasks, channels and timers.</small></a></div>
+<h2 id="doxygen">Low-level source reference</h2><p>The runtime has a reproducible Doxygen configuration and a CI warning ceiling, but its current warning baseline remains large. This site therefore does not publish a noisy generated dump as if it were curated reference. For exact declarations, follow the representative header in the component catalogue to the pinned source.</p><div class="callout"><div class="callout-title">Reference freshness</div><p>Curated pages state concepts and boundaries. Exact overload lists belong to generated/source-level documentation and tests, reducing hand-maintained API drift.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

@@ -1,0 +1,666 @@
+{
+  "schema": 1,
+  "source_repository": "https://github.com/openeggbert/sharp-runtime",
+  "source_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "physical_count": 41,
+  "direct_production_edges": 92,
+  "physical_components": [
+    {
+      "name": "Core.Base",
+      "owner": "modules/core",
+      "kind": "static",
+      "public_dependencies": [],
+      "private_dependencies": [],
+      "test_dependencies": [
+        "Collections.Core",
+        "Globalization",
+        "IO",
+        "Runtime",
+        "Text",
+        "Threading",
+        "Threading.Tasks",
+        "TimeZone",
+        "Uri"
+      ],
+      "external_dependency": "",
+      "header": "SharpRuntime/Experimental/Property.hpp"
+    },
+    {
+      "name": "Console",
+      "owner": "modules/console",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Console.hpp"
+    },
+    {
+      "name": "Uri",
+      "owner": "modules/uri",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Uri.hpp"
+    },
+    {
+      "name": "TimeZone",
+      "owner": "modules/time-zone",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/InvalidTimeZoneException.hpp"
+    },
+    {
+      "name": "Buffers",
+      "owner": "modules/buffers",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Buffers/ArrayBufferWriter.hpp"
+    },
+    {
+      "name": "Collections.Core",
+      "owner": "modules/collections",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [
+        "IO",
+        "Text"
+      ],
+      "external_dependency": "",
+      "header": "System/Collections/ArrayList.hpp"
+    },
+    {
+      "name": "Collections.Blocking",
+      "owner": "modules/collections-blocking",
+      "kind": "interface",
+      "public_dependencies": [
+        "Collections.Core",
+        "Core.Base",
+        "Threading"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Collections/Concurrent/BlockingCollection.hpp"
+    },
+    {
+      "name": "Collections.Async",
+      "owner": "modules/collections-async",
+      "kind": "interface",
+      "public_dependencies": [
+        "Threading"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Collections/Generic/IAsyncEnumerable.hpp"
+    },
+    {
+      "name": "Collections.ObjectModel",
+      "owner": "modules/collections-object-model",
+      "kind": "interface",
+      "public_dependencies": [
+        "Collections.Core",
+        "ComponentModel",
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Collections/ObjectModel/ObservableCollection.hpp"
+    },
+    {
+      "name": "ComponentModel",
+      "owner": "modules/component-model",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/ComponentModel/AsyncCompletedEventArgs.hpp"
+    },
+    {
+      "name": "Diagnostics",
+      "owner": "modules/diagnostics",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Diagnostics/CodeAnalysis/CodeAnalysisAttributes.hpp"
+    },
+    {
+      "name": "Globalization",
+      "owner": "modules/globalization",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Globalization/Calendar.hpp"
+    },
+    {
+      "name": "Numerics",
+      "owner": "modules/numerics",
+      "kind": "static",
+      "public_dependencies": [
+        "Buffers",
+        "Collections.Core",
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Numerics/BigInteger.hpp"
+    },
+    {
+      "name": "Runtime",
+      "owner": "modules/runtime",
+      "kind": "static",
+      "public_dependencies": [
+        "Collections.Core",
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Runtime/AmbiguousImplementationException.hpp"
+    },
+    {
+      "name": "Text",
+      "owner": "modules/text",
+      "kind": "static",
+      "public_dependencies": [
+        "Buffers",
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Text/ASCIIEncoding.hpp"
+    },
+    {
+      "name": "Text.Json",
+      "owner": "modules/text-json",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "Text"
+      ],
+      "private_dependencies": [
+        "Collections.Core"
+      ],
+      "test_dependencies": [
+        "Collections.Core"
+      ],
+      "external_dependency": "",
+      "header": "System/Text/Json/JsonCommentHandling.hpp"
+    },
+    {
+      "name": "Text.RegularExpressions",
+      "owner": "modules/text-regular-expressions",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Text/RegularExpressions/Capture.hpp"
+    },
+    {
+      "name": "Threading",
+      "owner": "modules/threading",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "TimeZone"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/AsyncCallback.hpp"
+    },
+    {
+      "name": "Threading.Tasks",
+      "owner": "modules/threading-tasks",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "Threading"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/IAsyncDisposable.hpp"
+    },
+    {
+      "name": "Threading.Channels",
+      "owner": "modules/threading-channels",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base",
+        "Threading.Tasks"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Threading/Channels/BoundedChannelFullMode.hpp"
+    },
+    {
+      "name": "Timers",
+      "owner": "modules/timers",
+      "kind": "static",
+      "public_dependencies": [
+        "ComponentModel",
+        "Core.Base"
+      ],
+      "private_dependencies": [
+        "Threading"
+      ],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Timers/ElapsedEventArgs.hpp"
+    },
+    {
+      "name": "IO",
+      "owner": "modules/io",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "Uri"
+      ],
+      "private_dependencies": [
+        "TimeZone"
+      ],
+      "test_dependencies": [
+        "IO.IsolatedStorage",
+        "TimeZone"
+      ],
+      "external_dependency": "",
+      "header": "System/BinaryData.hpp"
+    },
+    {
+      "name": "IO.Compression",
+      "owner": "modules/io-compression",
+      "kind": "static",
+      "public_dependencies": [
+        "Buffers",
+        "Core.Base",
+        "IO"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "ZLIB (private)",
+      "header": "System/IO/Compression/CompressionArgumentValidation.hpp"
+    },
+    {
+      "name": "IO.Compression.Zip",
+      "owner": "modules/io-compression-zip",
+      "kind": "static",
+      "public_dependencies": [
+        "IO"
+      ],
+      "private_dependencies": [
+        "Core.Base"
+      ],
+      "test_dependencies": [],
+      "external_dependency": "vendored miniz (private)",
+      "header": "System/IO/Compression/CompressionLevel.hpp"
+    },
+    {
+      "name": "IO.Hashing",
+      "owner": "modules/io-hashing",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "IO"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/IO/Hashing/Adler32.hpp"
+    },
+    {
+      "name": "Storage",
+      "owner": "modules/storage",
+      "kind": "static",
+      "public_dependencies": [],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "parent-provided SDL3 on Android (private)",
+      "header": "SharpRuntime/Storage/StoragePaths.hpp"
+    },
+    {
+      "name": "IO.IsolatedStorage",
+      "owner": "modules/io-isolated-storage",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "IO"
+      ],
+      "private_dependencies": [
+        "Storage"
+      ],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/IO/IsolatedStorage/IsolatedStorage.hpp"
+    },
+    {
+      "name": "Net",
+      "owner": "modules/net",
+      "kind": "static",
+      "public_dependencies": [
+        "Collections.Core",
+        "ComponentModel",
+        "Core.Base",
+        "Uri"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "ws2_32 on Windows (private)",
+      "header": "System/Net/Cookie.hpp"
+    },
+    {
+      "name": "Net.Sockets",
+      "owner": "modules/net-sockets",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "IO",
+        "Net",
+        "Threading.Tasks"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/Sockets/IPPacketInformation.hpp"
+    },
+    {
+      "name": "Net.Http",
+      "owner": "modules/net-http",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "IO",
+        "Net",
+        "Threading",
+        "Threading.Tasks"
+      ],
+      "private_dependencies": [
+        "Uri"
+      ],
+      "test_dependencies": [
+        "Net.Sockets"
+      ],
+      "external_dependency": "",
+      "header": "System/Net/Http/ByteArrayContent.hpp"
+    },
+    {
+      "name": "Net.Http.Headers",
+      "owner": "modules/net-http-headers",
+      "kind": "static",
+      "public_dependencies": [
+        "Collections.Core",
+        "Core.Base",
+        "Uri"
+      ],
+      "private_dependencies": [
+        "Net"
+      ],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/Http/Headers/AuthenticationHeaderValue.hpp"
+    },
+    {
+      "name": "Net.Http.Json",
+      "owner": "modules/net-http-json",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base",
+        "Net.Http",
+        "Text.Json",
+        "Threading.Tasks"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [
+        "Net.Sockets"
+      ],
+      "external_dependency": "",
+      "header": "System/Net/Http/Json/HttpClientJsonExtensions.hpp"
+    },
+    {
+      "name": "Net.Mime",
+      "owner": "modules/net-mime",
+      "kind": "static",
+      "public_dependencies": [
+        "Collections.Core",
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/Mime/ContentType.hpp"
+    },
+    {
+      "name": "Net.NetworkInformation",
+      "owner": "modules/net-network-information",
+      "kind": "static",
+      "public_dependencies": [
+        "ComponentModel",
+        "Core.Base",
+        "Net",
+        "Threading.Tasks"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/NetworkInformation/IPStatus.hpp"
+    },
+    {
+      "name": "Net.Security",
+      "owner": "modules/net-security",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/Security/AuthenticationLevel.hpp"
+    },
+    {
+      "name": "Net.WebSockets",
+      "owner": "modules/net-websockets",
+      "kind": "static",
+      "public_dependencies": [
+        "ComponentModel",
+        "Core.Base",
+        "Net",
+        "Net.Sockets",
+        "Threading",
+        "Threading.Tasks",
+        "Uri"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Net/WebSockets/ClientWebSocket.hpp"
+    },
+    {
+      "name": "Security",
+      "owner": "modules/security",
+      "kind": "interface",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Security/Authentication/AuthenticationException.hpp"
+    },
+    {
+      "name": "Security.Cryptography",
+      "owner": "modules/security-cryptography",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Security/Cryptography/AuthenticationTagMismatchException.hpp"
+    },
+    {
+      "name": "Security.Cryptography.Random",
+      "owner": "modules/security-cryptography-random",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "bcrypt on Windows (private)",
+      "header": "System/Security/Cryptography/RNGCryptoServiceProvider.hpp"
+    },
+    {
+      "name": "Xml",
+      "owner": "modules/xml",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "Uri"
+      ],
+      "private_dependencies": [
+        "Diagnostics"
+      ],
+      "test_dependencies": [
+        "Xml.Linq"
+      ],
+      "external_dependency": "vendored tinyxml2 (public)",
+      "header": "System/Xml/ConformanceLevel.hpp"
+    },
+    {
+      "name": "Xml.Linq",
+      "owner": "modules/xml-linq",
+      "kind": "static",
+      "public_dependencies": [
+        "Core.Base",
+        "Xml"
+      ],
+      "private_dependencies": [],
+      "test_dependencies": [],
+      "external_dependency": "",
+      "header": "System/Xml/Linq/Extensions.hpp"
+    }
+  ],
+  "compatibility_components": [
+    {
+      "name": "Core",
+      "owner": "modules/core",
+      "kind": "compatibility umbrella",
+      "dependencies": [
+        "Console",
+        "Core.Base",
+        "TimeZone",
+        "Uri"
+      ],
+      "header": "SharpRuntime/Experimental/Property.hpp"
+    },
+    {
+      "name": "Collections",
+      "owner": "modules/collections",
+      "kind": "compatibility umbrella",
+      "dependencies": [
+        "Collections.Async",
+        "Collections.Blocking",
+        "Collections.Core",
+        "Collections.ObjectModel"
+      ],
+      "header": "System/Collections/ArrayList.hpp"
+    },
+    {
+      "name": "Xml.XPath",
+      "owner": "modules/xml",
+      "kind": "alias of Xml",
+      "dependencies": [
+        "Xml"
+      ],
+      "header": "System/Xml/ConformanceLevel.hpp"
+    },
+    {
+      "name": "All",
+      "owner": "CMake aggregate",
+      "kind": "compatibility umbrella",
+      "dependencies": [
+        "Buffers",
+        "Collections.Async",
+        "Collections.Blocking",
+        "Collections.Core",
+        "Collections.ObjectModel",
+        "ComponentModel",
+        "Console",
+        "Core.Base",
+        "Diagnostics",
+        "Globalization",
+        "IO",
+        "IO.Compression",
+        "IO.Compression.Zip",
+        "IO.Hashing",
+        "IO.IsolatedStorage",
+        "Net",
+        "Net.Http",
+        "Net.Http.Headers",
+        "Net.Http.Json",
+        "Net.Mime",
+        "Net.NetworkInformation",
+        "Net.Security",
+        "Net.Sockets",
+        "Net.WebSockets",
+        "Numerics",
+        "Runtime",
+        "Security",
+        "Security.Cryptography",
+        "Security.Cryptography.Random",
+        "Storage",
+        "Text",
+        "Text.Json",
+        "Text.RegularExpressions",
+        "Threading",
+        "Threading.Channels",
+        "Threading.Tasks",
+        "TimeZone",
+        "Timers",
+        "Uri",
+        "Xml",
+        "Xml.Linq"
+      ],
+      "header": "SharpRuntime/Experimental/Property.hpp"
+    }
+  ]
+}

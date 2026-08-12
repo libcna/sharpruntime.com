@@ -1,101 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Net Module — sharp-runtime</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Networking Module Family | Sharp Runtime</title>
+  <meta name="description" content="Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.">
+  <link rel="canonical" href="https://sharpruntime.com/modules/net.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Networking Module Family | Sharp Runtime">
+  <meta property="og:description" content="Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.">
+  <meta property="og:url" content="https://sharpruntime.com/modules/net.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Networking Module Family | Sharp Runtime">
+  <meta name="twitter:description" content="Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Networking Module Family", "description": "Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.", "url": "https://sharpruntime.com/modules/net.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Components"}, {"@type": "ListItem", "position": 3, "name": "Networking Module Family", "item": "https://sharpruntime.com/modules/net.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li class="nav-section">Modules</li>
-    <li><a href="index.html">Modules Index</a></li>
-    <li><a href="collections.html">Collections</a></li>
-    <li><a href="numerics.html">Numerics</a></li>
-    <li><a href="text.html">Text</a></li>
-    <li><a href="globalization.html">Globalization</a></li>
-    <li><a href="diagnostics.html">Diagnostics</a></li>
-    <li><a href="net.html">Net.Sockets</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Net</span></div>
-    <div id="search-results"></div>
-    <h1>Net Module</h1>
-    <p class="page-subtitle">HttpClient, IPAddress, sockets — networking support.</p>
-
-    <h2>Component Selection</h2>
-    <div class="table-wrap"><table>
-      <tr><th>Surface</th><th>Target</th></tr>
-      <tr><td>Common network types</td><td><code>SharpRuntime::Net</code></td></tr>
-      <tr><td>Sockets</td><td><code>SharpRuntime::Net.Sockets</code></td></tr>
-      <tr><td>HTTP, headers, and HTTP JSON extensions</td><td><code>SharpRuntime::Net.Http</code>, <code>SharpRuntime::Net.Http.Headers</code>, <code>SharpRuntime::Net.Http.Json</code></td></tr>
-      <tr><td>WebSockets</td><td><code>SharpRuntime::Net.WebSockets</code></td></tr>
-      <tr><td>MIME and network information</td><td><code>SharpRuntime::Net.Mime</code>, <code>SharpRuntime::Net.NetworkInformation</code></td></tr>
-    </table></div>
-
-    <h2>System::Net::Http — HttpClient</h2>
-    <p class="file-path">modules/net-http/include/System/Net/Http/</p>
-    <p>Status: <span class="badge badge-partial">Partial</span></p>
-
-    <div class="callout warning">
-      <div class="callout-title">⚠ No TLS / HTTPS</div>
-      The current <code>HttpClient</code> implementation supports <strong>plain HTTP only</strong>.
-      HTTPS (TLS) is not implemented. Do not use for production HTTPS requests.
-    </div>
-
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
-      <tr><td><code>HttpClient</code></td><td><code>System/Net/Http/HttpClient.hpp</code></td><td>HTTP client (plain HTTP only)</td></tr>
-      <tr><td><code>HttpRequestMessage</code></td><td><code>System/Net/Http/HttpRequestMessage.hpp</code></td><td>HTTP request with method, URI, headers, content</td></tr>
-      <tr><td><code>HttpResponseMessage</code></td><td><code>System/Net/Http/HttpResponseMessage.hpp</code></td><td>HTTP response with status code, headers, content</td></tr>
-      <tr><td><code>HttpContent</code></td><td><code>System/Net/Http/HttpContent.hpp</code></td><td>Abstract base for request/response content</td></tr>
-      <tr><td><code>StringContent</code></td><td><code>System/Net/Http/StringContent.hpp</code></td><td>Text body content</td></tr>
-      <tr><td><code>ByteArrayContent</code></td><td><code>System/Net/Http/ByteArrayContent.hpp</code></td><td>Binary body content</td></tr>
-      <tr><td><code>FormUrlEncodedContent</code></td><td><code>System/Net/Http/FormUrlEncodedContent.hpp</code></td><td>URL-encoded form data</td></tr>
-      <tr><td><code>HttpMethod</code></td><td><code>System/Net/Http/HttpMethod.hpp</code></td><td>HTTP verb: GET, POST, PUT, DELETE, etc.</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Net::Sockets — POSIX-only</h2>
-    <p class="file-path">modules/net-sockets/include/System/Net/Sockets/</p>
-
-    <div class="callout warning">
-      <div class="callout-title">⚠ POSIX-only</div>
-      The <code>System::Net::Sockets</code> namespace currently uses POSIX socket APIs
-      (<code>&lt;sys/socket.h&gt;</code>, <code>&lt;unistd.h&gt;</code>). It works on Linux and macOS.
-      Windows and Emscripten support is a known gap.
-    </div>
-
-    <div class="table-wrap">
-    <table>
-      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
-      <tr><td><code>TcpClient</code></td><td><code>System/Net/Sockets/TcpClient.hpp</code></td><td>TCP client socket wrapper</td></tr>
-      <tr><td><code>UdpClient</code></td><td><code>System/Net/Sockets/UdpClient.hpp</code></td><td>UDP client socket wrapper</td></tr>
-      <tr><td><code>NetworkStream</code></td><td><code>System/Net/Sockets/NetworkStream.hpp</code></td><td>Stream over a network socket</td></tr>
-    </table>
-    </div>
-
-    <h2>System::Net — Common Types</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Type</th><th>Header</th><th>Description</th></tr>
-      <tr><td><code>IPAddress</code></td><td><code>System/Net/IPAddress.hpp</code></td><td>IP address (v4/v6)</td></tr>
-      <tr><td><code>IPEndPoint</code></td><td><code>System/Net/IPEndPoint.hpp</code></td><td>IP address + port</td></tr>
-      <tr><td><code>HttpStatusCode</code></td><td><code>System/Net/HttpStatusCode.hpp</code></td><td>HTTP status code enum</td></tr>
-      <tr><td><code>WebUtility</code></td><td><code>System/Net/WebUtility.hpp</code></td><td>URL encode/decode utilities</td></tr>
-    </table>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Components</span><span>/</span><span aria-current="page">Networking Module Family</span></nav><h1>Networking Module Family</h1><p class="lead">Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.</p><div class="page-meta"><span>Components</span><span>Source f827a6c5</span></div><p>The current architecture has nine networking components rather than one blanket Net module.</p><div class="page-index"><a href="../components/networking.html">Current networking page<small>All networking targets and caveats.</small></a><a href="../tutorials/http.html">HTTP tutorial<small>Transport boundaries.</small></a><a href="../platform-layer.html">Platforms<small>Evidence labels.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

@@ -1,172 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CNA Integration — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CNA Integration | Sharp Runtime</title>
+  <meta name="description" content="How CNA uses Sharp Runtime and where Sharp Runtime documentation stops and libcna.com begins.">
+  <link rel="canonical" href="https://sharpruntime.com/cna-integration.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="CNA Integration | Sharp Runtime">
+  <meta property="og:description" content="How CNA uses Sharp Runtime and where Sharp Runtime documentation stops and libcna.com begins.">
+  <meta property="og:url" content="https://sharpruntime.com/cna-integration.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CNA Integration | Sharp Runtime">
+  <meta name="twitter:description" content="How CNA uses Sharp Runtime and where Sharp Runtime documentation stops and libcna.com begins.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "CNA Integration", "description": "How CNA uses Sharp Runtime and where Sharp Runtime documentation stops and libcna.com begins.", "url": "https://sharpruntime.com/cna-integration.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "CNA Integration", "item": "https://sharpruntime.com/cna-integration.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>CNA Integration</span></div>
-    <div id="search-results"></div>
-    <h1>CNA Integration</h1>
-    <p class="page-subtitle">How CNA uses sharp-runtime as its foundation layer.</p>
-
-    <div class="callout note">
-      <div class="callout-title">ℹ Source of this documentation</div>
-      This page is based on information visible from sharp-runtime's <code>README.md</code>, <code>CLAUDE.md</code>,
-      <code>plan.sqlite3</code>/<code>prompt.md</code>, and <code>NEXT.md</code>. The CNA source code is not part of this repository.
-      Some details about the exact CNA build integration may need verification from the CNA repository.
-    </div>
-
-    <h2>What is CNA?</h2>
-    <p>
-      <strong>CNA</strong> is a C++ reimplementation of the <strong>XNA 4.0</strong> game framework.
-      XNA was Microsoft's game development framework (2006–2013), written in C# and targeting Xbox 360, Windows, and Windows Phone.
-    </p>
-    <p>
-      CNA ports the XNA API to C++, targeting modern platforms (Linux, Windows, macOS, Android, Web).
-      It uses sharp-runtime as its foundational system library — providing the <code>System::*</code> types
-      that the original XNA/C# code depends on.
-    </p>
-
-    <h2>Dependency Relationship</h2>
-    <pre><code>CNA (C++ XNA 4.0 port)
-  └── depends on sharp-runtime
-        └── uses System::* types
-              ├── SharpRuntime::intcs, bytecs, etc.
-              ├── System::EventArgs, EventHandler&lt;T&gt;
-              ├── System::Math, MathF
-              ├── System::Numerics::Vector2/3/4
-              ├── System::Numerics::Matrix4x4, Quaternion
-              ├── System::IO::Stream, FileStream
-              ├── System::IO::Compression (GZip, Deflate for XNB)
-              ├── System::IO::IsolatedStorage
-              ├── System::Collections::Generic::List/Dictionary
-              ├── System::Text::StringBuilder
-              ├── System::Threading::Thread, CancellationToken
-              ├── System::TimeSpan, DateTime, DateTimeOffset
-              └── ... (nearly all System::* types)</code></pre>
-
-    <h2>CMake Integration</h2>
-    <p>CNA adds sharp-runtime as a CMake subdirectory. The component set must be selected before it is added. Since CNA uses a broad runtime surface, an explicit complete-runtime integration is appropriate:</p>
-    <pre><code># In CNA's CMakeLists.txt (approximate):
-cna_configure_vendored_sdl()  # before Storage can be configured on Android
-
-set(SHARP_RUNTIME_COMPONENTS All)
-set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-add_subdirectory(vendor/sharp-runtime)
-
-target_link_libraries(CNA PRIVATE SharpRuntime::All)</code></pre>
-    <p>The legacy <code>SHARP_RUNTIME</code> target still forwards to the complete runtime in this configuration, but new integrations should use <code>SharpRuntime::All</code> or direct component targets. The SDL3 target must exist first only when the Android storage component is selected.</p>
-
-    <h3>Focused Consumers</h3>
-    <p>A smaller application should request only direct requirements, for example <code>Numerics</code>, <code>IO.Compression</code>, and <code>Text</code>. Transitive component dependencies are resolved automatically; applications do not need to duplicate them.</p>
-
-    <h2>Key sharp-runtime Features Used by CNA</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Feature</th><th>Usage in CNA</th></tr>
-      <tr><td>Primitive types (<code>intcs</code>, <code>bytecs</code>)</td><td>Used throughout for type-safe C# int/byte equivalents</td></tr>
-      <tr><td><code>System::EventHandler&lt;T&gt;</code>, <code>EventArgs</code></td><td>XNA events (Activated, Deactivated, Exiting, etc.)</td></tr>
-      <tr><td><code>System::Math</code>, <code>System::MathF</code></td><td>Game math operations</td></tr>
-      <tr><td><code>System::Numerics::Vector2/3/4</code></td><td>Positions, sizes, velocities in game logic</td></tr>
-      <tr><td><code>System::Numerics::Matrix4x4</code></td><td>Transform matrices for rendering</td></tr>
-      <tr><td><code>System::Numerics::Quaternion</code></td><td>3D rotations</td></tr>
-      <tr><td><code>System::IO::Stream</code> (and subclasses)</td><td>Content loading (XNB files)</td></tr>
-      <tr><td><code>System::IO::Compression::DeflateStream</code></td><td>XNB content decompression (XNB-compatible)</td></tr>
-      <tr><td><code>System::IO::IsolatedStorage</code></td><td>Save game data</td></tr>
-      <tr><td><code>System::Collections::Generic::*</code></td><td>Throughout game data structures</td></tr>
-      <tr><td><code>System::Threading</code></td><td>Background content loading, async operations</td></tr>
-      <tr><td><code>System::IDisposable</code></td><td>Audio, graphics resource lifecycle</td></tr>
-      <tr><td><code>System::TimeSpan</code></td><td>Game timing</td></tr>
-      <tr><td><code>System::DateTimeOffset</code></td><td>Sensor API</td></tr>
-      <tr><td>Prop.hpp macros</td><td>XNA properties (Width, Height, IsFullScreen, etc.)</td></tr>
-    </table>
-    </div>
-
-    <h2>Runtime Boundaries</h2>
-    <p>The conceptual boundary between sharp-runtime and CNA:</p>
-    <ul>
-      <li><strong>sharp-runtime provides:</strong> <code>System::*</code> types, primitives, collections, I/O, threading, math, serialization</li>
-      <li><strong>CNA provides:</strong> Game-specific types (SpriteBatch, Texture2D, GraphicsDevice, GamePad, Keyboard, Audio, etc.)</li>
-    </ul>
-    <p>If a new feature belongs in the <code>System.*</code> namespace and mirrors .NET, it should go in sharp-runtime. If it is XNA-specific (Microsoft.Xna.*), it belongs in CNA.</p>
-
-    <h2>mobile-eggbert Integration</h2>
-    <p>
-      <strong>mobile-eggbert</strong> is a C++ port of a Windows Phone SpeedyBlupi game.
-      It uses a subset of sharp-runtime:
-    </p>
-    <ul>
-      <li><code>intcs</code>, <code>bytecs</code> type aliases</li>
-      <li><code>System::Text::StringBuilder</code></li>
-      <li><code>System::TimeSpan</code></li>
-      <li><code>System::EventArgs</code></li>
-      <li><code>System::Random</code></li>
-      <li>Prop.hpp macros</li>
-    </ul>
-
-    <div class="callout needs-verification">
-      <div class="callout-title">Needs verification</div>
-      The exact CMake configuration, SDL3 integration point, and full list of sharp-runtime types used by CNA
-      should be verified from the CNA repository. The information above is derived from sharp-runtime's
-      own documentation files.
-    </div>
-
-    <div class="page-nav">
-      <a class="prev" href="csharp-compatibility.html"><span class="page-nav-label">← Previous</span>C# Compatibility</a>
-      <a class="next" href="modules/index.html"><span class="page-nav-label">Next →</span>Modules</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html" aria-current="page">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">CNA Integration</span></nav><h1>CNA integration</h1><p class="lead">CNA is the principal verified consumer: Sharp Runtime supplies the practical System.* layer beneath CNA’s XNA-facing API.</p><div class="page-meta"><span>Ecosystem</span><span>Consumer architecture</span></div>
+<h2 id="boundary">Project boundary</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Project</th><th scope="col">Owns</th></tr></thead><tbody><tr><td>Sharp Runtime</td><td>Native <code>System::*</code> compatibility types and componentized base-library behavior</td></tr><tr><td>CNA</td><td>The <code>Microsoft::Xna::Framework</code>-facing game framework, rendering, audio, input and content behavior</td></tr></tbody></table></div>
+<h2 id="integration">Integration pattern</h2><p>CNA configures Sharp Runtime as a sibling/subproject and links the surfaces its implementation needs. Direct consumers should select their own narrow components rather than copy CNA’s dependency set.</p>
+<h2 id="docs">Documentation ownership</h2><p>This site explains the runtime layer: types, components, portability and porting semantics. For XNA APIs, renderer selection, game loops, content and CNA tutorials, use <a href="https://libcna.com/">libcna.com</a>.</p><div class="callout"><div class="callout-title">Verified relationship, not adoption marketing</div><p>The source repositories establish CNA as a consumer. This site does not infer third-party adoption or popularity from that relationship.</p></div>
+<h2 id="next">Continue</h2><div class="page-index"><a href="https://libcna.com/">Visit libcna.com<small>CNA’s definitive project and documentation site.</small></a><a href="components/index.html">Sharp Runtime components<small>Select direct runtime surfaces.</small></a><a href="guides/porting-csharp.html">Porting C#<small>Native translations of familiar patterns.</small></a><a href="architecture.html">Architecture<small>Understand the boundary-validated graph.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

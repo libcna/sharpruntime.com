@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "source_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "evidence_date": "2026-08-12",
+  "current_test_cases": 16341,
+  "test_executables": 37,
+  "component_test_executables": 36,
+  "integration_test_executables": 1,
+  "last_controlled_gate": {
+    "cases": 16310,
+    "passed": 16303,
+    "skipped": 1,
+    "failed": 6
+  },
+  "post_gate_timezone_additions": 31,
+  "timezone_current_cases": 145
+}

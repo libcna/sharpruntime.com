@@ -1,193 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exceptions — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exceptions and Error Semantics | Sharp Runtime</title>
+  <meta name="description" content="Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.">
+  <link rel="canonical" href="https://sharpruntime.com/exceptions.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Exceptions and Error Semantics | Sharp Runtime">
+  <meta property="og:description" content="Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.">
+  <meta property="og:url" content="https://sharpruntime.com/exceptions.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Exceptions and Error Semantics | Sharp Runtime">
+  <meta name="twitter:description" content="Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Exceptions and Error Semantics", "description": "Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.", "url": "https://sharpruntime.com/exceptions.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Exceptions and Error Semantics", "item": "https://sharpruntime.com/exceptions.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Exceptions</span></div>
-    <div id="search-results"></div>
-    <h1>Exceptions</h1>
-    <p class="page-subtitle">Exception hierarchy, throwing conventions, C# to C++ mapping, and handling patterns.</p>
-
-    <h2>System::Exception — The Base</h2>
-    <p class="file-path">modules/core/include/System/Exception.hpp | modules/core/src/System/Exception.cpp</p>
-    <p><code>System::Exception</code> inherits from <code>std::exception</code>, giving it full integration with standard C++ exception handling:</p>
-    <pre><code>class Exception : public std::exception {
-public:
-    Exception();
-    explicit Exception(const char* msg);
-    explicit Exception(const std::string&amp; msg);
-    virtual const std::string&amp; getMessageProperty() const;
-    const char* what() const noexcept override;
-private:
-    std::string message_;
-};</code></pre>
-    <p>Note: <code>System::Exception</code> does <strong>not</strong> inherit from <code>System::Object</code>. This keeps it compatible with <code>std::exception</code> and standard C++ exception mechanisms.</p>
-
-    <h2>Exception Hierarchy</h2>
-    <pre><code>std::exception
-└── System::Exception
-      ├── System::SystemException
-      │     ├── ArgumentException
-      │     │     ├── ArgumentNullException
-      │     │     └── ArgumentOutOfRangeException
-      │     ├── ArithmeticException
-      │     │     ├── DivideByZeroException
-      │     │     └── OverflowException
-      │     ├── FormatException
-      │     ├── IndexOutOfRangeException
-      │     ├── InvalidCastException
-      │     ├── InvalidOperationException
-      │     ├── NotImplementedException
-      │     ├── NotSupportedException
-      │     ├── NullReferenceException
-      │     ├── ObjectDisposedException
-      │     ├── OperationCanceledException
-      │     ├── OutOfMemoryException
-      │     ├── TimeoutException
-      │     ├── UnauthorizedAccessException
-      │     ├── IO::IOException
-      │     │     ├── IO::DirectoryNotFoundException
-      │     │     ├── IO::EndOfStreamException
-      │     │     ├── IO::FileNotFoundException
-      │     │     ├── IO::InvalidDataException
-      │     │     └── IO::IsolatedStorage::IsolatedStorageException
-      │     └── ... (many more)
-      └── System::ApplicationException</code></pre>
-
-    <h2>Complete Exception List</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Exception Class</th><th>Header</th><th>C# Equivalent</th></tr>
-      <tr><td><code>Exception</code></td><td><code>System/Exception.hpp</code></td><td>System.Exception</td></tr>
-      <tr><td><code>SystemException</code></td><td><code>System/SystemException.hpp</code></td><td>System.SystemException</td></tr>
-      <tr><td><code>ApplicationException</code></td><td><code>System/ApplicationException.hpp</code></td><td>System.ApplicationException</td></tr>
-      <tr><td><code>ArgumentException</code></td><td><code>System/ArgumentException.hpp</code></td><td>System.ArgumentException</td></tr>
-      <tr><td><code>ArgumentNullException</code></td><td><code>System/ArgumentNullException.hpp</code></td><td>System.ArgumentNullException</td></tr>
-      <tr><td><code>ArgumentOutOfRangeException</code></td><td><code>System/ArgumentOutOfRangeException.hpp</code></td><td>System.ArgumentOutOfRangeException</td></tr>
-      <tr><td><code>ArithmeticException</code></td><td><code>System/ArithmeticException.hpp</code></td><td>System.ArithmeticException</td></tr>
-      <tr><td><code>DivideByZeroException</code></td><td><code>System/DivideByZeroException.hpp</code></td><td>System.DivideByZeroException</td></tr>
-      <tr><td><code>OverflowException</code></td><td><code>System/OverflowException.hpp</code></td><td>System.OverflowException</td></tr>
-      <tr><td><code>FormatException</code></td><td><code>System/FormatException.hpp</code></td><td>System.FormatException</td></tr>
-      <tr><td><code>IndexOutOfRangeException</code></td><td><code>System/IndexOutOfRangeException.hpp</code></td><td>System.IndexOutOfRangeException</td></tr>
-      <tr><td><code>InvalidCastException</code></td><td><code>System/InvalidCastException.hpp</code></td><td>System.InvalidCastException</td></tr>
-      <tr><td><code>InvalidOperationException</code></td><td><code>System/InvalidOperationException.hpp</code></td><td>System.InvalidOperationException</td></tr>
-      <tr><td><code>NotImplementedException</code></td><td><code>System/NotImplementedException.hpp</code></td><td>System.NotImplementedException</td></tr>
-      <tr><td><code>NotSupportedException</code></td><td><code>System/NotSupportedException.hpp</code></td><td>System.NotSupportedException</td></tr>
-      <tr><td><code>NullReferenceException</code></td><td><code>System/NullReferenceException.hpp</code></td><td>System.NullReferenceException</td></tr>
-      <tr><td><code>ObjectDisposedException</code></td><td><code>System/ObjectDisposedException.hpp</code></td><td>System.ObjectDisposedException</td></tr>
-      <tr><td><code>OperationCanceledException</code></td><td><code>System/OperationCanceledException.hpp</code></td><td>System.OperationCanceledException</td></tr>
-      <tr><td><code>OutOfMemoryException</code></td><td><code>System/OutOfMemoryException.hpp</code></td><td>System.OutOfMemoryException</td></tr>
-      <tr><td><code>TimeoutException</code></td><td><code>System/TimeoutException.hpp</code></td><td>System.TimeoutException</td></tr>
-      <tr><td><code>UnauthorizedAccessException</code></td><td><code>System/UnauthorizedAccessException.hpp</code></td><td>System.UnauthorizedAccessException</td></tr>
-      <tr><td><code>PlatformNotSupportedException</code></td><td><code>System/PlatformNotSupportedException.hpp</code></td><td>System.PlatformNotSupportedException</td></tr>
-      <tr><td><code>IO::IOException</code></td><td><code>System/IO/IOException.hpp</code></td><td>System.IO.IOException</td></tr>
-      <tr><td><code>IO::FileNotFoundException</code></td><td><code>System/IO/FileNotFoundException.hpp</code></td><td>System.IO.FileNotFoundException</td></tr>
-      <tr><td><code>IO::DirectoryNotFoundException</code></td><td><code>System/IO/DirectoryNotFoundException.hpp</code></td><td>System.IO.DirectoryNotFoundException</td></tr>
-      <tr><td><code>IO::EndOfStreamException</code></td><td><code>System/IO/EndOfStreamException.hpp</code></td><td>System.IO.EndOfStreamException</td></tr>
-      <tr><td><code>IO::InvalidDataException</code></td><td><code>System/IO/InvalidDataException.hpp</code></td><td>System.IO.InvalidDataException</td></tr>
-      <tr><td><code>Collections::Generic::KeyNotFoundException</code></td><td><code>System/Collections/Generic/KeyNotFoundException.hpp</code></td><td>System.Collections.Generic.KeyNotFoundException</td></tr>
-    </table>
-    </div>
-
-    <h2>Throwing Conventions</h2>
-    <pre><code>// Throw by value (standard C++ practice)
-throw System::ArgumentNullException("Parameter 'name' cannot be null.");
-throw System::ArgumentOutOfRangeException("index", "Index out of range.");
-throw System::NotImplementedException("This method is not yet implemented.");
-throw System::PlatformNotSupportedException("Not supported on this platform.");</code></pre>
-
-    <h2>Catching Conventions</h2>
-    <pre><code>try {
-    // ...
-}
-catch (const System::ArgumentNullException&amp; e) {
-    // specific catch
-    std::cerr &lt;&lt; e.getMessageProperty() &lt;&lt; "\n";
-}
-catch (const System::Exception&amp; e) {
-    // catch any sharp-runtime exception
-    std::cerr &lt;&lt; e.what() &lt;&lt; "\n";
-}
-catch (const std::exception&amp; e) {
-    // catch std or sharp-runtime exceptions
-    std::cerr &lt;&lt; e.what() &lt;&lt; "\n";
-}</code></pre>
-
-    <h2>Stub Exceptions</h2>
-    <p>Several exception types exist purely for API compatibility but are rarely thrown. They have headers but minimal or empty <code>.cpp</code> bodies:</p>
-    <ul>
-      <li><code>AccessViolationException</code></li>
-      <li><code>AppDomainUnloadedException</code></li>
-      <li><code>BadImageFormatException</code></li>
-      <li><code>ExecutionEngineException</code></li>
-      <li><code>StackOverflowException</code></li>
-    </ul>
-
-    <h2>Known Limitations vs .NET</h2>
-    <ul>
-      <li>No inner exception (<code>InnerException</code> property) — not visible in the current implementation</li>
-      <li>No stack trace capture — <code>StackTrace</code> property is a stub</li>
-      <li>No unhandled exception event with real thread-pool integration</li>
-      <li><code>OutOfMemoryException</code> is not automatically thrown on allocation failure (C++ <code>std::bad_alloc</code> would be thrown instead)</li>
-    </ul>
-
-    <div class="page-nav">
-      <a class="prev" href="memory-management.html"><span class="page-nav-label">← Previous</span>Memory Management</a>
-      <a class="next" href="strings.html"><span class="page-nav-label">Next →</span>Strings</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html" aria-current="page">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Exceptions and Error Semantics</span></nav><h1>Exceptions and Error Semantics</h1><p class="lead">Sharp Runtime exception hierarchy, HResult values, causal exceptions and native translation differences.</p><div class="page-meta"><span>Concepts</span><span>Source f827a6c5</span></div>
+<h2 id="hierarchy">Hierarchy</h2><p>The project provides a broad curated System exception hierarchy, including argument, I/O, networking, platform and implementation exceptions.</p>
+<h2 id="hresult">HResult and causes</h2><p>Many specialized exceptions populate .NET-compatible HResult constants, and causal/inner errors use native exception pointers where supported. Recent remediation corrected derived exception values and network propagation.</p>
+<h2 id="translation">Translation guidance</h2><ul><li>Catch the narrow exception only when recovery differs.</li><li>Preserve a causal exception when translating an OS/vendor failure.</li><li>Do not infer an exception type from prose if tests/code define a different contract.</li><li>NotImplemented and PlatformNotSupported are meaningful public boundaries, not generic failure buckets.</li></ul>
+<h2 id="native">Native difference</h2><p>There is no CLR stack or managed exception filter machinery. C++ destruction/RAII runs during unwinding, and exception-safety of owned resources remains essential.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

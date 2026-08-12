@@ -1,170 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adding Runtime Features — sharp-runtime Developer Guide</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adding Runtime Features | Sharp Runtime</title>
+  <meta name="description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <link rel="canonical" href="https://sharpruntime.com/development/adding-runtime-features.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Adding Runtime Features | Sharp Runtime">
+  <meta property="og:description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <meta property="og:url" content="https://sharpruntime.com/development/adding-runtime-features.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Adding Runtime Features | Sharp Runtime">
+  <meta name="twitter:description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Adding Runtime Features", "description": "Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.", "url": "https://sharpruntime.com/development/adding-runtime-features.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Adding Runtime Features", "item": "https://sharpruntime.com/development/adding-runtime-features.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Development</li>
-    <li><a href="index.html">Developer Guide</a></li>
-    <li><a href="coding-style.html">Coding Style</a></li>
-    <li><a href="debugging.html">Debugging</a></li>
-    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Adding Features</span></div>
-    <div id="search-results"></div>
-    <h1>Adding Runtime Features</h1>
-    <p class="page-subtitle">How to add a new class or feature to sharp-runtime following project conventions.</p>
-
-    <h2>Before You Start</h2>
-    <ul>
-      <li>Check <code>plan.sqlite3</code> (table <code>task</code>) to see if the class is tracked and what its status is — the porting workflow itself is documented in <code>prompt.md</code></li>
-      <li>Check <code>NEXT.md</code> for the current status summary and next unprocessed items</li>
-      <li>Confirm the class is part of <code>System.*</code> — sharp-runtime only targets the .NET System namespace</li>
-      <li>Consult the .NET reference docs to understand the expected API surface</li>
-    </ul>
-
-    <h2>Step 1: Choose the Owning Module</h2>
-    <p>Choose an existing physical module before creating files. The module owns the feature's public headers, implementation, tests, and dependency declaration. For example, a new fundamental <code>System</code> type normally belongs in <code>modules/core/</code>; an I/O type belongs in <code>modules/io/</code>.</p>
-    <p>If no existing module owns the API area, add a new module directory, register it once in <code>cmake/SharpRuntimeModules.cmake</code>, and declare its dependencies in its local <code>CMakeLists.txt</code>. Do not add new shared top-level <code>include/</code>, <code>src/</code>, or <code>tests/</code> trees.</p>
-
-    <h2>Step 2: Create the Header</h2>
-    <p>For a core type, create <code>modules/core/include/System/[Namespace]/ClassName.hpp</code>:</p>
-    <pre><code>// SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Robert Vokac
-// Based on .NET Runtime (MIT License)
-#pragma once
-#include &lt;System/Object.hpp&gt;
-#include &lt;SharpRuntime/Prop.hpp&gt;
-
-namespace System {
-// Or: namespace System::IO etc.
-
-/**
- * @brief One-line description.
- * @status Partial
- */
-class MyClass : public Object {
-public:
-    MyClass();
-    DDATA(int, SomeProperty)
-    void SomeMethod(const std::string&amp; arg);
-    GetTypeNameHPP();
-};
-
-} // namespace System</code></pre>
-
-    <h2>Step 3: Create the Implementation</h2>
-    <p>Create <code>modules/core/src/System/[Namespace]/MyClass.cpp</code> in the same owning module:</p>
-    <pre><code>// SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Robert Vokac
-// Based on .NET Runtime (MIT License)
-#include &lt;System/MyClass.hpp&gt;
-
-namespace System {
-
-GetTypeNameCPP(MyClass, "System.MyClass")
-IDATA(MyClass, int, SomeProperty)
-
-MyClass::MyClass() : someProperty_(0) {}
-
-void MyClass::SomeMethod(const std::string&amp; arg) {
-    // implementation
-}
-
-} // namespace System</code></pre>
-
-    <div class="callout note">
-      <div class="callout-title">Module-scoped discovery</div>
-      <code>sharp_runtime_register_module()</code> discovers <code>src/*.cpp</code> and
-      <code>tests/*.cpp</code> only inside the owning module. You do not need to edit its
-      <code>CMakeLists.txt</code> for another file in that module, but you must declare dependencies
-      correctly and register a genuinely new module.
-    </div>
-
-    <h2>Step 4: Write Tests</h2>
-    <p>Create <code>modules/core/tests/System/MyClassTest.cpp</code> (or the matching test path in the owning module):</p>
-    <pre><code>// SPDX-License-Identifier: MIT
-#include &lt;gtest/gtest.h&gt;
-#include &lt;System/MyClass.hpp&gt;
-
-using namespace System;
-
-TEST(MyClassTest, ConstructorDefault) {
-    MyClass obj;
-    EXPECT_EQ(obj.getSomePropertyProperty(), 0);
-}
-
-TEST(MyClassTest, SomeMethod) {
-    MyClass obj;
-    obj.SomeMethod("test");
-    // assert expected state
-}
-
-TEST(MyClassTest, GetTypeName) {
-    MyClass obj;
-    EXPECT_EQ(obj.GetTypeName(), "System.MyClass");
-}</code></pre>
-
-    <div class="callout warning">
-      <div class="callout-title">Test requirement</div>
-      Your new class must have focused tests. Build its component test target and run its executable;
-      for a repository-wide change, configure <code>All</code> and use
-      <code>scripts/run_component_tests.sh build</code>.
-    </div>
-
-    <h2>Step 5: Platform Guards (if needed)</h2>
-    <p>If your implementation uses platform-specific APIs:</p>
-    <ul>
-      <li>Keep platform-specific <code>#include</code>s in <code>.cpp</code> files only</li>
-      <li>Use <code>#ifdef _WIN32</code> / <code>#elif defined(__EMSCRIPTEN__)</code> / <code>#else</code> guards</li>
-      <li>If a feature is POSIX-only, document it in the header with a Doxygen note</li>
-      <li>Provide stub implementations for unsupported platforms rather than compilation errors</li>
-    </ul>
-
-    <h2>Step 6: Update Status</h2>
-    <p>Update the <code>@status</code> Doxygen comment in the header file as the implementation progresses:</p>
-    <ul>
-      <li><code>Todo</code> — planned, not started</li>
-      <li><code>Stub</code> — header exists, empty/minimal implementation</li>
-      <li><code>Partial</code> — key functionality works, some methods missing</li>
-      <li><code>Implemented</code> — all planned methods done</li>
-      <li><code>Verified</code> — fully tested against .NET behavior</li>
-    </ul>
-
-    <h2>Checklist</h2>
-    <ul>
-      <li>SPDX header on every file</li>
-      <li><code>#pragma once</code> in header</li>
-      <li><code>GetTypeNameHPP()</code> in class body</li>
-      <li><code>GetTypeNameCPP()</code> in .cpp</li>
-      <li>All properties use <code>DDATA</code>/<code>DGETTER</code> macros</li>
-      <li>Files are under one owning <code>modules/&lt;module&gt;</code> directory</li>
-      <li>Public, private, and test-only dependencies are declared with the correct visibility</li>
-      <li>No POSIX <code>#include</code>s in .hpp files</li>
-      <li>Tests written and passing</li>
-      <li>Zero new warnings after build</li>
-      <li><code>@status</code> comment reflects actual state</li>
-    </ul>
-
-    <div class="nav-links">
-      <a class="prev" href="porting-csharp-code.html">← Porting C# Code</a>
-      <a class="next" href="known-limitations.html">Known Limitations →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html" aria-current="page">Adding features</a><a href="debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Adding Runtime Features</span></nav><h1>Adding Runtime Features</h1><p class="lead">Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.</p><div class="page-meta"><span>Development</span><span>Source f827a6c5</span></div>
+<h2 id="evidence">1. Establish the contract</h2><p>Read the current implementation, headers, upstream reference source where applicable and existing tests. Treat project prose and audit tickets as evidence to corroborate—not automatic truth.</p>
+<h2 id="owner">2. Choose the owner</h2><p>Place the header/source/test under one physical module. Declare PUBLIC edges for headers, PRIVATE edges for implementation and TEST edges only for the test binary.</p>
+<h2 id="slice">3. Implement a bounded slice</h2><ul><li>Validate parameters before mutation.</li><li>Preserve exception type and causal error where established.</li><li>Define ownership, copy/move and disposal behavior.</li><li>Document intentional reductions and platform guards.</li></ul>
+<h2 id="test">4. Test behavior and boundaries</h2><p>Add normal, invalid, boundary and lifetime tests. For public includes or target behavior, add selective/negative consumer fixtures.</p>
+<h2 id="validate">5. Validate</h2><pre><code class="language-bash">python3 scripts/validate_module_boundaries.py
+python3 scripts/generate_component_catalog.py --check
+scripts/check_selective_components.sh
+scripts/local_ci_check.sh build</code></pre></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

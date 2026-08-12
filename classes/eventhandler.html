@@ -1,167 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>System::EventHandler — sharp-runtime</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EventHandler | Sharp Runtime</title>
+  <meta name="description" content="Typed event callback behavior and native capture lifetime.">
+  <link rel="canonical" href="https://sharpruntime.com/classes/eventhandler.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="EventHandler | Sharp Runtime">
+  <meta property="og:description" content="Typed event callback behavior and native capture lifetime.">
+  <meta property="og:url" content="https://sharpruntime.com/classes/eventhandler.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="EventHandler | Sharp Runtime">
+  <meta name="twitter:description" content="Typed event callback behavior and native capture lifetime.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "EventHandler", "description": "Typed event callback behavior and native capture lifetime.", "url": "https://sharpruntime.com/classes/eventhandler.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "EventHandler", "item": "https://sharpruntime.com/classes/eventhandler.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li><a href="../overview.html">Overview</a></li>
-    <li><a href="../getting-started.html">Getting Started</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="../modules/index.html">Modules</a></li>
-    <li><a href="index.html">Classes</a></li>
-    <li><a href="../api/index.html">API Reference</a></li>
-    <li><a href="../internals/index.html">Internals</a></li>
-    <li class="nav-section">Classes</li>
-    <li><a href="object.html">System::Object</a></li>
-    <li><a href="exception.html">System::Exception</a></li>
-    <li><a href="string.html">System::String</a></li>
-    <li><a href="array.html">System::Array</a></li>
-    <li><a href="eventhandler.html">System::EventHandler</a></li>
-    <li><a href="nullable.html">System::Nullable</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::EventHandler&lt;T&gt;</span></div>
-    <div id="search-results"></div>
-    <h1>System::EventHandler&lt;T&gt;</h1>
-    <p class="page-subtitle">Combined delegate type and event subscriber list. Wraps <code>std::function</code> subscribers.</p>
-    <p class="file-path">modules/core/include/System/EventHandler.hpp</p>
-
-    <p>Status: <span class="badge badge-done">Implemented</span></p>
-
-    <h2>Overview</h2>
-    <p>C# has separate concepts for the delegate type and the <code>event</code> keyword, which enforces
-    encapsulation. sharp-runtime folds both into a single <code>EventHandler&lt;T&gt;</code> class that
-    acts as both the delegate type and the subscriber list.</p>
-
-    <p>The template parameter <code>T</code> must derive from <code>System::EventArgs</code>.</p>
-
-    <h2>Class Definition (abbreviated)</h2>
-    <pre><code>namespace System {
-    template&lt;typename T&gt;
-    class EventHandler {
-    public:
-        using HandlerType = std::function&lt;void(Object*, T)&gt;;
-
-        void Add(HandlerType handler);
-        void Remove(HandlerType handler);
-        void Raise(Object* sender, T args);
-        void Invoke(Object* sender, T args); // alias for Raise
-        EventHandler&lt;T&gt;&amp; operator+=(HandlerType handler);
-        EventHandler&lt;T&gt;&amp; operator-=(HandlerType handler); // needs verification
-        int Size() const;
-        bool Empty() const;
-    private:
-        std::vector&lt;HandlerType&gt; handlers_;
-    };
-}</code></pre>
-
-    <h2>Methods</h2>
-
-    <h3>Add()</h3>
-    <pre><code>void Add(HandlerType handler);</code></pre>
-    <p>Appends a subscriber function to the internal list. Same as <code>operator+=</code>.</p>
-
-    <h3>Remove()</h3>
-    <pre><code>void Remove(HandlerType handler);</code></pre>
-    <p>Removes a previously added subscriber. Note: removing <code>std::function</code> objects
-    requires matching by address or wrapping — see the note below.</p>
-
-    <h3>Raise() / Invoke()</h3>
-    <pre><code>void Raise(Object* sender, T args);
-void Invoke(Object* sender, T args);</code></pre>
-    <p>Calls all registered subscribers in order with the given sender and args.</p>
-
-    <h3>operator+=</h3>
-    <pre><code>EventHandler&lt;T&gt;&amp; operator+=(HandlerType handler);</code></pre>
-    <p>Adds a subscriber. Mirrors C# <code>myEvent += handler;</code> syntax.</p>
-
-    <h3>Size() / Empty()</h3>
-    <pre><code>int Size() const;
-bool Empty() const;</code></pre>
-    <p>Returns the number of registered subscribers / whether the list is empty.</p>
-
-    <h2>Usage Example</h2>
-    <pre><code>// EventArgs subclass
-class ButtonClickArgs : public System::EventArgs {
-public:
-    int x, y;
-    ButtonClickArgs(int x, int y) : x(x), y(y) {}
-};
-
-// Class with an event
-class Button : public System::Object {
-public:
-    System::EventHandler&lt;ButtonClickArgs&gt; Click;
-    GetTypeNameHPP();
-
-    void press(int x, int y) {
-        if (!Click.Empty()) {
-            Click.Raise(this, ButtonClickArgs(x, y));
-        }
-    }
-};
-
-// Subscribing
-Button btn;
-btn.Click += [](System::Object* sender, ButtonClickArgs args) {
-    std::cout &lt;&lt; "Clicked at " &lt;&lt; args.x &lt;&lt; "," &lt;&lt; args.y &lt;&lt; "\n";
-};
-
-// Firing
-btn.press(10, 20);</code></pre>
-
-    <h2>Comparison with C#</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>C# concept</th><th>sharp-runtime equivalent</th></tr>
-      <tr><td><code>delegate void Eh(object s, EventArgs e)</code></td><td><code>EventHandler&lt;T&gt;::HandlerType</code> (std::function)</td></tr>
-      <tr><td><code>event EventHandler&lt;T&gt; Click</code></td><td><code>EventHandler&lt;T&gt; Click</code> (public field)</td></tr>
-      <tr><td><code>Click += handler</code></td><td><code>Click += handler</code> (same)</td></tr>
-      <tr><td><code>Click -= handler</code></td><td><code>Click.Remove(handler)</code> or <code>Click -= handler</code></td></tr>
-      <tr><td><code>Click?.Invoke(this, args)</code></td><td><code>if (!Click.Empty()) Click.Raise(this, args)</code></td></tr>
-    </table>
-    </div>
-
-    <div class="callout note">
-      <div class="callout-title">No C++ event keyword</div>
-      C++ has no <code>event</code> keyword. sharp-runtime does not enforce that only the
-      declaring class can <code>Raise</code> the event — all access is public on the
-      <code>EventHandler&lt;T&gt;</code> object. For encapsulation, expose only the <code>operator+=</code>
-      in the public interface if needed.
-    </div>
-
-    <div class="callout note">
-      <div class="callout-title">Removing std::function subscribers</div>
-      <code>std::function</code> objects are not equality-comparable, which makes <code>Remove</code>
-      tricky. A common pattern is to store the handler in a variable and remove by the same address,
-      or use a wrapper with an ID. The exact mechanism in sharp-runtime's <code>Remove</code>
-      implementation is: <span class="badge badge-needs-verification">Needs verification</span>
-    </div>
-
-    <h2>Related</h2>
-    <ul>
-      <li><a href="../delegates.html">Delegates</a> — full discussion of Action, Func, Predicate, EventArgs, EventHandler</li>
-      <li><code>System::EventArgs</code> — base class for all event argument types (<code>System/EventArgs.hpp</code>)</li>
-    </ul>
-
-    <div class="nav-links">
-      <a class="prev" href="array.html">← System::Array</a>
-      <a class="next" href="nullable.html">System::Nullable →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">EventHandler</span></nav><h1>EventHandler</h1><p class="lead">Typed event callback behavior and native capture lifetime.</p><div class="page-meta"><span>API</span><span>Source f827a6c5</span></div><p>EventHandler-shaped APIs provide familiar typed event patterns. Publisher/subscriber ownership and capture lifetime are not managed by a garbage collector.</p><div class="page-index"><a href="../delegates.html">Delegate guide<small>Composition and limits.</small></a><a href="../tutorials/use-events.html">Events tutorial<small>Safe callback lifetime.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

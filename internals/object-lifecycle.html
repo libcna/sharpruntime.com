@@ -1,122 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Object Lifecycle — sharp-runtime Internals</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Object Lifecycle Internals | Sharp Runtime</title>
+  <meta name="description" content="Construction, virtual destruction, native ownership and compatibility-shaped disposal.">
+  <link rel="canonical" href="https://sharpruntime.com/internals/object-lifecycle.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Object Lifecycle Internals | Sharp Runtime">
+  <meta property="og:description" content="Construction, virtual destruction, native ownership and compatibility-shaped disposal.">
+  <meta property="og:url" content="https://sharpruntime.com/internals/object-lifecycle.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Object Lifecycle Internals | Sharp Runtime">
+  <meta name="twitter:description" content="Construction, virtual destruction, native ownership and compatibility-shaped disposal.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Object Lifecycle Internals", "description": "Construction, virtual destruction, native ownership and compatibility-shaped disposal.", "url": "https://sharpruntime.com/internals/object-lifecycle.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Internals"}, {"@type": "ListItem", "position": 3, "name": "Object Lifecycle Internals", "item": "https://sharpruntime.com/internals/object-lifecycle.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="../index.html">Home</a></li>
-    <li class="nav-section">Internals</li>
-    <li><a href="index.html">Internals Index</a></li>
-    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
-    <li><a href="property-macros.html">Property Macros</a></li>
-    <li><a href="string-internals.html">String Internals</a></li>
-    <li><a href="array-internals.html">Array Internals</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Internals</a></span><span>Object Lifecycle</span></div>
-    <div id="search-results"></div>
-    <h1>Object Lifecycle</h1>
-    <p class="page-subtitle">How objects are created, owned, shared, and destroyed — without garbage collection.</p>
-
-    <h2>No Garbage Collector</h2>
-    <p>Unlike .NET, sharp-runtime has no garbage collector. <code>System::GC</code> is a stub class
-    that exists only for API compatibility — it does nothing. All memory management is explicit C++ RAII.</p>
-
-    <p>This is a fundamental difference from .NET. You must think about <em>ownership</em> when writing
-    or porting code.</p>
-
-    <h2>Ownership Patterns</h2>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Pattern</th><th>Use when</th><th>Notes</th></tr>
-      <tr><td>Stack value</td><td>Short-lived, single owner, value semantics</td><td>Destroyed at scope end</td></tr>
-      <tr><td><code>std::unique_ptr&lt;T&gt;</code></td><td>Single owner, heap-allocated</td><td>Ownership transferable via move</td></tr>
-      <tr><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Shared ownership, multiple holders</td><td>Ref-counted; cycles are a risk</td></tr>
-      <tr><td>Raw pointer / reference</td><td>Borrowed (non-owning)</td><td>Caller must keep owner alive</td></tr>
-    </table>
-    </div>
-
-    <h2>Typical Object Creation</h2>
-    <pre><code>// Stack allocation (value type behavior)
-System::DateTime dt = System::DateTime::Now();
-
-// Heap with unique ownership
-auto stream = std::make_unique&lt;System::IO::MemoryStream&gt;();
-
-// Heap with shared ownership
-auto obj = std::make_shared&lt;MyClass&gt;();
-std::shared_ptr&lt;MyClass&gt; ref2 = obj; // both hold a reference
-// obj and ref2 are both destroyed when count drops to 0</code></pre>
-
-    <h2>Virtual Destructor Rule</h2>
-    <p>All classes inheriting from <code>System::Object</code> get a virtual destructor via
-    <code>virtual ~Object() = default</code>. This ensures the correct destructor runs when
-    deleting through a base pointer.</p>
-    <pre><code>std::unique_ptr&lt;System::Object&gt; obj = std::make_unique&lt;MyDerivedClass&gt;();
-// When obj goes out of scope, ~MyDerivedClass() runs correctly</code></pre>
-
-    <h2>IDisposable Pattern</h2>
-    <p>Classes with external resources (file handles, sockets, etc.) implement
-    <code>System::IDisposable</code> with a <code>Dispose()</code> method. Unlike C# <code>using</code>
-    statements, there is no language-level RAII integration — you must call <code>Dispose()</code>
-    manually or use a custom RAII wrapper.</p>
-    <pre><code>// Manual dispose
-auto fs = std::make_unique&lt;System::IO::FileStream&gt;("file.txt", ...);
-// ... use ...
-fs-&gt;Dispose(); // or let unique_ptr destructor run (if it calls Dispose)</code></pre>
-
-    <div class="callout note">
-      <div class="callout-title">C++ destructor vs .NET Dispose</div>
-      In .NET, deterministic cleanup uses <code>Dispose()</code>; finalizers are a GC fallback.
-      In sharp-runtime, the C++ destructor is the primary cleanup mechanism. <code>Dispose()</code>
-      exists for API compatibility and may delegate to the destructor.
-    </div>
-
-    <h2>Copy and Move Semantics</h2>
-    <p>sharp-runtime classes use default C++ copy/move semantics unless a class explicitly
-    manages resources:</p>
-    <ul>
-      <li><strong>Value-type-like classes</strong> (e.g., <code>DateTime</code>, <code>TimeSpan</code>, <code>Vector2</code>) — copyable by value, cheap to copy.</li>
-      <li><strong>Collection types</strong> (e.g., <code>List&lt;T&gt;</code>) — hold a <code>std::vector</code> internally; copy is a deep copy of the vector.</li>
-      <li><strong>Stream types</strong> — typically non-copyable; move-only via <code>unique_ptr</code>.</li>
-      <li><strong>Shared objects</strong> — use <code>shared_ptr</code>; copying the pointer is cheap (increments refcount).</li>
-    </ul>
-
-    <h2>Null Handling</h2>
-    <p>In C++ there is no concept of "null object" for value types. Reference semantics are
-    represented by pointers:</p>
-    <ul>
-      <li>Raw pointer can be <code>nullptr</code></li>
-      <li><code>std::shared_ptr&lt;T&gt;</code> can be empty (default-constructed = null)</li>
-      <li><code>std::unique_ptr&lt;T&gt;</code> can be null</li>
-      <li>Use <code>Nullable&lt;T&gt;</code> for value types that need a null state</li>
-    </ul>
-
-    <h2>Reference Cycles</h2>
-    <div class="callout warning">
-      <div class="callout-title">Cycle Risk with shared_ptr</div>
-      If object A holds a <code>shared_ptr</code> to B and B holds a <code>shared_ptr</code> back to A,
-      neither will ever be destroyed. Break cycles with <code>std::weak_ptr&lt;T&gt;</code>.
-      This is a common pitfall when porting C# code where the GC handles cycles automatically.
-    </div>
-
-    <div class="nav-links">
-      <a class="prev" href="index.html">← Internals Index</a>
-      <a class="next" href="property-macros.html">Property Macros →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Internals</span><span>/</span><span aria-current="page">Object Lifecycle Internals</span></nav><h1>Object Lifecycle Internals</h1><p class="lead">Construction, virtual destruction, native ownership and compatibility-shaped disposal.</p><div class="page-meta"><span>Internals</span><span>Source f827a6c5</span></div>
+<h2 id="model">Native object model</h2><p><code>System::Object</code> is an abstract base for participating Sharp Runtime class hierarchies, not a hidden header attached to every C++ value. Construction, destruction, copying and moving remain ordinary C++. Its virtual destructor makes deletion through an Object base safe; it does not imply garbage collection.</p>
+<p><code>System::GC</code> is a compatibility no-op. It cannot find unreachable objects, break reference cycles, move allocations or extend a borrowed lifetime.</p>
+<h2 id="ownership">Ownership vocabulary</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Form</th><th scope="col">Use</th><th scope="col">Porting consequence</th></tr></thead><tbody><tr><td>Stack/value member</td><td>Small values with clear containing lifetime</td><td>Copy/move follows the value type</td></tr><tr><td><code>std::unique_ptr&lt;T&gt;</code></td><td>One transferable owner</td><td>Closest expression of exclusive ownership</td></tr><tr><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Genuinely shared lifetime</td><td>Cycles still leak unless a back edge is weak</td></tr><tr><td><code>std::weak_ptr&lt;T&gt;</code></td><td>Observation without keeping the target alive</td><td>Lock and handle expiry at every use</td></tr><tr><td>Reference/raw pointer</td><td>Short, documented borrow or interop boundary</td><td>Owner must outlive every access</td></tr><tr><td>Span/Memory/ArraySegment</td><td>Borrowed view into existing storage</td><td>Reallocation or owner destruction invalidates the view</td></tr></tbody></table></div>
+<h2 id="dispose">Dispose-shaped APIs</h2><p>Where present, <code>Dispose</code> aids source compatibility and deterministic release. The C++ destructor must still leave the type safe under scope exit and exception unwinding. A port should make repeated disposal and post-disposal behavior explicit rather than assuming the CLR contract.</p>
+<h2 id="exceptions">Surfaces that need extra care</h2><ul><li>Some collection enumerator and Keys/Values APIs return owning raw heap pointers; the caller must delete them.</li><li><code>MemoryHandle</code> has an explicit Dispose contract.</li><li>Reference-taking BlockingCollection constructors keep a no-delete shared wrapper; the referenced collection must outlive the wrapper.</li><li>Several asynchronous socket, HTTP and WebSocket operations capture a raw owner or caller buffer; both must survive task completion.</li><li>Delegates and event subscriptions keep the ownership expressed by their C++ captures—not a managed target root.</li></ul>
+<h2 id="copy-move">Copy, move and shutdown</h2><p>For each resource-owning type, decide whether copying duplicates a value, shares a handle, or must be disabled. Moving must leave a destructible source. For asynchronous owners, shutdown normally means: prevent new work, request cancellation, wait or join, detach subscriptions, then release state.</p><div class="callout callout--warning"><div class="callout-title">Audit lifetime at boundaries</div><p>The most dangerous compatibility bugs live where an API looks managed but stores a native borrow. Record the owner, invalidation events, and thread that may perform the last access.</p></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

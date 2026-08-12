@@ -1,194 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Architecture — sharp-runtime</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture | Sharp Runtime</title>
+  <meta name="description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <link rel="canonical" href="https://sharpruntime.com/architecture.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Architecture | Sharp Runtime">
+  <meta property="og:description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <meta property="og:url" content="https://sharpruntime.com/architecture.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Architecture | Sharp Runtime">
+  <meta name="twitter:description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Architecture", "description": "Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.", "url": "https://sharpruntime.com/architecture.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Overview"}, {"@type": "ListItem", "position": 3, "name": "Architecture", "item": "https://sharpruntime.com/architecture.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Getting Started</li>
-    <li><a href="index.html">Home</a></li>
-    <li><a href="overview.html">Overview</a></li>
-    <li><a href="getting-started.html">Getting Started</a></li>
-    <li><a href="build.html">Build</a></li>
-    <li><a href="running-tests.html">Running Tests</a></li>
-    <li class="nav-section">Architecture</li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="project-structure.html">Project Structure</a></li>
-    <li><a href="runtime-overview.html">Runtime Overview</a></li>
-    <li class="nav-section">Core Runtime</li>
-    <li><a href="type-system.html">Type System</a></li>
-    <li><a href="memory-management.html">Memory Management</a></li>
-    <li><a href="exceptions.html">Exceptions</a></li>
-    <li><a href="strings.html">Strings</a></li>
-    <li><a href="arrays.html">Arrays</a></li>
-    <li><a href="delegates.html">Delegates &amp; Events</a></li>
-    <li><a href="reflection.html">Reflection</a></li>
-    <li><a href="io.html">I/O</a></li>
-    <li><a href="threading.html">Threading</a></li>
-    <li><a href="platform-layer.html">Platform Layer</a></li>
-    <li class="nav-section">Compatibility</li>
-    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
-    <li><a href="cna-integration.html">CNA Integration</a></li>
-    <li class="nav-section">Reference</li>
-    <li><a href="modules/index.html">Modules</a></li>
-    <li><a href="classes/index.html">Classes</a></li>
-    <li><a href="api/index.html">API Reference</a></li>
-    <li><a href="internals/index.html">Internals</a></li>
-    <li class="nav-section">Tutorials</li>
-    <li><a href="tutorials/index.html">All Tutorials</a></li>
-    <li class="nav-section">Developer Guide</li>
-    <li><a href="development/index.html">Overview</a></li>
-    <li><a href="development/coding-style.html">Coding Style</a></li>
-    <li><a href="development/debugging.html">Debugging</a></li>
-    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="development/known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Architecture</span></div>
-    <div id="search-results"></div>
-    <h1>Architecture</h1>
-    <p class="page-subtitle">Runtime layers, namespace design, and key architectural decisions.</p>
-
-    <h2>Layer Overview</h2>
-    <p>sharp-runtime is organized into an API layer, a component layer, and the C++ implementation beneath them:</p>
-
-    <pre><code>┌──────────────────────────────────────────────┐
-│              CNA / mobile-eggbert            │  ← Consumer projects
-├──────────────────────────────────────────────┤
-│            System::* namespaces              │  ← Stable public API
-│  (String, Array, Exception, IO, Threading…)  │
-├──────────────────────────────────────────────┤
-│  SharpRuntime::* helpers + CMake components  │  ← Component selection
-│  (Core.Base, Text.Json, IO, Net.WebSockets…) │
-├──────────────────────────────────────────────┤
-│        C++ Standard Library + STL             │  ← std::string, std::vector…
-│     + component-owned dependencies            │  ← ZLIB, tinyxml2, miniz
-└──────────────────────────────────────────────┘</code></pre>
-
-    <h2>Build-Time Component Model</h2>
-    <p>The runtime has 40 physical modules. Each one owns its headers, sources, tests, and CMake registration under <code>modules/&lt;module&gt;</code>. Public header names have not changed, so consumers continue to include <code>System/*</code> and <code>SharpRuntime/*</code> paths.</p>
-    <pre><code>Application
-  └── SharpRuntime::Text.Json        # direct requirement
-        ├── SharpRuntime::Text        # public dependency
-        ├── SharpRuntime::Buffers     # via Text
-        └── SharpRuntime::Core.Base   # foundation
-
-Unselected components are not configured or linked.</code></pre>
-    <p>New consumers select direct targets only. Public dependencies propagate through CMake, private implementation dependencies remain internal, and test-only dependencies are restricted to the owning component's test executable.</p>
-
-    <h2>Namespace Structure</h2>
-    <p>All public API lives in the <code>System</code> namespace or its sub-namespaces, mirroring .NET conventions:</p>
-    <div class="table-wrap">
-    <table>
-      <tr><th>Namespace</th><th>Description</th></tr>
-      <tr><td><code>SharpRuntime</code></td><td>Primitive type aliases (<code>intcs</code>, <code>bytecs</code>, etc.) and utility macros</td></tr>
-      <tr><td><code>SharpRuntime::Storage</code></td><td>Storage path utilities for isolated storage</td></tr>
-      <tr><td><code>System</code></td><td>Core types: Object, String, Array, Exception, Math, DateTime, etc.</td></tr>
-      <tr><td><code>System::Buffers</code></td><td>ArrayPool&lt;T&gt;, MemoryPool&lt;T&gt;, BinaryPrimitives, SearchValues&lt;T&gt;, ReadOnlySequence&lt;T&gt;</td></tr>
-      <tr><td><code>System::Collections</code></td><td>Non-generic collections: ArrayList, Hashtable, BitArray</td></tr>
-      <tr><td><code>System::Collections::Generic</code></td><td>Generic: List&lt;T&gt;, Dictionary&lt;K,V&gt;, HashSet&lt;T&gt;, Queue&lt;T&gt;, etc.</td></tr>
-      <tr><td><code>System::Collections::Concurrent</code></td><td>Thread-safe collections</td></tr>
-      <tr><td><code>System::Collections::Immutable</code></td><td>Immutable collection types</td></tr>
-      <tr><td><code>System::Collections::ObjectModel</code></td><td>Collection base classes: Collection&lt;T&gt;, ObservableCollection&lt;T&gt;</td></tr>
-      <tr><td><code>System::IO</code></td><td>Stream, File, Directory, Path, MemoryStream, FileStream</td></tr>
-      <tr><td><code>System::IO::Compression</code></td><td>GZipStream, DeflateStream, ZipArchive</td></tr>
-      <tr><td><code>System::IO::IsolatedStorage</code></td><td>IsolatedStorageFile, IsolatedStorageFileStream</td></tr>
-      <tr><td><code>System::IO::Hashing</code></td><td>XxHash32, XxHash64, Crc32</td></tr>
-      <tr><td><code>System::Text</code></td><td>StringBuilder, Encoding, ASCIIEncoding, UTF8Encoding</td></tr>
-      <tr><td><code>System::Text::Json</code></td><td>JsonDocument, JsonSerializer (backed by nlohmann/json)</td></tr>
-      <tr><td><code>System::Xml</code></td><td>XmlReader, XmlWriter (backed by tinyxml2)</td></tr>
-      <tr><td><code>System::Xml::Linq</code></td><td>XDocument, XElement, XAttribute, XName</td></tr>
-      <tr><td><code>System::Threading</code></td><td>Thread, Mutex, Monitor, CancellationToken, Timer, etc.</td></tr>
-      <tr><td><code>System::Threading::Tasks</code></td><td>Task&lt;T&gt;, ValueTask, Parallel</td></tr>
-      <tr><td><code>System::Numerics</code></td><td>Vector2/3/4, Matrix3x2/4x4, Quaternion, Plane, BigInteger</td></tr>
-      <tr><td><code>System::Globalization</code></td><td>CultureInfo, DateTime formatting, calendars</td></tr>
-      <tr><td><code>System::Diagnostics</code></td><td>Debug, Debugger, Stopwatch, StackTrace</td></tr>
-      <tr><td><code>System::Net::Sockets</code></td><td>TcpClient, UdpClient, NetworkStream</td></tr>
-      <tr><td><code>System::Net::Http</code></td><td>HttpClient, HttpRequestMessage, HttpResponseMessage (plain HTTP only)</td></tr>
-    </table>
-    </div>
-
-    <h2>Key Architectural Decisions</h2>
-
-    <h3>1. std::string as the String Type</h3>
-    <p>C# <code>string</code> maps directly to <code>std::string</code> in C++. There is no custom <code>String</code> object type. <code>System::String</code> is a <strong>static utility class</strong> with helper methods (Split, Format, IsNullOrEmpty, etc.) — it cannot be instantiated.</p>
-
-    <h3>2. std::vector&lt;T&gt; as the Array Type</h3>
-    <p>C# <code>T[]</code> maps to <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> is a <strong>static template utility class</strong> with helpers (Sort, Copy, Resize, IndexOf, etc.) — not a concrete array type.</p>
-
-    <h3>3. No Garbage Collector</h3>
-    <p>Memory is managed via C++ RAII and smart pointers (<code>std::shared_ptr</code>, <code>std::unique_ptr</code>). There is no GC. The <code>System::GC</code> class exists as a stub/no-op only.</p>
-
-    <h3>4. C++ Exceptions = .NET Exceptions</h3>
-    <p><code>System::Exception</code> inherits from <code>std::exception</code>, so it integrates naturally with C++ exception handling. All sharp-runtime exceptions are real C++ exceptions that can be caught with <code>catch(const System::Exception&amp; e)</code> or <code>catch(const std::exception&amp; e)</code>.</p>
-
-    <h3>5. EventHandler Combines Delegate + Event</h3>
-    <p>C++ has no <code>event</code> keyword. <code>System::EventHandler&lt;T&gt;</code> combines both the delegate signature and the subscriber list. It supports <code>operator+=</code> for subscription (mirroring C# syntax) and <code>Raise()</code> / <code>Invoke()</code> for firing.</p>
-
-    <h3>6. Property Macros</h3>
-    <p>C++ has no property syntax. sharp-runtime provides macros (<code>DDATA</code>, <code>DGETTER</code>, <code>DGETTERSTATIC</code>) in the core module's <code>SharpRuntime/Prop.hpp</code> public header that generate <code>getXxxProperty()</code> / <code>setXxxProperty()</code> methods backed by private member fields.</p>
-
-    <h3>7. Header + Implementation Split</h3>
-    <p>Complex types use a <code>.hpp</code> declaration and a <code>.cpp</code> body. Simple types (enums, small structs, header-only templates) are header-only. Both are placed under their owning module rather than in shared top-level source trees.</p>
-
-    <h3>8. Platform Guards in .cpp Only</h3>
-    <p>POSIX includes (<code>&lt;unistd.h&gt;</code>, <code>&lt;sys/socket.h&gt;</code>, etc.) must <strong>not</strong> appear in public <code>.hpp</code> headers. Platform-specific code lives in <code>.cpp</code> files behind <code>#ifdef _WIN32</code> / <code>#elif defined(__EMSCRIPTEN__)</code> / <code>#else</code> guards.</p>
-
-    <h3>9. Immutable Collections Use shared_ptr</h3>
-    <p>Immutable collection types (<code>ImmutableArray</code>, <code>ImmutableList</code>, etc.) are backed by <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>.</p>
-
-    <h3>10. Namespace Syntax</h3>
-    <p>The project uses C++17 nested namespace syntax:</p>
-    <pre><code>namespace System::Collections::Generic {
-    template&lt;typename T&gt;
-    class List { ... };
-}</code></pre>
-
-    <h2>Object Model</h2>
-    <p>The base class for all non-primitive types is <code>System::Object</code>. It provides:</p>
-    <ul>
-      <li><code>virtual std::string ToString() const</code></li>
-      <li><code>virtual bool Equals(const Object*) const</code></li>
-      <li><code>virtual int GetHashCode() const</code></li>
-      <li><code>virtual const std::string&amp; GetTypeName() const = 0</code> — pure virtual; must be overridden</li>
-    </ul>
-    <p>The <code>GetTypeName()</code> method is assisted by the macros <code>GetTypeNameHPP()</code> and <code>GetTypeNameCPP(CLASS, NAME)</code> defined in the core module's public <code>System/Object.hpp</code> header.</p>
-
-    <h2>Summary Diagram</h2>
-    <pre><code>System::Object  (base class, virtual dispatch)
-  ├── System::Exception
-  │     ├── System::SystemException
-  │     │     ├── System::ArgumentException
-  │     │     │     ├── ArgumentNullException
-  │     │     │     └── ArgumentOutOfRangeException
-  │     │     ├── System::InvalidOperationException
-  │     │     ├── System::NullReferenceException
-  │     │     ├── System::IndexOutOfRangeException
-  │     │     ├── System::IO::IOException
-  │     │     │     ├── FileNotFoundException
-  │     │     │     ├── DirectoryNotFoundException
-  │     │     │     └── EndOfStreamException
-  │     │     └── ... (many more)
-  │     └── System::ApplicationException
-  ├── System::EventArgs
-  └── ... (other non-exception System types)</code></pre>
-
-    <div class="page-nav">
-      <a class="prev" href="running-tests.html"><span class="page-nav-label">← Previous</span>Running Tests</a>
-      <a class="next" href="project-structure.html"><span class="page-nav-label">Next →</span>Project Structure</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="getting-started.html">Start</a><a class="nav-link" href="guides/porting-csharp.html">Guides</a><a class="nav-link" href="components/index.html">Components</a><a class="nav-link" href="api/index.html">API</a><a class="nav-link" href="tutorials/index.html">Tutorials</a><a class="nav-link" href="search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html" aria-current="page">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Overview</span><span>/</span><span aria-current="page">Architecture</span></nav><h1>Architecture</h1><p class="lead">A native C++ compatibility layer organized into independently selectable, boundary-validated CMake components.</p><div class="page-meta"><span>41 physical components</span><span>92 direct edges</span><span>No dependency allow-list</span></div>
+<h2 id="layers">Conceptual layers</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Layer</th><th scope="col">Role</th></tr></thead><tbody><tr><td>Consumer code</td><td>Native application or source port using familiar <code>System::*</code> names</td></tr><tr><td>Curated compatibility API</td><td>Headers and behavior for the practical implemented subset</td></tr><tr><td>Physical components</td><td>Ownership units for headers, implementation, tests and dependencies</td></tr><tr><td>Native/platform layer</td><td>C++ standard library, OS facilities and narrowly attached vendor dependencies</td></tr></tbody></table></div>
+<h2 id="components">Component ownership</h2><p>Each module directory owns <code>include/</code>, optional <code>src/</code>, tests and one CMake registration. A component is either a static library or an interface/header-only target. Public, private and test dependencies are distinct.</p><div class="table-wrap"><table class=""><thead><tr><th scope="col">Edge kind</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>Public</td><td>A public header uses the dependency; include/link requirements reach consumers</td></tr><tr><td>Private</td><td>Only implementation sources use the dependency; static-link needs remain correct without leaking include roots</td></tr><tr><td>Test-only</td><td>Available to the owning test binary, not production consumers</td></tr></tbody></table></div>
+<h2 id="validation">Boundary enforcement</h2><p>The independent validator parses the registered graph and source includes. It rejects duplicate ownership, orphan production files, undeclared or stale edges, visibility mismatches and cycles. The current allow-list is empty.</p>
+<h2 id="native-model">Native object model</h2><p>Sharp Runtime uses ordinary C++ objects, values, templates, RAII and smart pointers. There is no tracing collector. Compatibility wrappers and macros help port familiar shapes, but C++ lifetime, copy/move and aliasing rules remain in force.</p>
+<h2 id="external">External dependency isolation</h2><p>ZLIB, miniz, tinyxml2, platform socket/crypto libraries and Android SDL integration attach to their narrow owners. This is what makes a <code>Text.Json</code>-only configuration meaningfully smaller than <code>All</code>.</p><div class="page-index"><a href="components/index.html">Components<small>Explore every target and dependency.</small></a><a href="memory-management.html">Memory and ownership<small>Managed concepts in native C++.</small></a><a href="internals/index.html">Internals<small>Ownership and validation details.</small></a><a href="tutorials/add-component.html">Adding a component<small>Contributor workflow.</small></a></div></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

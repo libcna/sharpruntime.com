@@ -1,139 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Debugging — sharp-runtime Developer Guide</title>
-<link rel="stylesheet" href="../assets/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Debugging Sharp Runtime | Sharp Runtime</title>
+  <meta name="description" content="Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.">
+  <link rel="canonical" href="https://sharpruntime.com/development/debugging.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Debugging Sharp Runtime | Sharp Runtime">
+  <meta property="og:description" content="Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.">
+  <meta property="og:url" content="https://sharpruntime.com/development/debugging.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Debugging Sharp Runtime | Sharp Runtime">
+  <meta name="twitter:description" content="Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Debugging Sharp Runtime", "description": "Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.", "url": "https://sharpruntime.com/development/debugging.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Debugging Sharp Runtime", "item": "https://sharpruntime.com/development/debugging.html"}]}]}</script>
 </head>
 <body>
-<header class="site-header">
-  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
-  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
-  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
-</header>
-<div class="page-body">
-  <aside class="sidebar"><nav><ul>
-    <li class="nav-section">Development</li>
-    <li><a href="index.html">Developer Guide</a></li>
-    <li><a href="coding-style.html">Coding Style</a></li>
-    <li><a href="debugging.html">Debugging</a></li>
-    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
-    <li><a href="adding-runtime-features.html">Adding Features</a></li>
-    <li><a href="known-limitations.html">Known Limitations</a></li>
-  </ul></nav></aside>
-  <main class="content">
-    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Debugging</span></div>
-    <div id="search-results"></div>
-    <h1>Debugging</h1>
-    <p class="page-subtitle">Tools and techniques for debugging sharp-runtime code.</p>
-
-    <h2>Build for Debug</h2>
-    <pre><code>cmake -S . -B build \
-  -DCMAKE_BUILD_TYPE=Debug \
-  '-DSHARP_RUNTIME_COMPONENTS=All'
-cmake --build build</code></pre>
-    <p>Debug builds include debug symbols and disable optimizations, making GDB/LLDB much more useful.</p>
-
-    <h2>Debug and Trace Utilities</h2>
-    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debug.hpp | Trace.hpp</p>
-    <p>Static assertion and trace output methods — header-only, no link dependencies:</p>
-    <pre><code>#include &lt;System/Diagnostics/Debug.hpp&gt;
-#include &lt;System/Diagnostics/Trace.hpp&gt;
-
-// Assertion (aborts if condition is false in debug builds)
-System::Diagnostics::Debug::Assert(ptr != nullptr);
-System::Diagnostics::Debug::Assert(count &gt; 0, "Count must be positive");
-
-// Output messages
-System::Diagnostics::Debug::WriteLine("Starting process...");
-System::Diagnostics::Debug::Fail("Unexpected branch reached");
-
-// Trace (similar, but typically for release/logging)
-System::Diagnostics::Trace::WriteLine("Operation completed");</code></pre>
-
-    <h2>Stopwatch</h2>
-    <p class="file-path">modules/core/include/System/Diagnostics/Stopwatch.hpp</p>
-    <p>Measures elapsed time using <code>std::chrono</code>:</p>
-    <pre><code>#include &lt;System/Diagnostics/Stopwatch.hpp&gt;
-
-System::Diagnostics::Stopwatch sw;
-sw.Start();
-
-// ... code to measure ...
-
-sw.Stop();
-long ms = sw.ElapsedMilliseconds;
-long us = sw.ElapsedMicroseconds;   // if available — needs verification
-std::cout &lt;&lt; "Elapsed: " &lt;&lt; ms &lt;&lt; "ms\n";
-
-// Reset and restart
-sw.Reset();
-sw.Restart(); // Reset + Start in one call</code></pre>
-
-    <h2>Debugger Breakpoints</h2>
-    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debugger.hpp</p>
-    <pre><code>#include &lt;System/Diagnostics/Debugger.hpp&gt;
-
-// Programmatic breakpoint
-System::Diagnostics::Debugger::Break();
-
-// Check if debugger is attached
-if (System::Diagnostics::Debugger::IsAttached) {
-    // special debugger-only behavior
-}</code></pre>
-
-    <h2>Using GDB / LLDB</h2>
-    <p>Standard C++ debuggers work well with sharp-runtime since it is plain C++ code:</p>
-    <pre><code># Build a selected component with debug symbols
-cmake -S . -B build \
-  -DCMAKE_BUILD_TYPE=Debug \
-  '-DSHARP_RUNTIME_COMPONENTS=Core.Base'
-cmake --build build --target SharpRuntimeTests_Core_Base
-
-# GDB
-gdb ./build/SharpRuntimeTests_Core_Base
-(gdb) run
-(gdb) bt         # backtrace after crash
-(gdb) p myObj    # print variable
-
-# LLDB
-lldb ./build/SharpRuntimeTests_Core_Base
-(lldb) run
-(lldb) bt        # backtrace
-(lldb) po myObj  # print object</code></pre>
-
-    <h2>Address Sanitizer</h2>
-    <pre><code>cmake -S . -B build \
-  -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined" \
-  '-DSHARP_RUNTIME_COMPONENTS=All'
-cmake --build build --target SharpRuntimeTests
-scripts/run_component_tests.sh build</code></pre>
-    <p>AddressSanitizer detects buffer overflows, use-after-free, and other memory errors.
-    Highly recommended when adding new code.</p>
-
-    <h2>Running Specific Tests</h2>
-    <pre><code># Run a single test suite
-./build/SharpRuntimeTests_Core_Base --gtest_filter=StringTest.*
-
-# Run all tests matching a pattern
-./build/SharpRuntimeTests_Core_Base --gtest_filter=*Array*
-
-# Show full output (don't suppress passing test output)
-./build/SharpRuntimeTests_Collections_Core --gtest_filter=ListTest.* -v</code></pre>
-
-    <h2>StackTrace Limitations</h2>
-    <p><code>System::Diagnostics::StackTrace</code> and <code>StackFrame</code> are stub classes.
-    Stack unwinding information is not captured at runtime. For stack traces, use GDB/LLDB
-    or <code>-g</code> debug symbols with crash handlers.</p>
-
-    <div class="nav-links">
-      <a class="prev" href="coding-style.html">← Coding Style</a>
-      <a class="next" href="porting-csharp-code.html">Porting C# Code →</a>
-    </div>
-  </main>
-</div>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="../tutorials/index.html">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html">Adding features</a><a href="debugging.html" aria-current="page">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Debugging Sharp Runtime</span></nav><h1>Debugging Sharp Runtime</h1><p class="lead">Diagnose component selection, exceptions, platform failures, concurrency and native memory errors.</p><div class="page-meta"><span>Development</span><span>Source f827a6c5</span></div>
+<h2 id="classify">Classify first</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Symptom</th><th scope="col">First question</th></tr></thead><tbody><tr><td>Configure failure</td><td>Unknown component, missing external dependency or Android parent target?</td></tr><tr><td>Header missing</td><td>Is the owning component linked, or is a private header leaking?</td></tr><tr><td>Link failure</td><td>Is an implementation dependency declared with correct visibility?</td></tr><tr><td>Test failure</td><td>Behavior defect or unavailable host facility?</td></tr><tr><td>Crash/use-after-free</td><td>Which native owner or callback outlived its target?</td></tr><tr><td>Race/deadlock</td><td>What cancellation/join/lock order is documented?</td></tr></tbody></table></div>
+<h2 id="tools">Useful tools</h2><ul><li>Component boundary validator and selective fixtures</li><li>GoogleTest filters on the owning executable</li><li>ASan/UBSan for native memory and undefined behavior</li><li>TSan for shared state where the toolchain supports it</li><li>Debugger breakpoints on specific Sharp Runtime exception construction</li><li>CMake target/property inspection rather than global include hacks</li></ul>
+<h2 id="network">Network tests</h2><p>Record permissions, namespace/container restrictions, DNS state, <code>ping_group_range</code> and interface files. An environment-limited result and an implementation defect require different fixes.</p></article></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>
