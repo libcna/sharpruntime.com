@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Overview — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Overview</span></div>
+    <div id="search-results"></div>
+    <h1>Project Overview</h1>
+    <p class="page-subtitle">What sharp-runtime is, its purpose, goals, and current status.</p>
+
+    <h2>What is sharp-runtime?</h2>
+    <p>
+      <strong>sharp-runtime</strong> is a C++23 component library that reimplements a practical subset of
+      the .NET <code>System.*</code> namespace hierarchy. Its primary goal is to enable source-porting
+      of C#/XNA game code to C++ with minimal changes, while providing a clean and modern C++ implementation
+      that does not require the Common Language Runtime (CLR) or any managed runtime.
+    </p>
+    <p>
+      The public API closely mirrors .NET — class names, method signatures, and namespace structure
+      all follow the .NET standard library conventions. The underlying C++ implementations use standard
+      containers, RAII, and C++23 features.
+    </p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠ Not a full .NET runtime</div>
+      sharp-runtime does <strong>not</strong> implement the CLR, JIT compilation, garbage collection,
+      reflection metadata, or full .NET standard compatibility. It is a pragmatic subset designed for
+      practical use in native C++ game projects.
+    </div>
+
+    <h2>Main Purpose</h2>
+    <p>sharp-runtime provides building blocks so that ported C#/XNA code can compile and run as native C++ with minimal changes. These building blocks include:</p>
+    <ul>
+      <li>C#-like primitive type aliases (<code>intcs</code>, <code>bytecs</code>, <code>shortcs</code>, etc.)</li>
+      <li>Exception hierarchy matching .NET (<code>System::Exception</code>, <code>System::ArgumentException</code>, etc.)</li>
+      <li>Delegate and event mechanisms (<code>System::Action</code>, <code>System::EventHandler&lt;T&gt;</code>)</li>
+      <li>String utilities (<code>System::String</code> static helpers over <code>std::string</code>)</li>
+      <li>Array helpers (<code>System::Array</code> static templates over <code>std::vector</code>)</li>
+      <li>Generic collections (<code>List&lt;T&gt;</code>, <code>Dictionary&lt;K,V&gt;</code>, <code>HashSet&lt;T&gt;</code>, etc.)</li>
+      <li>I/O subsystem (<code>System::IO::Stream</code>, <code>File</code>, <code>Directory</code>, compression)</li>
+      <li>Threading primitives (<code>Thread</code>, <code>Mutex</code>, <code>CancellationToken</code>, <code>Timer</code>)</li>
+      <li>Numerics (<code>Vector2</code>, <code>Vector3</code>, <code>Vector4</code>, <code>Matrix4x4</code>, <code>Quaternion</code>)</li>
+      <li>Text processing (<code>StringBuilder</code>, <code>Encoding</code>, JSON, XML)</li>
+    </ul>
+
+    <h2>Component-Based Integration</h2>
+    <p>The public API remains familiar, while the build is now divided into 40 independently selectable physical components. A project can request a narrow surface such as <code>Text.Json</code> or <code>Net.WebSockets</code>; CMake enables its public dependency closure automatically.</p>
+    <pre><code>set(SHARP_RUNTIME_COMPONENTS Text.Json)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+target_link_libraries(MyApp PRIVATE SharpRuntime::Text.Json)</code></pre>
+    <p><code>SharpRuntime::All</code> remains available for projects that need the complete runtime. Existing broad integration through <code>SHARP_RUNTIME</code> is retained when the complete runtime is selected.</p>
+
+    <h2>Relationship to Other Projects</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Project</th><th>Relationship</th></tr>
+      <tr>
+        <td><strong>CNA</strong></td>
+        <td>C++ reimplementation of XNA 4.0. CNA is built on top of sharp-runtime. It depends on sharp-runtime for all System::* types, primitives, events, I/O, and threading.</td>
+      </tr>
+      <tr>
+        <td><strong>mobile-eggbert</strong></td>
+        <td>C++ port of a Windows Phone game. Uses sharp-runtime for <code>intcs</code>/<code>bytecs</code> types, <code>StringBuilder</code>, <code>TimeSpan</code>, <code>EventArgs</code>, <code>Random</code>, and property macros.</td>
+      </tr>
+      <tr>
+        <td><strong>dotnet/runtime</strong></td>
+        <td>Used as reference for API design only (MIT License). sharp-runtime's public API mirrors .NET class/method names. The C++ implementation is original work.</td>
+      </tr>
+    </table>
+    </div>
+
+    <h2>Main Visible Features</h2>
+    <ul>
+      <li><strong>40 physical modules</strong> with explicit public, private, and test-only dependency boundaries</li>
+      <li><strong>983 public headers</strong> and <strong>369 component-owned test sources</strong> via GoogleTest</li>
+      <li>Core types: <code>Object</code>, <code>Exception</code> hierarchy, primitives (incl. <code>Half</code>, <code>Int128</code>, <code>UInt128</code>)</li>
+      <li>Collections: generic (<code>List</code>, <code>Dictionary</code>, <code>HashSet</code>, <code>SortedSet</code>…), immutable, non-generic (<code>Hashtable</code>, <code>ArrayList</code>, <code>BitArray</code>)</li>
+      <li>Span/Memory: <code>Span&lt;T&gt;</code>, <code>ReadOnlySpan&lt;T&gt;</code>, <code>Memory&lt;T&gt;</code>, <code>MemoryExtensions</code></li>
+      <li>Threading: full synchronization primitives + <code>Barrier</code>, <code>CountdownEvent</code>, <code>AsyncLocal</code>, <code>Lock</code>, Tasks (<code>Task&lt;T&gt;</code>, <code>ValueTask&lt;T&gt;</code>)</li>
+      <li>Networking: <code>HttpClient</code> (plain HTTP), <code>IPAddress</code>, POSIX sockets</li>
+      <li>I/O: streams, File, Directory, Compression (GZip/Deflate/Zip), Hashing</li>
+      <li>Text: <code>StringBuilder</code>, Encoding, JSON (<code>Utf8JsonReader/Writer</code>), XML (tinyxml2)</li>
+      <li>Time: <code>DateTime</code>, <code>DateOnly</code>, <code>TimeOnly</code>, <code>TimeSpan</code>, <code>TimeProvider</code></li>
+      <li>Clean C++23 code with zero warnings on GCC/Clang</li>
+      <li>Vendored dependencies: GoogleTest, nlohmann/json, tinyxml2, miniz</li>
+      <li>SPDX license headers on every file (MIT + .NET Foundation attribution)</li>
+      <li>Doxygen-compatible documentation comments with status notes</li>
+    </ul>
+
+    <h2>Supported Platforms</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Platform</th><th>Status</th><th>Notes</th></tr>
+      <tr><td>Linux</td><td><span class="badge badge-done">Done</span></td><td>Primary development and CI platform</td></tr>
+      <tr><td>macOS</td><td><span class="badge badge-done">Done</span></td><td>POSIX-compatible; same as Linux</td></tr>
+      <tr><td>Windows</td><td><span class="badge badge-partial">Partial</span></td><td>Links <code>ws2_32</code>; POSIX-only subsystems need Win32 guards</td></tr>
+      <tr><td>Android</td><td><span class="badge badge-partial">Partial</span></td><td>StoragePaths uses SDL3 when available; requires SDL3 from parent project</td></tr>
+      <tr><td>Emscripten</td><td><span class="badge badge-stub">Stub</span></td><td>Compiles cleanly; some features throw PlatformNotSupportedException at runtime</td></tr>
+    </table>
+    </div>
+
+    <h2>Important Dependencies</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Dependency</th><th>Location</th><th>Purpose</th></tr>
+      <tr><td>ZLIB</td><td>System (external)</td><td>Used privately by <code>IO.Compression</code> only when selected</td></tr>
+      <tr><td>GoogleTest</td><td><code>vendor/googletest/</code></td><td>Test framework (git submodule)</td></tr>
+      <tr><td>nlohmann/json</td><td><code>vendor/nlohmann/json.hpp</code></td><td>System::Text::Json implementation</td></tr>
+      <tr><td>tinyxml2</td><td><code>vendor/tinyxml2/</code></td><td>Owned by <code>Xml</code>; exposed because XML headers use its types</td></tr>
+      <tr><td>miniz</td><td><code>vendor/miniz/</code></td><td>Owned privately by <code>IO.Compression.Zip</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Current Maturity / Status</h2>
+    <p>
+      sharp-runtime is in active development with <strong>983 public headers</strong> organized into
+      <strong>40 physical modules</strong>. The build keeps module boundaries explicit while preserving
+      existing public namespaces and broad compatibility targets. Porting continues type-by-type driven
+      by CNA and mobile-eggbert dependency analysis.
+    </p>
+    <p>
+      The status tracking system uses these values, written in Doxygen comments:
+    </p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Status</th><th>Meaning</th></tr>
+      <tr><td><span class="badge badge-todo">Todo</span></td><td>Not implemented yet</td></tr>
+      <tr><td><span class="badge badge-stub">Stub</span></td><td>Skeleton only — returns placeholder or throws</td></tr>
+      <tr><td><span class="badge badge-partial">Partial</span></td><td>Partially implemented, may have known gaps</td></tr>
+      <tr><td><span class="badge badge-done">Implemented</span></td><td>Functionally complete</td></tr>
+      <tr><td><span class="badge badge-done">Verified</span></td><td>Validated against expected .NET behavior</td></tr>
+    </table>
+    </div>
+
+    <h2>Design Philosophy</h2>
+    <ul>
+      <li>Prefer clarity over completeness</li>
+      <li>Avoid unnecessary complexity</li>
+      <li>Keep APIs close to .NET where it makes sense</li>
+      <li>Use modern C++ (RAII, strong typing, clear ownership)</li>
+      <li>No LINQ — use <code>std::ranges</code> in ported code instead</li>
+      <li>No GC — RAII and smart pointers replace garbage collection</li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="prev" href="index.html"><span class="page-nav-label">← Previous</span>Home</a>
+      <a class="next" href="getting-started.html"><span class="page-nav-label">Next →</span>Getting Started</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

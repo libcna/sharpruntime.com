@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Architecture</span></div>
+    <div id="search-results"></div>
+    <h1>Architecture</h1>
+    <p class="page-subtitle">Runtime layers, namespace design, and key architectural decisions.</p>
+
+    <h2>Layer Overview</h2>
+    <p>sharp-runtime is organized into an API layer, a component layer, and the C++ implementation beneath them:</p>
+
+    <pre><code>┌──────────────────────────────────────────────┐
+│              CNA / mobile-eggbert            │  ← Consumer projects
+├──────────────────────────────────────────────┤
+│            System::* namespaces              │  ← Stable public API
+│  (String, Array, Exception, IO, Threading…)  │
+├──────────────────────────────────────────────┤
+│  SharpRuntime::* helpers + CMake components  │  ← Component selection
+│  (Core.Base, Text.Json, IO, Net.WebSockets…) │
+├──────────────────────────────────────────────┤
+│        C++ Standard Library + STL             │  ← std::string, std::vector…
+│     + component-owned dependencies            │  ← ZLIB, tinyxml2, miniz
+└──────────────────────────────────────────────┘</code></pre>
+
+    <h2>Build-Time Component Model</h2>
+    <p>The runtime has 40 physical modules. Each one owns its headers, sources, tests, and CMake registration under <code>modules/&lt;module&gt;</code>. Public header names have not changed, so consumers continue to include <code>System/*</code> and <code>SharpRuntime/*</code> paths.</p>
+    <pre><code>Application
+  └── SharpRuntime::Text.Json        # direct requirement
+        ├── SharpRuntime::Text        # public dependency
+        ├── SharpRuntime::Buffers     # via Text
+        └── SharpRuntime::Core.Base   # foundation
+
+Unselected components are not configured or linked.</code></pre>
+    <p>New consumers select direct targets only. Public dependencies propagate through CMake, private implementation dependencies remain internal, and test-only dependencies are restricted to the owning component's test executable.</p>
+
+    <h2>Namespace Structure</h2>
+    <p>All public API lives in the <code>System</code> namespace or its sub-namespaces, mirroring .NET conventions:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Namespace</th><th>Description</th></tr>
+      <tr><td><code>SharpRuntime</code></td><td>Primitive type aliases (<code>intcs</code>, <code>bytecs</code>, etc.) and utility macros</td></tr>
+      <tr><td><code>SharpRuntime::Storage</code></td><td>Storage path utilities for isolated storage</td></tr>
+      <tr><td><code>System</code></td><td>Core types: Object, String, Array, Exception, Math, DateTime, etc.</td></tr>
+      <tr><td><code>System::Buffers</code></td><td>ArrayPool&lt;T&gt;, MemoryPool&lt;T&gt;, BinaryPrimitives, SearchValues&lt;T&gt;, ReadOnlySequence&lt;T&gt;</td></tr>
+      <tr><td><code>System::Collections</code></td><td>Non-generic collections: ArrayList, Hashtable, BitArray</td></tr>
+      <tr><td><code>System::Collections::Generic</code></td><td>Generic: List&lt;T&gt;, Dictionary&lt;K,V&gt;, HashSet&lt;T&gt;, Queue&lt;T&gt;, etc.</td></tr>
+      <tr><td><code>System::Collections::Concurrent</code></td><td>Thread-safe collections</td></tr>
+      <tr><td><code>System::Collections::Immutable</code></td><td>Immutable collection types</td></tr>
+      <tr><td><code>System::Collections::ObjectModel</code></td><td>Collection base classes: Collection&lt;T&gt;, ObservableCollection&lt;T&gt;</td></tr>
+      <tr><td><code>System::IO</code></td><td>Stream, File, Directory, Path, MemoryStream, FileStream</td></tr>
+      <tr><td><code>System::IO::Compression</code></td><td>GZipStream, DeflateStream, ZipArchive</td></tr>
+      <tr><td><code>System::IO::IsolatedStorage</code></td><td>IsolatedStorageFile, IsolatedStorageFileStream</td></tr>
+      <tr><td><code>System::IO::Hashing</code></td><td>XxHash32, XxHash64, Crc32</td></tr>
+      <tr><td><code>System::Text</code></td><td>StringBuilder, Encoding, ASCIIEncoding, UTF8Encoding</td></tr>
+      <tr><td><code>System::Text::Json</code></td><td>JsonDocument, JsonSerializer (backed by nlohmann/json)</td></tr>
+      <tr><td><code>System::Xml</code></td><td>XmlReader, XmlWriter (backed by tinyxml2)</td></tr>
+      <tr><td><code>System::Xml::Linq</code></td><td>XDocument, XElement, XAttribute, XName</td></tr>
+      <tr><td><code>System::Threading</code></td><td>Thread, Mutex, Monitor, CancellationToken, Timer, etc.</td></tr>
+      <tr><td><code>System::Threading::Tasks</code></td><td>Task&lt;T&gt;, ValueTask, Parallel</td></tr>
+      <tr><td><code>System::Numerics</code></td><td>Vector2/3/4, Matrix3x2/4x4, Quaternion, Plane, BigInteger</td></tr>
+      <tr><td><code>System::Globalization</code></td><td>CultureInfo, DateTime formatting, calendars</td></tr>
+      <tr><td><code>System::Diagnostics</code></td><td>Debug, Debugger, Stopwatch, StackTrace</td></tr>
+      <tr><td><code>System::Net::Sockets</code></td><td>TcpClient, UdpClient, NetworkStream</td></tr>
+      <tr><td><code>System::Net::Http</code></td><td>HttpClient, HttpRequestMessage, HttpResponseMessage (plain HTTP only)</td></tr>
+    </table>
+    </div>
+
+    <h2>Key Architectural Decisions</h2>
+
+    <h3>1. std::string as the String Type</h3>
+    <p>C# <code>string</code> maps directly to <code>std::string</code> in C++. There is no custom <code>String</code> object type. <code>System::String</code> is a <strong>static utility class</strong> with helper methods (Split, Format, IsNullOrEmpty, etc.) — it cannot be instantiated.</p>
+
+    <h3>2. std::vector&lt;T&gt; as the Array Type</h3>
+    <p>C# <code>T[]</code> maps to <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> is a <strong>static template utility class</strong> with helpers (Sort, Copy, Resize, IndexOf, etc.) — not a concrete array type.</p>
+
+    <h3>3. No Garbage Collector</h3>
+    <p>Memory is managed via C++ RAII and smart pointers (<code>std::shared_ptr</code>, <code>std::unique_ptr</code>). There is no GC. The <code>System::GC</code> class exists as a stub/no-op only.</p>
+
+    <h3>4. C++ Exceptions = .NET Exceptions</h3>
+    <p><code>System::Exception</code> inherits from <code>std::exception</code>, so it integrates naturally with C++ exception handling. All sharp-runtime exceptions are real C++ exceptions that can be caught with <code>catch(const System::Exception&amp; e)</code> or <code>catch(const std::exception&amp; e)</code>.</p>
+
+    <h3>5. EventHandler Combines Delegate + Event</h3>
+    <p>C++ has no <code>event</code> keyword. <code>System::EventHandler&lt;T&gt;</code> combines both the delegate signature and the subscriber list. It supports <code>operator+=</code> for subscription (mirroring C# syntax) and <code>Raise()</code> / <code>Invoke()</code> for firing.</p>
+
+    <h3>6. Property Macros</h3>
+    <p>C++ has no property syntax. sharp-runtime provides macros (<code>DDATA</code>, <code>DGETTER</code>, <code>DGETTERSTATIC</code>) in the core module's <code>SharpRuntime/Prop.hpp</code> public header that generate <code>getXxxProperty()</code> / <code>setXxxProperty()</code> methods backed by private member fields.</p>
+
+    <h3>7. Header + Implementation Split</h3>
+    <p>Complex types use a <code>.hpp</code> declaration and a <code>.cpp</code> body. Simple types (enums, small structs, header-only templates) are header-only. Both are placed under their owning module rather than in shared top-level source trees.</p>
+
+    <h3>8. Platform Guards in .cpp Only</h3>
+    <p>POSIX includes (<code>&lt;unistd.h&gt;</code>, <code>&lt;sys/socket.h&gt;</code>, etc.) must <strong>not</strong> appear in public <code>.hpp</code> headers. Platform-specific code lives in <code>.cpp</code> files behind <code>#ifdef _WIN32</code> / <code>#elif defined(__EMSCRIPTEN__)</code> / <code>#else</code> guards.</p>
+
+    <h3>9. Immutable Collections Use shared_ptr</h3>
+    <p>Immutable collection types (<code>ImmutableArray</code>, <code>ImmutableList</code>, etc.) are backed by <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>.</p>
+
+    <h3>10. Namespace Syntax</h3>
+    <p>The project uses C++17 nested namespace syntax:</p>
+    <pre><code>namespace System::Collections::Generic {
+    template&lt;typename T&gt;
+    class List { ... };
+}</code></pre>
+
+    <h2>Object Model</h2>
+    <p>The base class for all non-primitive types is <code>System::Object</code>. It provides:</p>
+    <ul>
+      <li><code>virtual std::string ToString() const</code></li>
+      <li><code>virtual bool Equals(const Object*) const</code></li>
+      <li><code>virtual int GetHashCode() const</code></li>
+      <li><code>virtual const std::string&amp; GetTypeName() const = 0</code> — pure virtual; must be overridden</li>
+    </ul>
+    <p>The <code>GetTypeName()</code> method is assisted by the macros <code>GetTypeNameHPP()</code> and <code>GetTypeNameCPP(CLASS, NAME)</code> defined in the core module's public <code>System/Object.hpp</code> header.</p>
+
+    <h2>Summary Diagram</h2>
+    <pre><code>System::Object  (base class, virtual dispatch)
+  ├── System::Exception
+  │     ├── System::SystemException
+  │     │     ├── System::ArgumentException
+  │     │     │     ├── ArgumentNullException
+  │     │     │     └── ArgumentOutOfRangeException
+  │     │     ├── System::InvalidOperationException
+  │     │     ├── System::NullReferenceException
+  │     │     ├── System::IndexOutOfRangeException
+  │     │     ├── System::IO::IOException
+  │     │     │     ├── FileNotFoundException
+  │     │     │     ├── DirectoryNotFoundException
+  │     │     │     └── EndOfStreamException
+  │     │     └── ... (many more)
+  │     └── System::ApplicationException
+  ├── System::EventArgs
+  └── ... (other non-exception System types)</code></pre>
+
+    <div class="page-nav">
+      <a class="prev" href="running-tests.html"><span class="page-nav-label">← Previous</span>Running Tests</a>
+      <a class="next" href="project-structure.html"><span class="page-nav-label">Next →</span>Project Structure</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

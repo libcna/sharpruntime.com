@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debugging — sharp-runtime Developer Guide</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Development</li>
+    <li><a href="index.html">Developer Guide</a></li>
+    <li><a href="coding-style.html">Coding Style</a></li>
+    <li><a href="debugging.html">Debugging</a></li>
+    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Debugging</span></div>
+    <div id="search-results"></div>
+    <h1>Debugging</h1>
+    <p class="page-subtitle">Tools and techniques for debugging sharp-runtime code.</p>
+
+    <h2>Build for Debug</h2>
+    <pre><code>cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Debug \
+  '-DSHARP_RUNTIME_COMPONENTS=All'
+cmake --build build</code></pre>
+    <p>Debug builds include debug symbols and disable optimizations, making GDB/LLDB much more useful.</p>
+
+    <h2>Debug and Trace Utilities</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debug.hpp | Trace.hpp</p>
+    <p>Static assertion and trace output methods — header-only, no link dependencies:</p>
+    <pre><code>#include &lt;System/Diagnostics/Debug.hpp&gt;
+#include &lt;System/Diagnostics/Trace.hpp&gt;
+
+// Assertion (aborts if condition is false in debug builds)
+System::Diagnostics::Debug::Assert(ptr != nullptr);
+System::Diagnostics::Debug::Assert(count &gt; 0, "Count must be positive");
+
+// Output messages
+System::Diagnostics::Debug::WriteLine("Starting process...");
+System::Diagnostics::Debug::Fail("Unexpected branch reached");
+
+// Trace (similar, but typically for release/logging)
+System::Diagnostics::Trace::WriteLine("Operation completed");</code></pre>
+
+    <h2>Stopwatch</h2>
+    <p class="file-path">modules/core/include/System/Diagnostics/Stopwatch.hpp</p>
+    <p>Measures elapsed time using <code>std::chrono</code>:</p>
+    <pre><code>#include &lt;System/Diagnostics/Stopwatch.hpp&gt;
+
+System::Diagnostics::Stopwatch sw;
+sw.Start();
+
+// ... code to measure ...
+
+sw.Stop();
+long ms = sw.ElapsedMilliseconds;
+long us = sw.ElapsedMicroseconds;   // if available — needs verification
+std::cout &lt;&lt; "Elapsed: " &lt;&lt; ms &lt;&lt; "ms\n";
+
+// Reset and restart
+sw.Reset();
+sw.Restart(); // Reset + Start in one call</code></pre>
+
+    <h2>Debugger Breakpoints</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debugger.hpp</p>
+    <pre><code>#include &lt;System/Diagnostics/Debugger.hpp&gt;
+
+// Programmatic breakpoint
+System::Diagnostics::Debugger::Break();
+
+// Check if debugger is attached
+if (System::Diagnostics::Debugger::IsAttached) {
+    // special debugger-only behavior
+}</code></pre>
+
+    <h2>Using GDB / LLDB</h2>
+    <p>Standard C++ debuggers work well with sharp-runtime since it is plain C++ code:</p>
+    <pre><code># Build a selected component with debug symbols
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Debug \
+  '-DSHARP_RUNTIME_COMPONENTS=Core.Base'
+cmake --build build --target SharpRuntimeTests_Core_Base
+
+# GDB
+gdb ./build/SharpRuntimeTests_Core_Base
+(gdb) run
+(gdb) bt         # backtrace after crash
+(gdb) p myObj    # print variable
+
+# LLDB
+lldb ./build/SharpRuntimeTests_Core_Base
+(lldb) run
+(lldb) bt        # backtrace
+(lldb) po myObj  # print object</code></pre>
+
+    <h2>Address Sanitizer</h2>
+    <pre><code>cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined" \
+  '-DSHARP_RUNTIME_COMPONENTS=All'
+cmake --build build --target SharpRuntimeTests
+scripts/run_component_tests.sh build</code></pre>
+    <p>AddressSanitizer detects buffer overflows, use-after-free, and other memory errors.
+    Highly recommended when adding new code.</p>
+
+    <h2>Running Specific Tests</h2>
+    <pre><code># Run a single test suite
+./build/SharpRuntimeTests_Core_Base --gtest_filter=StringTest.*
+
+# Run all tests matching a pattern
+./build/SharpRuntimeTests_Core_Base --gtest_filter=*Array*
+
+# Show full output (don't suppress passing test output)
+./build/SharpRuntimeTests_Collections_Core --gtest_filter=ListTest.* -v</code></pre>
+
+    <h2>StackTrace Limitations</h2>
+    <p><code>System::Diagnostics::StackTrace</code> and <code>StackFrame</code> are stub classes.
+    Stack unwinding information is not captured at runtime. For stack traces, use GDB/LLDB
+    or <code>-g</code> debug symbols with crash handlers.</p>
+
+    <div class="nav-links">
+      <a class="prev" href="coding-style.html">← Coding Style</a>
+      <a class="next" href="porting-csharp-code.html">Porting C# Code →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Object Lifecycle — sharp-runtime Internals</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li class="nav-section">Internals</li>
+    <li><a href="index.html">Internals Index</a></li>
+    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
+    <li><a href="property-macros.html">Property Macros</a></li>
+    <li><a href="string-internals.html">String Internals</a></li>
+    <li><a href="array-internals.html">Array Internals</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Internals</a></span><span>Object Lifecycle</span></div>
+    <div id="search-results"></div>
+    <h1>Object Lifecycle</h1>
+    <p class="page-subtitle">How objects are created, owned, shared, and destroyed — without garbage collection.</p>
+
+    <h2>No Garbage Collector</h2>
+    <p>Unlike .NET, sharp-runtime has no garbage collector. <code>System::GC</code> is a stub class
+    that exists only for API compatibility — it does nothing. All memory management is explicit C++ RAII.</p>
+
+    <p>This is a fundamental difference from .NET. You must think about <em>ownership</em> when writing
+    or porting code.</p>
+
+    <h2>Ownership Patterns</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Pattern</th><th>Use when</th><th>Notes</th></tr>
+      <tr><td>Stack value</td><td>Short-lived, single owner, value semantics</td><td>Destroyed at scope end</td></tr>
+      <tr><td><code>std::unique_ptr&lt;T&gt;</code></td><td>Single owner, heap-allocated</td><td>Ownership transferable via move</td></tr>
+      <tr><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Shared ownership, multiple holders</td><td>Ref-counted; cycles are a risk</td></tr>
+      <tr><td>Raw pointer / reference</td><td>Borrowed (non-owning)</td><td>Caller must keep owner alive</td></tr>
+    </table>
+    </div>
+
+    <h2>Typical Object Creation</h2>
+    <pre><code>// Stack allocation (value type behavior)
+System::DateTime dt = System::DateTime::Now();
+
+// Heap with unique ownership
+auto stream = std::make_unique&lt;System::IO::MemoryStream&gt;();
+
+// Heap with shared ownership
+auto obj = std::make_shared&lt;MyClass&gt;();
+std::shared_ptr&lt;MyClass&gt; ref2 = obj; // both hold a reference
+// obj and ref2 are both destroyed when count drops to 0</code></pre>
+
+    <h2>Virtual Destructor Rule</h2>
+    <p>All classes inheriting from <code>System::Object</code> get a virtual destructor via
+    <code>virtual ~Object() = default</code>. This ensures the correct destructor runs when
+    deleting through a base pointer.</p>
+    <pre><code>std::unique_ptr&lt;System::Object&gt; obj = std::make_unique&lt;MyDerivedClass&gt;();
+// When obj goes out of scope, ~MyDerivedClass() runs correctly</code></pre>
+
+    <h2>IDisposable Pattern</h2>
+    <p>Classes with external resources (file handles, sockets, etc.) implement
+    <code>System::IDisposable</code> with a <code>Dispose()</code> method. Unlike C# <code>using</code>
+    statements, there is no language-level RAII integration — you must call <code>Dispose()</code>
+    manually or use a custom RAII wrapper.</p>
+    <pre><code>// Manual dispose
+auto fs = std::make_unique&lt;System::IO::FileStream&gt;("file.txt", ...);
+// ... use ...
+fs-&gt;Dispose(); // or let unique_ptr destructor run (if it calls Dispose)</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">C++ destructor vs .NET Dispose</div>
+      In .NET, deterministic cleanup uses <code>Dispose()</code>; finalizers are a GC fallback.
+      In sharp-runtime, the C++ destructor is the primary cleanup mechanism. <code>Dispose()</code>
+      exists for API compatibility and may delegate to the destructor.
+    </div>
+
+    <h2>Copy and Move Semantics</h2>
+    <p>sharp-runtime classes use default C++ copy/move semantics unless a class explicitly
+    manages resources:</p>
+    <ul>
+      <li><strong>Value-type-like classes</strong> (e.g., <code>DateTime</code>, <code>TimeSpan</code>, <code>Vector2</code>) — copyable by value, cheap to copy.</li>
+      <li><strong>Collection types</strong> (e.g., <code>List&lt;T&gt;</code>) — hold a <code>std::vector</code> internally; copy is a deep copy of the vector.</li>
+      <li><strong>Stream types</strong> — typically non-copyable; move-only via <code>unique_ptr</code>.</li>
+      <li><strong>Shared objects</strong> — use <code>shared_ptr</code>; copying the pointer is cheap (increments refcount).</li>
+    </ul>
+
+    <h2>Null Handling</h2>
+    <p>In C++ there is no concept of "null object" for value types. Reference semantics are
+    represented by pointers:</p>
+    <ul>
+      <li>Raw pointer can be <code>nullptr</code></li>
+      <li><code>std::shared_ptr&lt;T&gt;</code> can be empty (default-constructed = null)</li>
+      <li><code>std::unique_ptr&lt;T&gt;</code> can be null</li>
+      <li>Use <code>Nullable&lt;T&gt;</code> for value types that need a null state</li>
+    </ul>
+
+    <h2>Reference Cycles</h2>
+    <div class="callout warning">
+      <div class="callout-title">Cycle Risk with shared_ptr</div>
+      If object A holds a <code>shared_ptr</code> to B and B holds a <code>shared_ptr</code> back to A,
+      neither will ever be destroyed. Break cycles with <code>std::weak_ptr&lt;T&gt;</code>.
+      This is a common pitfall when porting C# code where the GC handles cycles automatically.
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="index.html">← Internals Index</a>
+      <a class="next" href="property-macros.html">Property Macros →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

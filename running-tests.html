@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Tests — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Running Tests</span></div>
+    <div id="search-results"></div>
+    <h1>Running Tests</h1>
+    <p class="page-subtitle">GoogleTest framework, test structure, and how to run specific test suites.</p>
+
+    <h2>Test Framework</h2>
+    <p>sharp-runtime uses <strong>GoogleTest</strong>. Tests are built per requested component when <code>SHARP_RUNTIME_BUILD_TESTS=ON</code> (the default). GoogleTest is provided by the <code>vendor/googletest/</code> Git submodule.</p>
+
+    <h2>Run the Complete Suite</h2>
+    <pre><code>cmake -S . -B build \
+  -DSHARP_RUNTIME_COMPONENTS=All \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON
+cmake --build build --target SharpRuntimeTests --parallel 4
+scripts/run_component_tests.sh build</code></pre>
+    <p><code>SharpRuntimeTests</code> is an aggregate build target. The runner script finds every selected component test executable, runs it, and prints a total after all executables pass.</p>
+
+    <h2>Test One Component</h2>
+    <pre><code>cmake -S . -B build-json-tests \
+  '-DSHARP_RUNTIME_COMPONENTS=Text.Json' \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON
+cmake --build build-json-tests --target SharpRuntimeTests --parallel 4
+scripts/run_component_tests.sh build-json-tests</code></pre>
+    <p>This builds and runs <code>SharpRuntimeTests_Text_Json</code>. It does not build test executables for unrelated components or for ordinary production dependencies.</p>
+
+    <h2>Run a Specific Test Suite</h2>
+    <pre><code># The executable name derives from the component name.
+./build-json-tests/SharpRuntimeTests_Text_Json \
+  --gtest_filter="Json*"
+
+# CTest can discover individual GoogleTest cases.
+ctest --test-dir build-json-tests --output-on-failure</code></pre>
+
+    <h2>Test Locations and Targets</h2>
+    <p>Each component owns its tests next to its public headers and implementation:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Component</th><th>Test source location</th><th>Test executable</th></tr>
+      <tr><td><code>Core.Base</code></td><td><code>modules/core/tests/</code></td><td><code>SharpRuntimeTests_Core_Base</code></td></tr>
+      <tr><td><code>Collections.Core</code></td><td><code>modules/collections/tests/</code></td><td><code>SharpRuntimeTests_Collections_Core</code></td></tr>
+      <tr><td><code>Text.Json</code></td><td><code>modules/text-json/tests/</code></td><td><code>SharpRuntimeTests_Text_Json</code></td></tr>
+      <tr><td><code>IO.Compression</code></td><td><code>modules/io-compression/tests/</code></td><td><code>SharpRuntimeTests_IO_Compression</code></td></tr>
+      <tr><td><code>Net.Sockets</code></td><td><code>modules/net-sockets/tests/</code></td><td><code>SharpRuntimeTests_Net_Sockets</code></td></tr>
+      <tr><td>Cross-component scenarios</td><td><code>tests/integration/</code></td><td><code>SharpRuntimeIntegrationTests</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Adding a Test</h2>
+    <p>Add the source beneath the owning component's <code>tests/</code> directory. The component registration discovers and builds the test source; test-only production dependencies must be declared by that component, rather than being pulled in by the entire runtime.</p>
+    <pre><code>// modules/text-json/tests/System/Text/Json/MyNewTests.cpp
+#include &lt;gtest/gtest.h&gt;
+#include &lt;System/Text/Json/JsonDocument.hpp&gt;
+
+TEST(MyNewTests, ParsesExpectedInput) {
+    // ...
+}</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">ℹ Verification rule</div>
+      Run the tests for every selected component before committing. For a repository-wide change, configure <code>All</code> and run the complete component suite.
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="build.html"><span class="page-nav-label">← Previous</span>Build</a>
+      <a class="next" href="architecture.html"><span class="page-nav-label">Next →</span>Architecture</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

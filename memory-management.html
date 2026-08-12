@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Management — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Memory Management</span></div>
+    <div id="search-results"></div>
+    <h1>Memory Management</h1>
+    <p class="page-subtitle">RAII, ownership rules, no garbage collector, smart pointers, and lifetime patterns.</p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠ No Garbage Collector</div>
+      sharp-runtime does <strong>not</strong> implement a garbage collector.
+      Memory is managed entirely through C++ RAII, destructors, and smart pointers.
+      The <code>System::GC</code> class exists as a stub/no-op compatibility header only.
+    </div>
+
+    <h2>Core Principle: RAII</h2>
+    <p>
+      All resource management in sharp-runtime follows C++ RAII (Resource Acquisition Is Initialization):
+      resources are acquired in constructors and released in destructors. When a value goes out of scope
+      or a smart pointer's reference count drops to zero, its destructor runs automatically.
+    </p>
+    <p>This differs fundamentally from .NET, where the garbage collector handles deallocation.</p>
+
+    <h2>Ownership Rules</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Pattern</th><th>C++ Tool</th><th>When to Use</th></tr>
+      <tr><td>Exclusive ownership</td><td><code>std::unique_ptr&lt;T&gt;</code></td><td>One clear owner; ownership can be transferred</td></tr>
+      <tr><td>Shared ownership</td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Multiple owners (e.g., immutable collections)</td></tr>
+      <tr><td>Non-owning reference</td><td>raw pointer <code>T*</code> or reference <code>T&amp;</code></td><td>Observing only; caller guarantees lifetime</td></tr>
+      <tr><td>Value semantics</td><td>by-value (stack)</td><td>Most primitive types, structs</td></tr>
+    </table>
+    </div>
+
+    <h2>Immutable Collections</h2>
+    <p>Immutable collection types use <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>:</p>
+    <pre><code>// ImmutableArray&lt;T&gt; is backed by shared_ptr to const vector
+auto arr = ImmutableArray&lt;int&gt;::Create({1, 2, 3});</code></pre>
+
+    <h2>No GC — Practical Consequences</h2>
+    <ul>
+      <li><strong>No cycles via naked pointers.</strong> Use <code>std::weak_ptr</code> to break ownership cycles.</li>
+      <li><strong>Object lifetime is deterministic.</strong> Destructors run immediately when scope exits.</li>
+      <li><strong>No finalizers.</strong> Use RAII destructors instead of <code>~Object()</code> finalizers.</li>
+      <li><strong>IDisposable pattern:</strong> <code>System::IDisposable</code> exists but there is no <code>using</code> statement. Call <code>Dispose()</code> explicitly or use RAII wrappers.</li>
+    </ul>
+
+    <h2>Null Handling</h2>
+    <p>
+      C# references can be <code>null</code>; C++ pointers can be <code>nullptr</code>.
+      In sharp-runtime code:
+    </p>
+    <ul>
+      <li>Raw pointer parameters that can be null are typically <code>const Object*</code> — callers can pass <code>nullptr</code>.</li>
+      <li><code>System::Nullable&lt;T&gt;</code> (backed by <code>std::optional</code>) is used for nullable value types.</li>
+      <li>Dereferencing a null pointer is undefined behaviour — no NullReferenceException is automatically thrown. Sharp-runtime may throw <code>System::NullReferenceException</code> where defensive checks exist.</li>
+    </ul>
+
+    <h2>Copy and Move Semantics</h2>
+    <p>
+      Most value types in sharp-runtime (structs, primitives) follow standard C++ copy/move semantics.
+      Large types like <code>System::Text::StringBuilder</code> store an internal <code>std::string</code> buffer and
+      support move construction and assignment.
+    </p>
+    <p>
+      Class types that inherit from <code>System::Object</code> typically have virtual destructors.
+      They are generally heap-allocated and accessed via pointer or smart pointer.
+    </p>
+
+    <h2>Destructor and Cleanup Patterns</h2>
+    <pre><code>// Pattern 1: RAII — stack-allocated value type
+{
+    System::Text::StringBuilder sb;
+    sb.Append("hello");
+    // sb is destroyed when it goes out of scope
+}
+
+// Pattern 2: shared_ptr for heap-allocated Objects
+auto stream = std::make_shared&lt;System::IO::MemoryStream&gt;();
+stream-&gt;Write(buffer, 0, len);
+// Destroyed when all shared_ptrs go out of scope
+
+// Pattern 3: unique_ptr for exclusive ownership
+auto reader = std::make_unique&lt;System::IO::BinaryReader&gt;(stream);
+// Destroyed when reader goes out of scope</code></pre>
+
+    <h2>Differences from .NET / C# Behavior</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# / .NET</th><th>sharp-runtime / C++</th></tr>
+      <tr><td>GC collects unreachable objects</td><td>No GC — RAII + smart pointers</td></tr>
+      <tr><td>Finalizers run asynchronously</td><td>Destructors run synchronously at scope exit</td></tr>
+      <tr><td><code>using</code> statement calls <code>Dispose()</code></td><td>No <code>using</code> — call <code>Dispose()</code> manually or use RAII</td></tr>
+      <tr><td>Reference cycles handled by GC</td><td>Use <code>std::weak_ptr</code> to break cycles</td></tr>
+      <tr><td>All objects are heap-allocated</td><td>Value types can be stack-allocated</td></tr>
+      <tr><td>Null reference throws <code>NullReferenceException</code></td><td>Null dereference is UB — some places throw explicitly</td></tr>
+    </table>
+    </div>
+
+    <h2>Known Risks</h2>
+    <ul>
+      <li>Dangling pointers when raw pointer observers outlive the owning object</li>
+      <li>Double-free if ownership is transferred without clearing the source pointer</li>
+      <li>Reference cycles via <code>shared_ptr</code> — use <code>weak_ptr</code></li>
+      <li>Use-after-free when passing raw <code>this</code> to background threads (fixed in <code>Threading::Timer</code> via <code>shared_ptr&lt;State&gt;</code>)</li>
+    </ul>
+
+    <div class="callout needs-verification">
+      <div class="callout-title">Needs verification</div>
+      The exact ownership conventions used by each subsystem (e.g., whether Stream callers own the buffer or the stream owns it) should be verified per-class from the source headers.
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="type-system.html"><span class="page-nav-label">← Previous</span>Type System</a>
+      <a class="next" href="exceptions.html"><span class="page-nav-label">Next →</span>Exceptions</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

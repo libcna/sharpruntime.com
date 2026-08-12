@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porting a C# Class — sharp-runtime Tutorials</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="index.html">Tutorials Index</a></li>
+    <li><a href="use-collections.html">Using Collections</a></li>
+    <li><a href="port-csharp-class.html">Porting a C# Class</a></li>
+    <li><a href="work-with-files.html">Working with Files</a></li>
+    <li><a href="use-events.html">Using Events</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Tutorials</a></span><span>Porting a C# Class</span></div>
+    <div id="search-results"></div>
+    <h1>Porting a C# Class</h1>
+    <p class="page-subtitle">Step-by-step walkthrough of porting a C# class to sharp-runtime.</p>
+
+    <h2>The C# Original</h2>
+    <p>We will port this simple C# class:</p>
+    <pre><code>// C# original
+using System;
+using System.Collections.Generic;
+
+namespace MyApp
+{
+    public class Player
+    {
+        public string Name { get; set; }
+        public int Score { get; private set; }
+        private List&lt;string&gt; achievements_ = new();
+
+        public event EventHandler&lt;ScoreChangedArgs&gt; ScoreChanged;
+
+        public Player(string name)
+        {
+            Name = name;
+            Score = 0;
+        }
+
+        public void AddScore(int points)
+        {
+            Score += points;
+            ScoreChanged?.Invoke(this, new ScoreChangedArgs(Score));
+        }
+
+        public void AddAchievement(string name)
+        {
+            achievements_.Add(name);
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}: {Score} pts";
+        }
+    }
+
+    public class ScoreChangedArgs : EventArgs
+    {
+        public int NewScore { get; }
+        public ScoreChangedArgs(int score) { NewScore = score; }
+    }
+}</code></pre>
+
+    <h2>Step 1: Create the Header File</h2>
+    <p>Map each C# element to its sharp-runtime equivalent:</p>
+    <pre><code>// Player.hpp
+#pragma once
+#include &lt;string&gt;
+#include &lt;System/Object.hpp&gt;
+#include &lt;System/EventHandler.hpp&gt;
+#include &lt;System/EventArgs.hpp&gt;
+#include &lt;System/Collections/Generic/List.hpp&gt;
+#include &lt;SharpRuntime/Prop.hpp&gt;
+
+namespace MyApp {
+
+class ScoreChangedArgs : public System::EventArgs {
+public:
+    explicit ScoreChangedArgs(int score) : newScore_(score) {}
+    DGETTER(int, NewScore)
+    GetTypeNameHPP();
+private:
+    int newScore_;
+};
+
+class Player : public System::Object {
+public:
+    explicit Player(const std::string&amp; name);
+
+    // Properties
+    DDATA(std::string, Name)      // read-write
+    DGETTER(int, Score)            // read-only from outside
+
+    // Event
+    System::EventHandler&lt;ScoreChangedArgs&gt; ScoreChanged;
+
+    // Methods
+    void AddScore(int points);
+    void AddAchievement(const std::string&amp; name);
+    std::string ToString() const override;
+    GetTypeNameHPP();
+
+private:
+    int score_ = 0;
+    System::Collections::Generic::List&lt;std::string&gt; achievements_;
+};
+
+} // namespace MyApp</code></pre>
+
+    <h2>Step 2: Create the Implementation File</h2>
+    <pre><code>// Player.cpp
+#include "Player.hpp"
+#include &lt;System/String.hpp&gt;
+
+namespace MyApp {
+
+// ScoreChangedArgs
+IGETTER(ScoreChangedArgs, int, NewScore, newScore_)
+GetTypeNameCPP(ScoreChangedArgs, "MyApp.ScoreChangedArgs")
+
+// Player
+IDATA(Player, std::string, Name)
+IGETTER(Player, int, Score, score_)
+GetTypeNameCPP(Player, "MyApp.Player")
+
+Player::Player(const std::string&amp; name) : name_(name), score_(0) {}
+
+void Player::AddScore(int points) {
+    score_ += points;
+    if (!ScoreChanged.Empty()) {
+        ScoreChanged.Raise(this, ScoreChangedArgs(score_));
+    }
+}
+
+void Player::AddAchievement(const std::string&amp; name) {
+    achievements_.Add(name);
+}
+
+std::string Player::ToString() const {
+    return name_ + ": " + std::to_string(score_) + " pts";
+}
+
+} // namespace MyApp</code></pre>
+
+    <h2>Step 3: Usage</h2>
+    <pre><code>#include "Player.hpp"
+#include &lt;iostream&gt;
+
+int main() {
+    MyApp::Player player("Alice");
+
+    // Subscribe to event
+    player.ScoreChanged += [](System::Object* sender, MyApp::ScoreChangedArgs args) {
+        std::cout &lt;&lt; "Score changed to: " &lt;&lt; args.getNewScoreProperty() &lt;&lt; "\n";
+    };
+
+    player.AddScore(50);   // prints: Score changed to: 50
+    player.AddScore(25);   // prints: Score changed to: 75
+
+    std::cout &lt;&lt; player.ToString() &lt;&lt; "\n"; // Alice: 75 pts
+    return 0;
+}</code></pre>
+
+    <h2>Key Differences Summary</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# construct</th><th>sharp-runtime equivalent</th></tr>
+      <tr><td><code>public string Name { get; set; }</code></td><td><code>DDATA(std::string, Name)</code> + <code>IDATA()</code></td></tr>
+      <tr><td><code>public int Score { get; private set; }</code></td><td><code>DGETTER(int, Score)</code> + <code>IGETTER()</code> + private field</td></tr>
+      <tr><td><code>new List&lt;string&gt;()</code></td><td><code>System::Collections::Generic::List&lt;std::string&gt;</code></td></tr>
+      <tr><td><code>event EventHandler&lt;T&gt; E;</code></td><td><code>System::EventHandler&lt;T&gt; E;</code> (public)</td></tr>
+      <tr><td><code>E?.Invoke(this, args)</code></td><td><code>if (!E.Empty()) E.Raise(this, args);</code></td></tr>
+      <tr><td><code>: EventArgs</code></td><td><code>: public System::EventArgs</code></td></tr>
+      <tr><td><code>override string ToString()</code></td><td><code>std::string ToString() const override</code></td></tr>
+      <tr><td><code>$"{name}: {score}"</code></td><td><code>name_ + ": " + std::to_string(score_)</code></td></tr>
+    </table>
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="use-collections.html">← Using Collections</a>
+      <a class="next" href="work-with-files.html">Working with Files →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

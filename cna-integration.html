@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNA Integration — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>CNA Integration</span></div>
+    <div id="search-results"></div>
+    <h1>CNA Integration</h1>
+    <p class="page-subtitle">How CNA uses sharp-runtime as its foundation layer.</p>
+
+    <div class="callout note">
+      <div class="callout-title">ℹ Source of this documentation</div>
+      This page is based on information visible from sharp-runtime's <code>README.md</code>, <code>CLAUDE.md</code>,
+      <code>plan.sqlite3</code>/<code>prompt.md</code>, and <code>NEXT.md</code>. The CNA source code is not part of this repository.
+      Some details about the exact CNA build integration may need verification from the CNA repository.
+    </div>
+
+    <h2>What is CNA?</h2>
+    <p>
+      <strong>CNA</strong> is a C++ reimplementation of the <strong>XNA 4.0</strong> game framework.
+      XNA was Microsoft's game development framework (2006–2013), written in C# and targeting Xbox 360, Windows, and Windows Phone.
+    </p>
+    <p>
+      CNA ports the XNA API to C++, targeting modern platforms (Linux, Windows, macOS, Android, Web).
+      It uses sharp-runtime as its foundational system library — providing the <code>System::*</code> types
+      that the original XNA/C# code depends on.
+    </p>
+
+    <h2>Dependency Relationship</h2>
+    <pre><code>CNA (C++ XNA 4.0 port)
+  └── depends on sharp-runtime
+        └── uses System::* types
+              ├── SharpRuntime::intcs, bytecs, etc.
+              ├── System::EventArgs, EventHandler&lt;T&gt;
+              ├── System::Math, MathF
+              ├── System::Numerics::Vector2/3/4
+              ├── System::Numerics::Matrix4x4, Quaternion
+              ├── System::IO::Stream, FileStream
+              ├── System::IO::Compression (GZip, Deflate for XNB)
+              ├── System::IO::IsolatedStorage
+              ├── System::Collections::Generic::List/Dictionary
+              ├── System::Text::StringBuilder
+              ├── System::Threading::Thread, CancellationToken
+              ├── System::TimeSpan, DateTime, DateTimeOffset
+              └── ... (nearly all System::* types)</code></pre>
+
+    <h2>CMake Integration</h2>
+    <p>CNA adds sharp-runtime as a CMake subdirectory. The component set must be selected before it is added. Since CNA uses a broad runtime surface, an explicit complete-runtime integration is appropriate:</p>
+    <pre><code># In CNA's CMakeLists.txt (approximate):
+cna_configure_vendored_sdl()  # before Storage can be configured on Android
+
+set(SHARP_RUNTIME_COMPONENTS All)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(vendor/sharp-runtime)
+
+target_link_libraries(CNA PRIVATE SharpRuntime::All)</code></pre>
+    <p>The legacy <code>SHARP_RUNTIME</code> target still forwards to the complete runtime in this configuration, but new integrations should use <code>SharpRuntime::All</code> or direct component targets. The SDL3 target must exist first only when the Android storage component is selected.</p>
+
+    <h3>Focused Consumers</h3>
+    <p>A smaller application should request only direct requirements, for example <code>Numerics</code>, <code>IO.Compression</code>, and <code>Text</code>. Transitive component dependencies are resolved automatically; applications do not need to duplicate them.</p>
+
+    <h2>Key sharp-runtime Features Used by CNA</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Usage in CNA</th></tr>
+      <tr><td>Primitive types (<code>intcs</code>, <code>bytecs</code>)</td><td>Used throughout for type-safe C# int/byte equivalents</td></tr>
+      <tr><td><code>System::EventHandler&lt;T&gt;</code>, <code>EventArgs</code></td><td>XNA events (Activated, Deactivated, Exiting, etc.)</td></tr>
+      <tr><td><code>System::Math</code>, <code>System::MathF</code></td><td>Game math operations</td></tr>
+      <tr><td><code>System::Numerics::Vector2/3/4</code></td><td>Positions, sizes, velocities in game logic</td></tr>
+      <tr><td><code>System::Numerics::Matrix4x4</code></td><td>Transform matrices for rendering</td></tr>
+      <tr><td><code>System::Numerics::Quaternion</code></td><td>3D rotations</td></tr>
+      <tr><td><code>System::IO::Stream</code> (and subclasses)</td><td>Content loading (XNB files)</td></tr>
+      <tr><td><code>System::IO::Compression::DeflateStream</code></td><td>XNB content decompression (XNB-compatible)</td></tr>
+      <tr><td><code>System::IO::IsolatedStorage</code></td><td>Save game data</td></tr>
+      <tr><td><code>System::Collections::Generic::*</code></td><td>Throughout game data structures</td></tr>
+      <tr><td><code>System::Threading</code></td><td>Background content loading, async operations</td></tr>
+      <tr><td><code>System::IDisposable</code></td><td>Audio, graphics resource lifecycle</td></tr>
+      <tr><td><code>System::TimeSpan</code></td><td>Game timing</td></tr>
+      <tr><td><code>System::DateTimeOffset</code></td><td>Sensor API</td></tr>
+      <tr><td>Prop.hpp macros</td><td>XNA properties (Width, Height, IsFullScreen, etc.)</td></tr>
+    </table>
+    </div>
+
+    <h2>Runtime Boundaries</h2>
+    <p>The conceptual boundary between sharp-runtime and CNA:</p>
+    <ul>
+      <li><strong>sharp-runtime provides:</strong> <code>System::*</code> types, primitives, collections, I/O, threading, math, serialization</li>
+      <li><strong>CNA provides:</strong> Game-specific types (SpriteBatch, Texture2D, GraphicsDevice, GamePad, Keyboard, Audio, etc.)</li>
+    </ul>
+    <p>If a new feature belongs in the <code>System.*</code> namespace and mirrors .NET, it should go in sharp-runtime. If it is XNA-specific (Microsoft.Xna.*), it belongs in CNA.</p>
+
+    <h2>mobile-eggbert Integration</h2>
+    <p>
+      <strong>mobile-eggbert</strong> is a C++ port of a Windows Phone SpeedyBlupi game.
+      It uses a subset of sharp-runtime:
+    </p>
+    <ul>
+      <li><code>intcs</code>, <code>bytecs</code> type aliases</li>
+      <li><code>System::Text::StringBuilder</code></li>
+      <li><code>System::TimeSpan</code></li>
+      <li><code>System::EventArgs</code></li>
+      <li><code>System::Random</code></li>
+      <li>Prop.hpp macros</li>
+    </ul>
+
+    <div class="callout needs-verification">
+      <div class="callout-title">Needs verification</div>
+      The exact CMake configuration, SDL3 integration point, and full list of sharp-runtime types used by CNA
+      should be verified from the CNA repository. The information above is derived from sharp-runtime's
+      own documentation files.
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="csharp-compatibility.html"><span class="page-nav-label">← Previous</span>C# Compatibility</a>
+      <a class="next" href="modules/index.html"><span class="page-nav-label">Next →</span>Modules</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

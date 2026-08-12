@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strings — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Strings</span></div>
+    <div id="search-results"></div>
+    <h1>Strings</h1>
+    <p class="page-subtitle">String representation, System::String utilities, StringBuilder, and encoding.</p>
+
+    <h2>The String Type: std::string</h2>
+    <p>
+      In sharp-runtime, C# <code>string</code> maps directly to <code>std::string</code>.
+      There is no custom String object type. <code>std::string</code> is UTF-8 by convention,
+      though the library does not enforce encoding — it relies on the content passed by the caller.
+    </p>
+    <p>In <code>SharpRuntimeHelper.hpp</code>, a type alias is provided for porting convenience:</p>
+    <pre><code>namespace SharpRuntime {
+    using String = std::string;  // C# string → std::string
+}</code></pre>
+
+    <h2>System::String — Static Utility Class</h2>
+    <p class="file-path">modules/core/include/System/String.hpp | modules/core/src/System/String.cpp</p>
+    <p>
+      <code>System::String</code> is a <strong>deleted-constructor static class</strong> — it cannot be instantiated.
+      It provides static helper methods that mirror commonly-used C# <code>string</code> instance methods.
+    </p>
+    <p>Status: <span class="badge badge-partial">Partial</span> — only a useful subset is implemented.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Method</th><th>Description</th><th>Status</th></tr>
+      <tr><td><code>Split(string, char)</code></td><td>Splits by a single character delimiter; returns <code>vector&lt;string&gt;</code></td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>IsEmpty(string)</code></td><td>True if string is empty</td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>IsNullOrEmpty(string)</code></td><td>True if string is empty (null not possible in C++, same as IsEmpty)</td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>StartsWith(string, string)</code></td><td>True if string starts with prefix</td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>Format(string, intcs)</code></td><td>Formats with one integer argument</td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>Format(string, string)</code></td><td>Formats with one string argument</td><td><span class="badge badge-done">Implemented</span></td></tr>
+      <tr><td><code>ToString(intcs, int, char)</code></td><td>Zero-pads integer to given width</td><td><span class="badge badge-done">Implemented</span></td></tr>
+    </table>
+    </div>
+    <pre><code>using namespace System;
+
+auto parts = String::Split("a,b,c", ',');   // {"a", "b", "c"}
+bool empty = String::IsNullOrEmpty("");      // true
+bool sw    = String::StartsWith("hello", "hel"); // true
+std::string fmt = String::Format("{0} items", 5); // "5 items"</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">ℹ Note on C# string methods</div>
+      C# <code>string</code> has many instance methods (<code>ToLower()</code>, <code>Trim()</code>, <code>Contains()</code>, etc.)
+      that are NOT in <code>System::String</code>. For these, use <code>std::string</code> methods directly:
+      <code>s.find()</code>, <code>s.substr()</code>, etc., or the C++20/23 standard library.
+    </div>
+
+    <h2>System::Text::StringBuilder</h2>
+    <p class="file-path">modules/text/include/System/Text/StringBuilder.hpp | modules/text/src/System/Text/StringBuilder.cpp</p>
+    <p>A mutable string buffer for efficient string construction. Backed by an internal <code>std::string</code>.</p>
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+    <pre><code>System::Text::StringBuilder sb;
+sb.Append("Hello");
+sb.Append(", ");
+sb.Append("World");
+std::string result = sb.ToString();  // "Hello, World"
+sb.Clear();
+
+// Insert, Remove, Replace are also implemented
+sb.Append("abcdef");
+sb.Insert(2, "XY");    // "abXYcdef"
+sb.Remove(0, 2);       // "XYcdef"
+sb.Replace("cd", "ZZ"); // "XYZZef"</code></pre>
+
+    <h2>String Comparison</h2>
+    <p class="file-path">modules/core/include/System/StringComparison.hpp | modules/core/include/System/StringComparer.hpp</p>
+    <p>Headers for <code>StringComparison</code> enum (OrdinalIgnoreCase, CurrentCulture, etc.) and <code>StringComparer</code> class exist as compatibility types.</p>
+    <div class="callout needs-verification">
+      <div class="callout-title">Needs verification</div>
+      The extent to which <code>StringComparer</code> comparison modes are fully implemented needs verification from the source headers.
+    </div>
+
+    <h2>Encoding</h2>
+    <p class="file-path">modules/text/include/System/Text/Encoding.hpp</p>
+    <p>Abstract encoding base class with static accessors for common encodings:</p>
+    <ul>
+      <li><code>Encoding::UTF8</code> → <code>UTF8Encoding</code></li>
+      <li><code>Encoding::ASCII</code> → <code>ASCIIEncoding</code></li>
+      <li><code>Encoding::Latin1</code> → <code>Latin1Encoding</code></li>
+      <li><code>Encoding::Unicode</code> → <code>UnicodeEncoding</code> (UTF-16)</li>
+      <li><code>Encoding::UTF32</code> → <code>UTF32Encoding</code></li>
+    </ul>
+
+    <h2>Character Type</h2>
+    <p>C# <code>char</code> (UTF-16, 16-bit) maps to <code>SharpRuntime::charcs = char16_t</code>.
+    In practice, most string operations in the library use <code>std::string</code> (byte strings)
+    rather than <code>std::u16string</code>.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="exceptions.html"><span class="page-nav-label">← Previous</span>Exceptions</a>
+      <a class="next" href="arrays.html"><span class="page-nav-label">Next →</span>Arrays</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

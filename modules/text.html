@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Module — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li class="nav-section">Modules</li>
+    <li><a href="index.html">Modules Index</a></li>
+    <li><a href="collections.html">Collections</a></li>
+    <li><a href="numerics.html">Numerics</a></li>
+    <li><a href="text.html">Text</a></li>
+    <li><a href="globalization.html">Globalization</a></li>
+    <li><a href="diagnostics.html">Diagnostics</a></li>
+    <li><a href="net.html">Net.Sockets</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Text</span></div>
+    <div id="search-results"></div>
+    <h1>Text Module</h1>
+    <p class="page-subtitle">StringBuilder, Encoding, JSON, XML, Regex, and web encoders.</p>
+
+    <h2>Component Selection</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Surface</th><th>Target</th><th>Physical module</th></tr>
+      <tr><td>StringBuilder and encodings</td><td><code>SharpRuntime::Text</code></td><td><code>modules/text</code></td></tr>
+      <tr><td>JSON</td><td><code>SharpRuntime::Text.Json</code></td><td><code>modules/text-json</code></td></tr>
+      <tr><td>Regular expressions</td><td><code>SharpRuntime::Text.RegularExpressions</code></td><td><code>modules/text-regular-expressions</code></td></tr>
+      <tr><td>XML and LINQ to XML</td><td><code>SharpRuntime::Xml</code>, <code>SharpRuntime::Xml.Linq</code></td><td><code>modules/xml</code>, <code>modules/xml-linq</code></td></tr>
+    </table></div>
+
+    <h2>StringBuilder</h2>
+    <p class="file-path">modules/text/include/System/Text/StringBuilder.hpp</p>
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+    <p>Mutable string buffer backed by <code>std::string</code>. Key methods:</p>
+    <ul>
+      <li><code>Append(string)</code>, <code>Append(int)</code>, <code>Append(long)</code>, <code>Append(char)</code>, <code>Append(float)</code></li>
+      <li><code>Insert(index, string)</code></li>
+      <li><code>Remove(start, count)</code></li>
+      <li><code>Replace(old, new)</code></li>
+      <li><code>Clear()</code></li>
+      <li><code>ToString()</code></li>
+      <li><code>getLength()</code> / <code>getLengthProperty()</code></li>
+    </ul>
+
+    <h2>Encoding</h2>
+    <p class="file-path">modules/text/include/System/Text/Encoding.hpp</p>
+    <p>Abstract base class. Static factory methods:</p>
+    <ul>
+      <li><code>Encoding::UTF8</code></li>
+      <li><code>Encoding::ASCII</code></li>
+      <li><code>Encoding::Latin1</code></li>
+      <li><code>Encoding::Unicode</code> (UTF-16)</li>
+      <li><code>Encoding::UTF32</code></li>
+    </ul>
+    <p>Core methods: <code>GetBytes(string)</code>, <code>GetString(bytes)</code>, <code>GetByteCount(string)</code>.</p>
+
+    <h2>Encoding Implementations</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Status</th></tr>
+      <tr><td><code>UTF8Encoding</code></td><td><code>System/Text/UTF8Encoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
+      <tr><td><code>ASCIIEncoding</code></td><td><code>System/Text/ASCIIEncoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
+      <tr><td><code>Latin1Encoding</code></td><td><code>System/Text/Latin1Encoding.hpp</code></td><td><span class="badge badge-done">Done</span></td></tr>
+      <tr><td><code>UnicodeEncoding</code></td><td><code>System/Text/UnicodeEncoding.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
+      <tr><td><code>UTF32Encoding</code></td><td><code>System/Text/UTF32Encoding.hpp</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
+      <tr><td><code>UTF7Encoding</code></td><td><code>System/Text/UTF7Encoding.hpp</code></td><td><span class="badge badge-stub">Stub</span></td></tr>
+    </table>
+    </div>
+
+    <h2>JSON (System::Text::Json)</h2>
+    <p class="file-path">modules/text-json/include/System/Text/Json/</p>
+    <p>Status: <span class="badge badge-done">Done</span> — backed by <strong>nlohmann/json v3.10.4</strong> at <code>vendor/nlohmann/json.hpp</code>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Description</th></tr>
+      <tr><td><code>JsonDocument</code></td><td>Parse and navigate JSON</td></tr>
+      <tr><td><code>JsonElement</code></td><td>An element within a JSON document</td></tr>
+      <tr><td><code>JsonSerializer</code></td><td>Serialize/deserialize to/from JSON</td></tr>
+      <tr><td><code>JsonSerializerOptions</code></td><td>Options for serialization</td></tr>
+      <tr><td><code>JsonValueKind</code></td><td>Enum: Undefined, Object, Array, String, Number, True, False, Null</td></tr>
+    </table>
+    </div>
+
+    <h2>XML (System::Xml)</h2>
+    <p class="file-path">modules/xml/include/System/Xml/ | modules/xml-linq/include/System/Xml/Linq/</p>
+    <p>Status: <span class="badge badge-done">Done</span> — backed by <strong>tinyxml2</strong> at <code>vendor/tinyxml2/</code>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Description</th></tr>
+      <tr><td><code>XmlReader</code></td><td>tinyxml2 DOM cursor; event-based reading</td></tr>
+      <tr><td><code>XmlWriter</code></td><td>tinyxml2 DOM builder + XMLPrinter</td></tr>
+      <tr><td><code>Linq::XDocument</code></td><td>LINQ-to-XML document</td></tr>
+      <tr><td><code>Linq::XElement</code></td><td>XML element with attributes and children</td></tr>
+      <tr><td><code>Linq::XAttribute</code></td><td>XML attribute (name=value)</td></tr>
+      <tr><td><code>Linq::XName</code></td><td>XML name (namespace + local name)</td></tr>
+    </table>
+    </div>
+
+    <h2>Regular Expressions</h2>
+    <p class="file-path">modules/text-regular-expressions/include/System/Text/RegularExpressions/</p>
+    <p>Compatibility headers only:</p>
+    <ul>
+      <li><code>Regex</code> — backed by <code>std::regex</code></li>
+      <li><code>Match</code></li>
+      <li><code>MatchCollection</code></li>
+    </ul>
+
+    <h2>Web Encoders (System::Text::Encodings::Web)</h2>
+    <p>Stub classes for web-safe encoding:</p>
+    <ul>
+      <li><code>HtmlEncoder</code></li>
+      <li><code>JavaScriptEncoder</code></li>
+      <li><code>UrlEncoder</code></li>
+    </ul>
+
+    <h2>Other Text Types</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Description</th></tr>
+      <tr><td><code>Rune</code></td><td>Unicode scalar value (UTF-32 code point)</td></tr>
+      <tr><td><code>Ascii</code></td><td>ASCII character utilities</td></tr>
+      <tr><td><code>CompositeFormat</code></td><td>Pre-parsed format string</td></tr>
+    </table>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

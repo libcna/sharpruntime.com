@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Net Module — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li class="nav-section">Modules</li>
+    <li><a href="index.html">Modules Index</a></li>
+    <li><a href="collections.html">Collections</a></li>
+    <li><a href="numerics.html">Numerics</a></li>
+    <li><a href="text.html">Text</a></li>
+    <li><a href="globalization.html">Globalization</a></li>
+    <li><a href="diagnostics.html">Diagnostics</a></li>
+    <li><a href="net.html">Net.Sockets</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Net</span></div>
+    <div id="search-results"></div>
+    <h1>Net Module</h1>
+    <p class="page-subtitle">HttpClient, IPAddress, sockets — networking support.</p>
+
+    <h2>Component Selection</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Surface</th><th>Target</th></tr>
+      <tr><td>Common network types</td><td><code>SharpRuntime::Net</code></td></tr>
+      <tr><td>Sockets</td><td><code>SharpRuntime::Net.Sockets</code></td></tr>
+      <tr><td>HTTP, headers, and HTTP JSON extensions</td><td><code>SharpRuntime::Net.Http</code>, <code>SharpRuntime::Net.Http.Headers</code>, <code>SharpRuntime::Net.Http.Json</code></td></tr>
+      <tr><td>WebSockets</td><td><code>SharpRuntime::Net.WebSockets</code></td></tr>
+      <tr><td>MIME and network information</td><td><code>SharpRuntime::Net.Mime</code>, <code>SharpRuntime::Net.NetworkInformation</code></td></tr>
+    </table></div>
+
+    <h2>System::Net::Http — HttpClient</h2>
+    <p class="file-path">modules/net-http/include/System/Net/Http/</p>
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠ No TLS / HTTPS</div>
+      The current <code>HttpClient</code> implementation supports <strong>plain HTTP only</strong>.
+      HTTPS (TLS) is not implemented. Do not use for production HTTPS requests.
+    </div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>HttpClient</code></td><td><code>System/Net/Http/HttpClient.hpp</code></td><td>HTTP client (plain HTTP only)</td></tr>
+      <tr><td><code>HttpRequestMessage</code></td><td><code>System/Net/Http/HttpRequestMessage.hpp</code></td><td>HTTP request with method, URI, headers, content</td></tr>
+      <tr><td><code>HttpResponseMessage</code></td><td><code>System/Net/Http/HttpResponseMessage.hpp</code></td><td>HTTP response with status code, headers, content</td></tr>
+      <tr><td><code>HttpContent</code></td><td><code>System/Net/Http/HttpContent.hpp</code></td><td>Abstract base for request/response content</td></tr>
+      <tr><td><code>StringContent</code></td><td><code>System/Net/Http/StringContent.hpp</code></td><td>Text body content</td></tr>
+      <tr><td><code>ByteArrayContent</code></td><td><code>System/Net/Http/ByteArrayContent.hpp</code></td><td>Binary body content</td></tr>
+      <tr><td><code>FormUrlEncodedContent</code></td><td><code>System/Net/Http/FormUrlEncodedContent.hpp</code></td><td>URL-encoded form data</td></tr>
+      <tr><td><code>HttpMethod</code></td><td><code>System/Net/Http/HttpMethod.hpp</code></td><td>HTTP verb: GET, POST, PUT, DELETE, etc.</td></tr>
+    </table>
+    </div>
+
+    <h2>System::Net::Sockets — POSIX-only</h2>
+    <p class="file-path">modules/net-sockets/include/System/Net/Sockets/</p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠ POSIX-only</div>
+      The <code>System::Net::Sockets</code> namespace currently uses POSIX socket APIs
+      (<code>&lt;sys/socket.h&gt;</code>, <code>&lt;unistd.h&gt;</code>). It works on Linux and macOS.
+      Windows and Emscripten support is a known gap.
+    </div>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>TcpClient</code></td><td><code>System/Net/Sockets/TcpClient.hpp</code></td><td>TCP client socket wrapper</td></tr>
+      <tr><td><code>UdpClient</code></td><td><code>System/Net/Sockets/UdpClient.hpp</code></td><td>UDP client socket wrapper</td></tr>
+      <tr><td><code>NetworkStream</code></td><td><code>System/Net/Sockets/NetworkStream.hpp</code></td><td>Stream over a network socket</td></tr>
+    </table>
+    </div>
+
+    <h2>System::Net — Common Types</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>IPAddress</code></td><td><code>System/Net/IPAddress.hpp</code></td><td>IP address (v4/v6)</td></tr>
+      <tr><td><code>IPEndPoint</code></td><td><code>System/Net/IPEndPoint.hpp</code></td><td>IP address + port</td></tr>
+      <tr><td><code>HttpStatusCode</code></td><td><code>System/Net/HttpStatusCode.hpp</code></td><td>HTTP status code enum</td></tr>
+      <tr><td><code>WebUtility</code></td><td><code>System/Net/WebUtility.hpp</code></td><td>URL encode/decode utilities</td></tr>
+    </table>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

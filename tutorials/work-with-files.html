@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Working with Files — sharp-runtime Tutorials</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="index.html">Tutorials Index</a></li>
+    <li><a href="use-collections.html">Using Collections</a></li>
+    <li><a href="port-csharp-class.html">Porting a C# Class</a></li>
+    <li><a href="work-with-files.html">Working with Files</a></li>
+    <li><a href="use-events.html">Using Events</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Tutorials</a></span><span>Working with Files</span></div>
+    <div id="search-results"></div>
+    <h1>Working with Files</h1>
+    <p class="page-subtitle">Reading and writing files using the System::IO namespace.</p>
+
+    <h2>Includes</h2>
+    <pre><code>#include &lt;System/IO/FileStream.hpp&gt;
+#include &lt;System/IO/StreamReader.hpp&gt;
+#include &lt;System/IO/StreamWriter.hpp&gt;
+#include &lt;System/IO/BinaryReader.hpp&gt;
+#include &lt;System/IO/BinaryWriter.hpp&gt;
+#include &lt;System/IO/File.hpp&gt;
+#include &lt;System/IO/Path.hpp&gt;</code></pre>
+
+    <h2>Reading a Text File</h2>
+    <pre><code>// Method 1: StreamReader (line by line)
+{
+    auto reader = std::make_unique&lt;System::IO::StreamReader&gt;("data.txt");
+    std::string line;
+    while ((line = reader-&gt;ReadLine()) != "") {
+        std::cout &lt;&lt; line &lt;&lt; "\n";
+    }
+    reader-&gt;Close();
+}
+
+// Method 2: File::ReadAllText (full file at once)
+std::string content = System::IO::File::ReadAllText("data.txt");
+
+// Method 3: File::ReadAllLines
+std::vector&lt;std::string&gt; lines = System::IO::File::ReadAllLines("data.txt");</code></pre>
+
+    <h2>Writing a Text File</h2>
+    <pre><code>// Method 1: StreamWriter
+{
+    auto writer = std::make_unique&lt;System::IO::StreamWriter&gt;("output.txt");
+    writer-&gt;WriteLine("Hello, world!");
+    writer-&gt;WriteLine("Line 2");
+    writer-&gt;Close();
+}
+
+// Method 2: File::WriteAllText
+System::IO::File::WriteAllText("output.txt", "Hello, world!\n");
+
+// Method 3: File::WriteAllLines
+std::vector&lt;std::string&gt; lines = {"Line 1", "Line 2", "Line 3"};
+System::IO::File::WriteAllLines("output.txt", lines);</code></pre>
+
+    <h2>Binary File I/O</h2>
+    <pre><code>// Write binary
+{
+    auto fs = std::make_unique&lt;System::IO::FileStream&gt;(
+        "data.bin", System::IO::FileMode::Create);
+    auto writer = std::make_unique&lt;System::IO::BinaryWriter&gt;(std::move(fs));
+    writer-&gt;Write(42);           // int
+    writer-&gt;Write(3.14f);        // float
+    writer-&gt;Write(std::string("hello")); // length-prefixed string
+    writer-&gt;Close();
+}
+
+// Read binary
+{
+    auto fs = std::make_unique&lt;System::IO::FileStream&gt;(
+        "data.bin", System::IO::FileMode::Open);
+    auto reader = std::make_unique&lt;System::IO::BinaryReader&gt;(std::move(fs));
+    int    i = reader-&gt;ReadInt32();
+    float  f = reader-&gt;ReadSingle();
+    std::string s = reader-&gt;ReadString();
+    reader-&gt;Close();
+}</code></pre>
+
+    <h2>Path Manipulation</h2>
+    <pre><code>// Combine paths
+std::string full = System::IO::Path::Combine("data", "saves", "save1.dat");
+
+// Get filename / extension
+std::string name = System::IO::Path::GetFileName("data/saves/save1.dat"); // "save1.dat"
+std::string ext  = System::IO::Path::GetExtension("save1.dat");           // ".dat"
+std::string base = System::IO::Path::GetFileNameWithoutExtension("save1.dat"); // "save1"
+
+// Directory
+std::string dir = System::IO::Path::GetDirectoryName("data/saves/save1.dat"); // "data/saves"</code></pre>
+
+    <h2>File Existence and Directory Operations</h2>
+    <pre><code>// Check existence
+bool exists = System::IO::File::Exists("data.txt");
+bool dirEx  = System::IO::Directory::Exists("data/saves");
+
+// Create directory
+System::IO::Directory::CreateDirectory("data/saves");
+
+// Delete file
+System::IO::File::Delete("old.txt");
+
+// List files
+std::vector&lt;std::string&gt; files = System::IO::Directory::GetFiles("data");
+std::vector&lt;std::string&gt; dirs  = System::IO::Directory::GetDirectories("data");</code></pre>
+
+    <h2>IsolatedStorage</h2>
+    <p>For sandboxed storage (used in mobile-eggbert), use <code>IsolatedStorageFile</code>:</p>
+    <pre><code>#include &lt;System/IO/IsolatedStorage/IsolatedStorageFile.hpp&gt;
+
+auto store = System::IO::IsolatedStorage::IsolatedStorageFile::GetUserStoreForApplication();
+// Creates/opens files relative to the app's isolated storage root</code></pre>
+    <p>On Android with SDL3, the root path is obtained via <code>SDL_GetPrefPath</code>
+    (SDL3 must be provided by the parent project, e.g., CNA).</p>
+
+    <div class="callout note">
+      <div class="callout-title">Exception handling</div>
+      File I/O operations can throw <code>System::IO::IOException</code> and its subclasses
+      (<code>FileNotFoundException</code>, <code>DirectoryNotFoundException</code>).
+      Wrap in try/catch when robustness is needed.
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="port-csharp-class.html">← Porting a C# Class</a>
+      <a class="next" href="use-events.html">Using Events →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collections Module — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li><a href="../build.html">Build</a></li>
+    <li><a href="../running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Modules</li>
+    <li><a href="index.html">Modules Index</a></li>
+    <li><a href="collections.html">Collections</a></li>
+    <li><a href="numerics.html">Numerics</a></li>
+    <li><a href="text.html">Text</a></li>
+    <li><a href="globalization.html">Globalization</a></li>
+    <li><a href="diagnostics.html">Diagnostics</a></li>
+    <li><a href="net.html">Net.Sockets</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Collections</span></div>
+    <div id="search-results"></div>
+    <h1>Collections Module</h1>
+    <p class="page-subtitle">Generic collections, immutable collections, concurrent collections, and ObjectModel.</p>
+
+    <h2>Component Selection</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Surface</th><th>Target</th><th>Physical module</th></tr>
+      <tr><td>Core, immutable, concurrent, and specialized collections</td><td><code>SharpRuntime::Collections.Core</code></td><td><code>modules/collections</code></td></tr>
+      <tr><td>Async collection interfaces</td><td><code>SharpRuntime::Collections.Async</code></td><td><code>modules/collections-async</code></td></tr>
+      <tr><td>Observable collections and change notifications</td><td><code>SharpRuntime::Collections.ObjectModel</code></td><td><code>modules/collections-object-model</code></td></tr>
+    </table></div>
+    <p>The <code>SharpRuntime::Collections</code> compatibility target aggregates these three components; new consumers should select the narrower target they need.</p>
+
+    <h2>Generic Collections (System::Collections::Generic)</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Backed by</th><th>Notes</th></tr>
+      <tr><td><code>List&lt;T&gt;</code></td><td><code>std::vector&lt;T&gt;</code></td><td>Dynamic array with .NET API; Add, Remove, Insert, IndexOf, Contains, Sort</td></tr>
+      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>std::unordered_map&lt;K,V&gt;</code></td><td>Hash table; Add, Remove, ContainsKey, TryGetValue</td></tr>
+      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>std::unordered_set&lt;T&gt;</code></td><td>Add, Remove, Contains, ExceptWith, IntersectWith</td></tr>
+      <tr><td><code>Queue&lt;T&gt;</code></td><td><code>std::queue&lt;T&gt;</code></td><td>Enqueue, Dequeue, Peek</td></tr>
+      <tr><td><code>Stack&lt;T&gt;</code></td><td><code>std::stack&lt;T&gt;</code></td><td>Push, Pop, Peek</td></tr>
+      <tr><td><code>SortedDictionary&lt;K,V&gt;</code></td><td><code>std::map&lt;K,V&gt;</code></td><td>Ordered key-value pairs</td></tr>
+      <tr><td><code>SortedList&lt;K,V&gt;</code></td><td><code>std::map&lt;K,V&gt;</code></td><td>Sorted by key</td></tr>
+      <tr><td><code>SortedSet&lt;T&gt;</code></td><td><code>std::set&lt;T&gt;</code></td><td>Sorted, no duplicates</td></tr>
+      <tr><td><code>LinkedList&lt;T&gt;</code></td><td><code>std::list&lt;T&gt;</code></td><td>Doubly-linked list</td></tr>
+      <tr><td><code>PriorityQueue&lt;T,P&gt;</code></td><td><code>std::priority_queue</code></td><td>Min-heap by priority</td></tr>
+      <tr><td><code>KeyValuePair&lt;K,V&gt;</code></td><td>Struct</td><td>Key/Value pair</td></tr>
+    </table>
+    </div>
+
+    <h3>List&lt;T&gt; Example</h3>
+    <pre><code>#include "System/Collections/Generic/List.hpp"
+using namespace System::Collections::Generic;
+
+List&lt;int&gt; list;
+list.Add(1);
+list.Add(2);
+list.Add(3);
+int count = list.getCountProperty();  // 3
+bool has = list.Contains(2);          // true
+list.Remove(2);
+for (auto&amp; item : list) { /* range-for works */ }</code></pre>
+
+    <h3>Dictionary&lt;K,V&gt; Example</h3>
+    <pre><code>#include "System/Collections/Generic/Dictionary.hpp"
+using namespace System::Collections::Generic;
+
+Dictionary&lt;std::string, int&gt; dict;
+dict.Add("one", 1);
+dict.Add("two", 2);
+int val;
+if (dict.TryGetValue("one", val)) { /* val = 1 */ }
+bool has = dict.ContainsKey("two");  // true
+dict.Remove("two");</code></pre>
+
+    <h2>Immutable Collections (System::Collections::Immutable)</h2>
+    <p>Backed by <code>shared_ptr&lt;const std::container&lt;T&gt;&gt;</code>. Provides value-copy semantics with efficient sharing.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>ImmutableArray&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableArray.hpp</code></td></tr>
+      <tr><td><code>ImmutableList&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableList.hpp</code></td></tr>
+      <tr><td><code>ImmutableDictionary&lt;K,V&gt;</code></td><td><code>System/Collections/Immutable/ImmutableDictionary.hpp</code></td></tr>
+      <tr><td><code>ImmutableHashSet&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableHashSet.hpp</code></td></tr>
+      <tr><td><code>ImmutableQueue&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableQueue.hpp</code></td></tr>
+      <tr><td><code>ImmutableStack&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableStack.hpp</code></td></tr>
+      <tr><td><code>ImmutableSortedDictionary&lt;K,V&gt;</code></td><td><code>System/Collections/Immutable/ImmutableSortedDictionary.hpp</code></td></tr>
+      <tr><td><code>ImmutableSortedSet&lt;T&gt;</code></td><td><code>System/Collections/Immutable/ImmutableSortedSet.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Concurrent Collections (System::Collections::Concurrent)</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>ConcurrentDictionary&lt;K,V&gt;</code></td><td><code>System/Collections/Concurrent/ConcurrentDictionary.hpp</code></td><td>Thread-safe dictionary</td></tr>
+      <tr><td><code>ConcurrentQueue&lt;T&gt;</code></td><td><code>System/Collections/Concurrent/ConcurrentQueue.hpp</code></td><td>Thread-safe FIFO queue</td></tr>
+      <tr><td><code>ConcurrentStack&lt;T&gt;</code></td><td><code>System/Collections/Concurrent/ConcurrentStack.hpp</code></td><td>Thread-safe LIFO stack</td></tr>
+    </table>
+    </div>
+
+    <h2>ObjectModel (System::Collections::ObjectModel)</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>Collection&lt;T&gt;</code></td><td><code>System/Collections/ObjectModel/Collection.hpp</code></td></tr>
+      <tr><td><code>ObservableCollection&lt;T&gt;</code></td><td><code>System/Collections/ObjectModel/ObservableCollection.hpp</code></td></tr>
+      <tr><td><code>ReadOnlyCollection&lt;T&gt;</code></td><td><code>System/Collections/ObjectModel/ReadOnlyCollection.hpp</code></td></tr>
+      <tr><td><code>KeyedCollection&lt;K,T&gt;</code></td><td><code>System/Collections/ObjectModel/KeyedCollection.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Non-Generic Collections (System::Collections)</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>ArrayList</code></td><td><code>System/Collections/ArrayList.hpp</code></td></tr>
+      <tr><td><code>Hashtable</code></td><td><code>System/Collections/Hashtable.hpp</code></td></tr>
+      <tr><td><code>BitArray</code></td><td><code>System/Collections/BitArray.hpp</code></td></tr>
+      <tr><td><code>Queue</code></td><td><code>System/Collections/Queue.hpp</code></td></tr>
+      <tr><td><code>Stack</code></td><td><code>System/Collections/Stack.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Interfaces</h2>
+    <p>All generic collection interfaces have C++ abstract base class equivalents:</p>
+    <ul>
+      <li><code>IEnumerable&lt;T&gt;</code>, <code>IEnumerator&lt;T&gt;</code></li>
+      <li><code>ICollection&lt;T&gt;</code></li>
+      <li><code>IList&lt;T&gt;</code></li>
+      <li><code>IDictionary&lt;K,V&gt;</code></li>
+      <li><code>ISet&lt;T&gt;</code></li>
+      <li><code>IReadOnlyCollection&lt;T&gt;</code>, <code>IReadOnlyList&lt;T&gt;</code>, <code>IReadOnlyDictionary&lt;K,V&gt;</code></li>
+      <li><code>IComparer&lt;T&gt;</code>, <code>IEqualityComparer&lt;T&gt;</code></li>
+    </ul>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

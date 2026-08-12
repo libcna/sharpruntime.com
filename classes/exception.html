@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::Exception — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::Exception</span></div>
+    <div id="search-results"></div>
+    <h1>System::Exception</h1>
+    <p class="page-subtitle">Base exception class. Inherits <code>std::exception</code>. Root of the exception hierarchy.</p>
+    <p class="file-path">modules/core/include/System/Exception.hpp</p>
+
+    <p>Status: <span class="badge badge-done">Implemented</span></p>
+
+    <h2>Overview</h2>
+    <p><code>System::Exception</code> is the base class for all exceptions thrown by sharp-runtime code.
+    It inherits <code>std::exception</code>, which means it integrates naturally with standard C++
+    <code>try/catch</code> and can be caught as <code>std::exception&amp;</code>.</p>
+
+    <p>The message string is stored internally as <code>std::string message_</code>, and
+    <code>what()</code> returns a C-string pointer to it (satisfying <code>std::exception</code>).</p>
+
+    <h2>Class Definition</h2>
+    <pre><code>namespace System {
+    class Exception : public std::exception {
+    public:
+        explicit Exception(const std::string&amp; message = "");
+        virtual const char* what() const noexcept override;
+        virtual std::string getMessage() const;
+        virtual std::string GetTypeName() const; // from Object pattern
+    protected:
+        std::string message_;
+    };
+}</code></pre>
+
+    <h2>Constructors</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Form</th><th>Description</th></tr>
+      <tr><td><code>Exception()</code></td><td>Default — empty message</td></tr>
+      <tr><td><code>Exception(const std::string&amp; message)</code></td><td>Exception with a message string</td></tr>
+    </table>
+    </div>
+
+    <h2>Methods</h2>
+
+    <h3>what()</h3>
+    <pre><code>virtual const char* what() const noexcept override;</code></pre>
+    <p>Returns the message as a null-terminated C string. Satisfies <code>std::exception</code>. Delegates to <code>message_.c_str()</code>.</p>
+
+    <h3>getMessage()</h3>
+    <pre><code>virtual std::string getMessage() const;</code></pre>
+    <p>Returns the message as <code>std::string</code>. Mirrors C# <code>Exception.Message</code>.</p>
+
+    <h2>Usage</h2>
+    <pre><code>// Throwing
+throw System::InvalidOperationException("Object is in invalid state");
+
+// Catching as base type
+try {
+    doSomething();
+} catch (const System::Exception&amp; ex) {
+    std::cerr &lt;&lt; ex.what() &lt;&lt; "\n";
+}
+
+// Catching as std::exception (also works)
+try {
+    doSomething();
+} catch (const std::exception&amp; ex) {
+    std::cerr &lt;&lt; ex.what() &lt;&lt; "\n";
+}</code></pre>
+
+    <h2>Exception Hierarchy</h2>
+    <p>The full hierarchy is documented in <a href="../exceptions.html">Exceptions</a>. The most common derived classes:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>SystemException</code></td><td><code>System/SystemException.hpp</code></td></tr>
+      <tr><td><code>ArgumentException</code></td><td><code>System/ArgumentException.hpp</code></td></tr>
+      <tr><td><code>ArgumentNullException</code></td><td><code>System/ArgumentNullException.hpp</code></td></tr>
+      <tr><td><code>ArgumentOutOfRangeException</code></td><td><code>System/ArgumentOutOfRangeException.hpp</code></td></tr>
+      <tr><td><code>InvalidOperationException</code></td><td><code>System/InvalidOperationException.hpp</code></td></tr>
+      <tr><td><code>NotImplementedException</code></td><td><code>System/NotImplementedException.hpp</code></td></tr>
+      <tr><td><code>NotSupportedException</code></td><td><code>System/NotSupportedException.hpp</code></td></tr>
+      <tr><td><code>NullReferenceException</code></td><td><code>System/NullReferenceException.hpp</code></td></tr>
+      <tr><td><code>IndexOutOfRangeException</code></td><td><code>System/IndexOutOfRangeException.hpp</code></td></tr>
+      <tr><td><code>IOException</code></td><td><code>System/IO/IOException.hpp</code></td></tr>
+      <tr><td><code>OverflowException</code></td><td><code>System/OverflowException.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Creating Custom Exceptions</h2>
+    <pre><code>class MyException : public System::Exception {
+public:
+    explicit MyException(const std::string&amp; msg) : System::Exception(msg) {}
+    GetTypeNameHPP();
+};
+
+// In .cpp:
+GetTypeNameCPP(MyException, "MyNamespace.MyException");</code></pre>
+
+    <h2>Differences from .NET</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>.NET</th><th>sharp-runtime</th></tr>
+      <tr><td><code>Exception.Message</code> (property)</td><td><code>getMessage()</code> method</td></tr>
+      <tr><td><code>Exception.InnerException</code></td><td>Needs verification — may be stub</td></tr>
+      <tr><td><code>Exception.StackTrace</code></td><td>Not implemented (StackTrace is stub)</td></tr>
+      <tr><td>Inherits <code>Object</code></td><td>Inherits <code>std::exception</code> instead</td></tr>
+    </table>
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="object.html">← System::Object</a>
+      <a class="next" href="string.html">System::String →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

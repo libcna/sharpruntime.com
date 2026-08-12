@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internals — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="../classes/index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="index.html">Internals</a></li>
+    <li class="nav-section">Internals</li>
+    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
+    <li><a href="property-macros.html">Property Macros</a></li>
+    <li><a href="string-internals.html">String Internals</a></li>
+    <li><a href="array-internals.html">Array Internals</a></li>
+    <li class="nav-section">Development</li>
+    <li><a href="../development/index.html">Developer Guide</a></li>
+    <li><a href="../tutorials/index.html">Tutorials</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span>Internals</span></div>
+    <div id="search-results"></div>
+    <h1>Internals</h1>
+    <p class="page-subtitle">Deep-dive documentation on how sharp-runtime is implemented.</p>
+
+    <div class="card-grid">
+      <a class="card" href="object-lifecycle.html">
+        <h3>Object Lifecycle</h3>
+        <p>How objects are created, owned, shared, and destroyed. RAII patterns, smart pointers, and the absence of garbage collection.</p>
+      </a>
+      <a class="card" href="property-macros.html">
+        <h3>Property Macros</h3>
+        <p>The DDATA/DGETTER/DGETTERSTATIC macro system in Prop.hpp that implements .NET-style properties in C++.</p>
+      </a>
+      <a class="card" href="string-internals.html">
+        <h3>String Internals</h3>
+        <p>How C# string semantics are mapped to std::string, encoding concerns, and the charcs/char16_t split.</p>
+      </a>
+      <a class="card" href="array-internals.html">
+        <h3>Array Internals</h3>
+        <p>How C# arrays map to std::vector, the role of System::Array static helpers, and collection ownership.</p>
+      </a>
+    </div>
+
+    <h2>Related Documentation</h2>
+    <ul>
+      <li><a href="../architecture.html">Architecture</a> — high-level system design</li>
+      <li><a href="../memory-management.html">Memory Management</a> — RAII ownership rules</li>
+      <li><a href="../type-system.html">Type System</a> — primitive types, Object, Nullable</li>
+      <li><a href="../platform-layer.html">Platform Layer</a> — platform guards and conditional compilation</li>
+    </ul>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

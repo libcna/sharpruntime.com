@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adding Runtime Features — sharp-runtime Developer Guide</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Development</li>
+    <li><a href="index.html">Developer Guide</a></li>
+    <li><a href="coding-style.html">Coding Style</a></li>
+    <li><a href="debugging.html">Debugging</a></li>
+    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Adding Features</span></div>
+    <div id="search-results"></div>
+    <h1>Adding Runtime Features</h1>
+    <p class="page-subtitle">How to add a new class or feature to sharp-runtime following project conventions.</p>
+
+    <h2>Before You Start</h2>
+    <ul>
+      <li>Check <code>plan.sqlite3</code> (table <code>task</code>) to see if the class is tracked and what its status is — the porting workflow itself is documented in <code>prompt.md</code></li>
+      <li>Check <code>NEXT.md</code> for the current status summary and next unprocessed items</li>
+      <li>Confirm the class is part of <code>System.*</code> — sharp-runtime only targets the .NET System namespace</li>
+      <li>Consult the .NET reference docs to understand the expected API surface</li>
+    </ul>
+
+    <h2>Step 1: Choose the Owning Module</h2>
+    <p>Choose an existing physical module before creating files. The module owns the feature's public headers, implementation, tests, and dependency declaration. For example, a new fundamental <code>System</code> type normally belongs in <code>modules/core/</code>; an I/O type belongs in <code>modules/io/</code>.</p>
+    <p>If no existing module owns the API area, add a new module directory, register it once in <code>cmake/SharpRuntimeModules.cmake</code>, and declare its dependencies in its local <code>CMakeLists.txt</code>. Do not add new shared top-level <code>include/</code>, <code>src/</code>, or <code>tests/</code> trees.</p>
+
+    <h2>Step 2: Create the Header</h2>
+    <p>For a core type, create <code>modules/core/include/System/[Namespace]/ClassName.hpp</code>:</p>
+    <pre><code>// SPDX-License-Identifier: MIT
+// Copyright (C) 2024 Robert Vokac
+// Based on .NET Runtime (MIT License)
+#pragma once
+#include &lt;System/Object.hpp&gt;
+#include &lt;SharpRuntime/Prop.hpp&gt;
+
+namespace System {
+// Or: namespace System::IO etc.
+
+/**
+ * @brief One-line description.
+ * @status Partial
+ */
+class MyClass : public Object {
+public:
+    MyClass();
+    DDATA(int, SomeProperty)
+    void SomeMethod(const std::string&amp; arg);
+    GetTypeNameHPP();
+};
+
+} // namespace System</code></pre>
+
+    <h2>Step 3: Create the Implementation</h2>
+    <p>Create <code>modules/core/src/System/[Namespace]/MyClass.cpp</code> in the same owning module:</p>
+    <pre><code>// SPDX-License-Identifier: MIT
+// Copyright (C) 2024 Robert Vokac
+// Based on .NET Runtime (MIT License)
+#include &lt;System/MyClass.hpp&gt;
+
+namespace System {
+
+GetTypeNameCPP(MyClass, "System.MyClass")
+IDATA(MyClass, int, SomeProperty)
+
+MyClass::MyClass() : someProperty_(0) {}
+
+void MyClass::SomeMethod(const std::string&amp; arg) {
+    // implementation
+}
+
+} // namespace System</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">Module-scoped discovery</div>
+      <code>sharp_runtime_register_module()</code> discovers <code>src/*.cpp</code> and
+      <code>tests/*.cpp</code> only inside the owning module. You do not need to edit its
+      <code>CMakeLists.txt</code> for another file in that module, but you must declare dependencies
+      correctly and register a genuinely new module.
+    </div>
+
+    <h2>Step 4: Write Tests</h2>
+    <p>Create <code>modules/core/tests/System/MyClassTest.cpp</code> (or the matching test path in the owning module):</p>
+    <pre><code>// SPDX-License-Identifier: MIT
+#include &lt;gtest/gtest.h&gt;
+#include &lt;System/MyClass.hpp&gt;
+
+using namespace System;
+
+TEST(MyClassTest, ConstructorDefault) {
+    MyClass obj;
+    EXPECT_EQ(obj.getSomePropertyProperty(), 0);
+}
+
+TEST(MyClassTest, SomeMethod) {
+    MyClass obj;
+    obj.SomeMethod("test");
+    // assert expected state
+}
+
+TEST(MyClassTest, GetTypeName) {
+    MyClass obj;
+    EXPECT_EQ(obj.GetTypeName(), "System.MyClass");
+}</code></pre>
+
+    <div class="callout warning">
+      <div class="callout-title">Test requirement</div>
+      Your new class must have focused tests. Build its component test target and run its executable;
+      for a repository-wide change, configure <code>All</code> and use
+      <code>scripts/run_component_tests.sh build</code>.
+    </div>
+
+    <h2>Step 5: Platform Guards (if needed)</h2>
+    <p>If your implementation uses platform-specific APIs:</p>
+    <ul>
+      <li>Keep platform-specific <code>#include</code>s in <code>.cpp</code> files only</li>
+      <li>Use <code>#ifdef _WIN32</code> / <code>#elif defined(__EMSCRIPTEN__)</code> / <code>#else</code> guards</li>
+      <li>If a feature is POSIX-only, document it in the header with a Doxygen note</li>
+      <li>Provide stub implementations for unsupported platforms rather than compilation errors</li>
+    </ul>
+
+    <h2>Step 6: Update Status</h2>
+    <p>Update the <code>@status</code> Doxygen comment in the header file as the implementation progresses:</p>
+    <ul>
+      <li><code>Todo</code> — planned, not started</li>
+      <li><code>Stub</code> — header exists, empty/minimal implementation</li>
+      <li><code>Partial</code> — key functionality works, some methods missing</li>
+      <li><code>Implemented</code> — all planned methods done</li>
+      <li><code>Verified</code> — fully tested against .NET behavior</li>
+    </ul>
+
+    <h2>Checklist</h2>
+    <ul>
+      <li>SPDX header on every file</li>
+      <li><code>#pragma once</code> in header</li>
+      <li><code>GetTypeNameHPP()</code> in class body</li>
+      <li><code>GetTypeNameCPP()</code> in .cpp</li>
+      <li>All properties use <code>DDATA</code>/<code>DGETTER</code> macros</li>
+      <li>Files are under one owning <code>modules/&lt;module&gt;</code> directory</li>
+      <li>Public, private, and test-only dependencies are declared with the correct visibility</li>
+      <li>No POSIX <code>#include</code>s in .hpp files</li>
+      <li>Tests written and passing</li>
+      <li>Zero new warnings after build</li>
+      <li><code>@status</code> comment reflects actual state</li>
+    </ul>
+
+    <div class="nav-links">
+      <a class="prev" href="porting-csharp-code.html">← Porting C# Code</a>
+      <a class="next" href="known-limitations.html">Known Limitations →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

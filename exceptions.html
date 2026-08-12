@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exceptions — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Exceptions</span></div>
+    <div id="search-results"></div>
+    <h1>Exceptions</h1>
+    <p class="page-subtitle">Exception hierarchy, throwing conventions, C# to C++ mapping, and handling patterns.</p>
+
+    <h2>System::Exception — The Base</h2>
+    <p class="file-path">modules/core/include/System/Exception.hpp | modules/core/src/System/Exception.cpp</p>
+    <p><code>System::Exception</code> inherits from <code>std::exception</code>, giving it full integration with standard C++ exception handling:</p>
+    <pre><code>class Exception : public std::exception {
+public:
+    Exception();
+    explicit Exception(const char* msg);
+    explicit Exception(const std::string&amp; msg);
+    virtual const std::string&amp; getMessageProperty() const;
+    const char* what() const noexcept override;
+private:
+    std::string message_;
+};</code></pre>
+    <p>Note: <code>System::Exception</code> does <strong>not</strong> inherit from <code>System::Object</code>. This keeps it compatible with <code>std::exception</code> and standard C++ exception mechanisms.</p>
+
+    <h2>Exception Hierarchy</h2>
+    <pre><code>std::exception
+└── System::Exception
+      ├── System::SystemException
+      │     ├── ArgumentException
+      │     │     ├── ArgumentNullException
+      │     │     └── ArgumentOutOfRangeException
+      │     ├── ArithmeticException
+      │     │     ├── DivideByZeroException
+      │     │     └── OverflowException
+      │     ├── FormatException
+      │     ├── IndexOutOfRangeException
+      │     ├── InvalidCastException
+      │     ├── InvalidOperationException
+      │     ├── NotImplementedException
+      │     ├── NotSupportedException
+      │     ├── NullReferenceException
+      │     ├── ObjectDisposedException
+      │     ├── OperationCanceledException
+      │     ├── OutOfMemoryException
+      │     ├── TimeoutException
+      │     ├── UnauthorizedAccessException
+      │     ├── IO::IOException
+      │     │     ├── IO::DirectoryNotFoundException
+      │     │     ├── IO::EndOfStreamException
+      │     │     ├── IO::FileNotFoundException
+      │     │     ├── IO::InvalidDataException
+      │     │     └── IO::IsolatedStorage::IsolatedStorageException
+      │     └── ... (many more)
+      └── System::ApplicationException</code></pre>
+
+    <h2>Complete Exception List</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exception Class</th><th>Header</th><th>C# Equivalent</th></tr>
+      <tr><td><code>Exception</code></td><td><code>System/Exception.hpp</code></td><td>System.Exception</td></tr>
+      <tr><td><code>SystemException</code></td><td><code>System/SystemException.hpp</code></td><td>System.SystemException</td></tr>
+      <tr><td><code>ApplicationException</code></td><td><code>System/ApplicationException.hpp</code></td><td>System.ApplicationException</td></tr>
+      <tr><td><code>ArgumentException</code></td><td><code>System/ArgumentException.hpp</code></td><td>System.ArgumentException</td></tr>
+      <tr><td><code>ArgumentNullException</code></td><td><code>System/ArgumentNullException.hpp</code></td><td>System.ArgumentNullException</td></tr>
+      <tr><td><code>ArgumentOutOfRangeException</code></td><td><code>System/ArgumentOutOfRangeException.hpp</code></td><td>System.ArgumentOutOfRangeException</td></tr>
+      <tr><td><code>ArithmeticException</code></td><td><code>System/ArithmeticException.hpp</code></td><td>System.ArithmeticException</td></tr>
+      <tr><td><code>DivideByZeroException</code></td><td><code>System/DivideByZeroException.hpp</code></td><td>System.DivideByZeroException</td></tr>
+      <tr><td><code>OverflowException</code></td><td><code>System/OverflowException.hpp</code></td><td>System.OverflowException</td></tr>
+      <tr><td><code>FormatException</code></td><td><code>System/FormatException.hpp</code></td><td>System.FormatException</td></tr>
+      <tr><td><code>IndexOutOfRangeException</code></td><td><code>System/IndexOutOfRangeException.hpp</code></td><td>System.IndexOutOfRangeException</td></tr>
+      <tr><td><code>InvalidCastException</code></td><td><code>System/InvalidCastException.hpp</code></td><td>System.InvalidCastException</td></tr>
+      <tr><td><code>InvalidOperationException</code></td><td><code>System/InvalidOperationException.hpp</code></td><td>System.InvalidOperationException</td></tr>
+      <tr><td><code>NotImplementedException</code></td><td><code>System/NotImplementedException.hpp</code></td><td>System.NotImplementedException</td></tr>
+      <tr><td><code>NotSupportedException</code></td><td><code>System/NotSupportedException.hpp</code></td><td>System.NotSupportedException</td></tr>
+      <tr><td><code>NullReferenceException</code></td><td><code>System/NullReferenceException.hpp</code></td><td>System.NullReferenceException</td></tr>
+      <tr><td><code>ObjectDisposedException</code></td><td><code>System/ObjectDisposedException.hpp</code></td><td>System.ObjectDisposedException</td></tr>
+      <tr><td><code>OperationCanceledException</code></td><td><code>System/OperationCanceledException.hpp</code></td><td>System.OperationCanceledException</td></tr>
+      <tr><td><code>OutOfMemoryException</code></td><td><code>System/OutOfMemoryException.hpp</code></td><td>System.OutOfMemoryException</td></tr>
+      <tr><td><code>TimeoutException</code></td><td><code>System/TimeoutException.hpp</code></td><td>System.TimeoutException</td></tr>
+      <tr><td><code>UnauthorizedAccessException</code></td><td><code>System/UnauthorizedAccessException.hpp</code></td><td>System.UnauthorizedAccessException</td></tr>
+      <tr><td><code>PlatformNotSupportedException</code></td><td><code>System/PlatformNotSupportedException.hpp</code></td><td>System.PlatformNotSupportedException</td></tr>
+      <tr><td><code>IO::IOException</code></td><td><code>System/IO/IOException.hpp</code></td><td>System.IO.IOException</td></tr>
+      <tr><td><code>IO::FileNotFoundException</code></td><td><code>System/IO/FileNotFoundException.hpp</code></td><td>System.IO.FileNotFoundException</td></tr>
+      <tr><td><code>IO::DirectoryNotFoundException</code></td><td><code>System/IO/DirectoryNotFoundException.hpp</code></td><td>System.IO.DirectoryNotFoundException</td></tr>
+      <tr><td><code>IO::EndOfStreamException</code></td><td><code>System/IO/EndOfStreamException.hpp</code></td><td>System.IO.EndOfStreamException</td></tr>
+      <tr><td><code>IO::InvalidDataException</code></td><td><code>System/IO/InvalidDataException.hpp</code></td><td>System.IO.InvalidDataException</td></tr>
+      <tr><td><code>Collections::Generic::KeyNotFoundException</code></td><td><code>System/Collections/Generic/KeyNotFoundException.hpp</code></td><td>System.Collections.Generic.KeyNotFoundException</td></tr>
+    </table>
+    </div>
+
+    <h2>Throwing Conventions</h2>
+    <pre><code>// Throw by value (standard C++ practice)
+throw System::ArgumentNullException("Parameter 'name' cannot be null.");
+throw System::ArgumentOutOfRangeException("index", "Index out of range.");
+throw System::NotImplementedException("This method is not yet implemented.");
+throw System::PlatformNotSupportedException("Not supported on this platform.");</code></pre>
+
+    <h2>Catching Conventions</h2>
+    <pre><code>try {
+    // ...
+}
+catch (const System::ArgumentNullException&amp; e) {
+    // specific catch
+    std::cerr &lt;&lt; e.getMessageProperty() &lt;&lt; "\n";
+}
+catch (const System::Exception&amp; e) {
+    // catch any sharp-runtime exception
+    std::cerr &lt;&lt; e.what() &lt;&lt; "\n";
+}
+catch (const std::exception&amp; e) {
+    // catch std or sharp-runtime exceptions
+    std::cerr &lt;&lt; e.what() &lt;&lt; "\n";
+}</code></pre>
+
+    <h2>Stub Exceptions</h2>
+    <p>Several exception types exist purely for API compatibility but are rarely thrown. They have headers but minimal or empty <code>.cpp</code> bodies:</p>
+    <ul>
+      <li><code>AccessViolationException</code></li>
+      <li><code>AppDomainUnloadedException</code></li>
+      <li><code>BadImageFormatException</code></li>
+      <li><code>ExecutionEngineException</code></li>
+      <li><code>StackOverflowException</code></li>
+    </ul>
+
+    <h2>Known Limitations vs .NET</h2>
+    <ul>
+      <li>No inner exception (<code>InnerException</code> property) — not visible in the current implementation</li>
+      <li>No stack trace capture — <code>StackTrace</code> property is a stub</li>
+      <li>No unhandled exception event with real thread-pool integration</li>
+      <li><code>OutOfMemoryException</code> is not automatically thrown on allocation failure (C++ <code>std::bad_alloc</code> would be thrown instead)</li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="prev" href="memory-management.html"><span class="page-nav-label">← Previous</span>Memory Management</a>
+      <a class="next" href="strings.html"><span class="page-nav-label">Next →</span>Strings</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

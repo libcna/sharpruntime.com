@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding Style — sharp-runtime Developer Guide</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Development</li>
+    <li><a href="index.html">Developer Guide</a></li>
+    <li><a href="coding-style.html">Coding Style</a></li>
+    <li><a href="debugging.html">Debugging</a></li>
+    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Coding Style</span></div>
+    <div id="search-results"></div>
+    <h1>Coding Style</h1>
+    <p class="page-subtitle">Non-negotiable coding conventions enforced by <code>CLAUDE.md</code>.</p>
+
+    <div class="callout warning">
+      <div class="callout-title">These rules are enforced</div>
+      The rules in this section come directly from <code>CLAUDE.md</code> in the sharp-runtime
+      repository. They are non-negotiable. All new code must follow them exactly.
+    </div>
+
+    <h2>Zero Warnings Policy</h2>
+    <p>The project must compile with zero warnings. The CMakeLists.txt enables strict warning flags.
+    Any code that introduces a new warning must be fixed before merging.</p>
+
+    <h2>Test Requirement</h2>
+    <p>New features must include focused tests in their owning module. Run that component's test executable during development; run <code>scripts/run_component_tests.sh build</code> after configuring <code>All</code> for a repository-wide change.</p>
+
+    <h2>C++ Standard</h2>
+    <p>C++23 is required. Use C++23 features freely — the project explicitly targets GCC 13+,
+    Clang 17+, and MSVC 2022 17.5+.</p>
+
+    <h2>Namespace Syntax</h2>
+    <p>Use C++17 nested namespace syntax, not the older nested braces form:</p>
+    <pre><code>// Correct
+namespace System::Collections::Generic {
+    class List { ... };
+}
+
+// Wrong — do not use
+namespace System {
+    namespace Collections {
+        namespace Generic {
+            class List { ... };
+        }
+    }
+}</code></pre>
+
+    <h2>Property Naming</h2>
+    <p>All properties must use the <code>getXxxProperty()</code> / <code>setXxxProperty()</code>
+    naming convention with the <code>Prop.hpp</code> macros:</p>
+    <pre><code>// In .hpp
+DDATA(int, Width)       // declares width_, getWidthProperty(), setWidthProperty()
+DGETTER(int, Area)      // declares getAreaProperty() only (read-only)
+
+// In .cpp
+IDATA(MyClass, int, Width)   // implements getter + setter
+IGETTER(MyClass, int, Area, width_ * height_)  // implements computed getter</code></pre>
+    <p>Static properties use <code>DGETTERSTATIC</code> / <code>IGETTERSTATIC</code>.</p>
+
+    <h2>Platform Guards</h2>
+    <p>POSIX headers (<code>&lt;unistd.h&gt;</code>, <code>&lt;sys/socket.h&gt;</code>, etc.)
+    must <strong>only</strong> appear in <code>.cpp</code> files, never in <code>.hpp</code> files.
+    Platform-specific code must be guarded:</p>
+    <pre><code>#ifdef _WIN32
+    // Windows-specific
+#elif defined(__EMSCRIPTEN__)
+    // Emscripten-specific
+#else
+    // POSIX (Linux, macOS, Android)
+#endif</code></pre>
+
+    <h2>SPDX License Headers</h2>
+    <p>Every file must start with the SPDX header:</p>
+    <pre><code>// SPDX-License-Identifier: MIT
+// Copyright (C) [year] [author]
+// Based on .NET Runtime (MIT License)</code></pre>
+
+    <h2>GetTypeName Macros</h2>
+    <p>Every class that inherits <code>System::Object</code> must implement <code>GetTypeName()</code>
+    using the macros:</p>
+    <pre><code>// In .hpp class body:
+GetTypeNameHPP();
+
+// In .cpp:
+GetTypeNameCPP(ClassName, "Namespace.ClassName")</code></pre>
+
+    <h2>File Structure</h2>
+    <ul>
+      <li>Headers in <code>modules/&lt;module&gt;/include/</code>, mirroring the namespace hierarchy</li>
+      <li>Implementations in the same module's <code>src/</code> directory</li>
+      <li>Tests in the same module's <code>tests/</code> directory (one test file per class is typical)</li>
+      <li>Cross-module scenarios only in <code>tests/integration/</code></li>
+      <li>Each module declares its public, private, and test-only dependencies in its local <code>CMakeLists.txt</code></li>
+      <li>File names match class names exactly</li>
+    </ul>
+
+    <h2>Header Guards</h2>
+    <p>Use <code>#pragma once</code> (not traditional <code>#ifndef</code> guards).</p>
+
+    <h2>Status Doxygen Comments</h2>
+    <p>Each class header should include a Doxygen comment with its implementation status:</p>
+    <pre><code>/**
+ * @brief Short description.
+ * @status Implemented | Partial | Stub | Todo | Verified
+ */</code></pre>
+
+    <h2>Naming Conventions</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>What</th><th>Convention</th><th>Example</th></tr>
+      <tr><td>Classes</td><td>PascalCase</td><td><code>MyClass</code></td></tr>
+      <tr><td>Methods</td><td>PascalCase</td><td><code>DoSomething()</code></td></tr>
+      <tr><td>Private fields</td><td>camelCase + underscore</td><td><code>myField_</code></td></tr>
+      <tr><td>Property backing field</td><td>camelCase + underscore</td><td><code>width_</code></td></tr>
+      <tr><td>Property getter</td><td>get + PascalCase + Property</td><td><code>getWidthProperty()</code></td></tr>
+      <tr><td>Property setter</td><td>set + PascalCase + Property</td><td><code>setWidthProperty(v)</code></td></tr>
+      <tr><td>Local variables</td><td>camelCase</td><td><code>localVar</code></td></tr>
+      <tr><td>Namespaces</td><td>PascalCase</td><td><code>System::IO</code></td></tr>
+    </table>
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="index.html">← Developer Guide</a>
+      <a class="next" href="debugging.html">Debugging →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

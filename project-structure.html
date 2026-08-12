@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Structure — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Project Structure</span></div>
+    <div id="search-results"></div>
+    <h1>Project Structure</h1>
+    <p class="page-subtitle">Module ownership, stable public include paths, and the build-time dependency graph.</p>
+
+    <h2>Top-Level Layout</h2>
+    <pre><code>sharp-runtime/
+├── CMakeLists.txt          # Root component selection and build options
+├── cmake/                  # Component registration and boundary validation
+├── modules/                # 40 self-contained runtime modules
+├── tests/integration/      # Tests which genuinely span modules
+├── vendor/                 # Third-party dependencies
+├── scripts/                # Component checks and test runner
+├── docs/                   # Component guides and generated catalogue
+├── README.md               # Project overview and integration quick start
+├── CLAUDE.md               # Architecture and portability policy
+├── Doxyfile                # Doxygen configuration
+└── build/                  # Generated build artifacts (not committed)</code></pre>
+
+    <h2>modules/ — Runtime Ownership</h2>
+    <p>The physical layout is module-based. Every module owns its public headers, implementation sources, tests, and CMake declaration:</p>
+    <pre><code>modules/text-json/
+├── CMakeLists.txt
+├── README.md
+├── include/System/Text/Json/  # Consumer-facing header paths
+├── src/
+└── tests/System/Text/Json/</code></pre>
+    <p>Consumer include spellings are stable: code still writes <code>#include &lt;System/Text/Json/JsonDocument.hpp&gt;</code>. Linking the appropriate <code>SharpRuntime::*</code> target supplies the module include root.</p>
+
+    <h3>Module groups</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Group</th><th>Physical modules</th></tr>
+      <tr><td>Foundation</td><td><code>core</code>, <code>console</code>, <code>uri</code>, <code>time-zone</code>, <code>runtime</code>, <code>storage</code></td></tr>
+      <tr><td>Collections and data</td><td><code>buffers</code>, <code>collections</code>, <code>collections-async</code>, <code>collections-object-model</code>, <code>component-model</code>, <code>numerics</code></td></tr>
+      <tr><td>Text and execution</td><td><code>text</code>, <code>text-json</code>, <code>text-regular-expressions</code>, <code>threading</code>, <code>threading-tasks</code>, <code>threading-channels</code>, <code>timers</code></td></tr>
+      <tr><td>I/O</td><td><code>io</code>, <code>io-compression</code>, <code>io-compression-zip</code>, <code>io-hashing</code>, <code>io-isolated-storage</code></td></tr>
+      <tr><td>Networking</td><td><code>net</code>, <code>net-sockets</code>, <code>net-http</code>, <code>net-http-headers</code>, <code>net-http-json</code>, <code>net-mime</code>, <code>net-network-information</code>, <code>net-security</code>, <code>net-websockets</code></td></tr>
+      <tr><td>Other domains</td><td><code>diagnostics</code>, <code>globalization</code>, <code>security</code>, <code>security-cryptography</code>, <code>security-cryptography-random</code>, <code>xml</code>, <code>xml-linq</code></td></tr>
+    </table></div>
+
+    <h2>Headers, Sources, and Tests</h2>
+    <p>Module ownership, rather than namespace prefixes, defines physical placement. A header may be included as <code>System/IO/Stream.hpp</code> while living in <code>modules/io/include/</code>. Header-only components have no implementation sources; static components keep their sources in the local <code>src/</code> directory.</p>
+    <p>There are 983 public headers and 369 component-owned test sources. Only cross-module scenarios live in <code>tests/integration/</code>.</p>
+
+    <h2>CMake and Dependency Boundaries</h2>
+    <p>Each module's <code>CMakeLists.txt</code> declares whether its dependencies are public, private, or test-only. Public dependencies propagate the necessary include roots to consumers; private dependencies do not. The component validator checks source ownership, include relationships, dependency visibility, and graph cycles.</p>
+    <p>See <a href="modules/index.html">Components &amp; Modules</a> for the public component catalogue and <a href="build.html">Build System</a> for selection examples.</p>
+
+    <h2>Third-Party Code</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Dependency</th><th>Owner</th><th>Visibility</th></tr>
+      <tr><td>GoogleTest</td><td>Test build</td><td>Enabled only with <code>SHARP_RUNTIME_BUILD_TESTS</code></td></tr>
+      <tr><td>ZLIB</td><td><code>IO.Compression</code></td><td>Private</td></tr>
+      <tr><td>miniz</td><td><code>IO.Compression.Zip</code></td><td>Private</td></tr>
+      <tr><td>tinyxml2</td><td><code>Xml</code></td><td>Public, because XML headers expose its types</td></tr>
+      <tr><td>nlohmann/json</td><td><code>Text.Json</code></td><td>Vendored header dependency</td></tr>
+    </table></div>
+
+    <div class="page-nav">
+      <a class="prev" href="architecture.html"><span class="page-nav-label">← Previous</span>Architecture</a>
+      <a class="next" href="runtime-overview.html"><span class="page-nav-label">Next →</span>Runtime Overview</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

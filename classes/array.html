@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::Array — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::Array</span></div>
+    <div id="search-results"></div>
+    <h1>System::Array</h1>
+    <p class="page-subtitle">Static array helper class. The actual array type is <code>std::vector&lt;T&gt;</code>.</p>
+    <p class="file-path">modules/core/include/System/Array.hpp</p>
+
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+
+    <div class="callout warning">
+      <div class="callout-title">Key Design Choice</div>
+      In sharp-runtime, C# <code>T[]</code> maps to <code>std::vector&lt;T&gt;</code>, <strong>not</strong>
+      to <code>System::Array</code>. The <code>System::Array</code> class contains only
+      <strong>static template helpers</strong> that operate on <code>std::vector</code>.
+      Its constructor is deleted — you cannot instantiate it.
+    </div>
+
+    <h2>Overview</h2>
+    <p>When porting C# code that uses <code>Array.Sort(arr)</code> or <code>Array.Copy(src, dst, len)</code>,
+    replace with <code>System::Array::Sort(vec)</code> or <code>System::Array::Copy(src, dst, len)</code>.</p>
+
+    <p>The static methods are all template functions that accept <code>std::vector&lt;T&gt;&amp;</code>.</p>
+
+    <h2>Static Template Methods</h2>
+
+    <h3>Sort</h3>
+    <pre><code>template&lt;typename T&gt;
+static void Sort(std::vector&lt;T&gt;&amp; array);
+
+template&lt;typename T, typename Comparison&gt;
+static void Sort(std::vector&lt;T&gt;&amp; array, Comparison comparison);</code></pre>
+    <p>Sorts the vector in-place. Wraps <code>std::sort</code>.
+    The two-argument overload accepts a comparator (equivalent to C# <code>IComparer</code>).</p>
+    <pre><code>std::vector&lt;int&gt; nums = {3, 1, 2};
+System::Array::Sort(nums);
+// nums is now {1, 2, 3}
+
+System::Array::Sort(nums, [](int a, int b){ return a &gt; b; });
+// nums is now {3, 2, 1}</code></pre>
+
+    <h3>Copy</h3>
+    <pre><code>template&lt;typename T&gt;
+static void Copy(const std::vector&lt;T&gt;&amp; src, std::vector&lt;T&gt;&amp; dst, int length);
+
+template&lt;typename T&gt;
+static void Copy(const std::vector&lt;T&gt;&amp; src, int srcIndex,
+                 std::vector&lt;T&gt;&amp; dst, int dstIndex, int length);</code></pre>
+    <p>Copies elements between vectors. The four-index overload copies a range with offset.</p>
+
+    <h3>Resize</h3>
+    <pre><code>template&lt;typename T&gt;
+static void Resize(std::vector&lt;T&gt;&amp; array, int newSize);</code></pre>
+    <p>Resizes the vector. Elements beyond the new size are dropped; new slots are value-initialized.
+    Wraps <code>std::vector::resize</code>.</p>
+
+    <h3>IndexOf</h3>
+    <pre><code>template&lt;typename T&gt;
+static int IndexOf(const std::vector&lt;T&gt;&amp; array, const T&amp; value);
+
+template&lt;typename T&gt;
+static int IndexOf(const std::vector&lt;T&gt;&amp; array, const T&amp; value, int startIndex);</code></pre>
+    <p>Returns the zero-based index of the first occurrence of <code>value</code>, or <code>-1</code> if not found.</p>
+
+    <h3>Reverse</h3>
+    <pre><code>template&lt;typename T&gt;
+static void Reverse(std::vector&lt;T&gt;&amp; array);</code></pre>
+    <p>Reverses the vector in-place. Wraps <code>std::reverse</code>.</p>
+
+    <h3>Clear</h3>
+    <pre><code>template&lt;typename T&gt;
+static void Clear(std::vector&lt;T&gt;&amp; array, int index, int length);</code></pre>
+    <p>Sets elements in the range <code>[index, index+length)</code> to their default value
+    (zero for numeric types, empty for strings, etc.).</p>
+
+    <h3>BinarySearch</h3>
+    <pre><code>template&lt;typename T&gt;
+static int BinarySearch(const std::vector&lt;T&gt;&amp; array, const T&amp; value);</code></pre>
+    <p>Binary search on a sorted vector. Returns the index or a negative value if not found (same
+    convention as .NET). <span class="badge badge-needs-verification">Needs verification</span></p>
+
+    <h2>Mapping from C#</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>sharp-runtime equivalent</th></tr>
+      <tr><td><code>int[] arr = new int[5];</code></td><td><code>std::vector&lt;int&gt; arr(5);</code></td></tr>
+      <tr><td><code>int[] arr = {1,2,3};</code></td><td><code>std::vector&lt;int&gt; arr = {1,2,3};</code></td></tr>
+      <tr><td><code>arr.Length</code></td><td><code>arr.size()</code></td></tr>
+      <tr><td><code>arr[i]</code></td><td><code>arr[i]</code> (same)</td></tr>
+      <tr><td><code>Array.Sort(arr)</code></td><td><code>System::Array::Sort(arr)</code></td></tr>
+      <tr><td><code>Array.Copy(src,dst,n)</code></td><td><code>System::Array::Copy(src,dst,n)</code></td></tr>
+      <tr><td><code>Array.Resize(ref arr, n)</code></td><td><code>System::Array::Resize(arr, n)</code></td></tr>
+      <tr><td><code>Array.IndexOf(arr, val)</code></td><td><code>System::Array::IndexOf(arr, val)</code></td></tr>
+      <tr><td><code>Array.Reverse(arr)</code></td><td><code>System::Array::Reverse(arr)</code></td></tr>
+      <tr><td><code>Array.Clear(arr, i, n)</code></td><td><code>System::Array::Clear(arr, i, n)</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Related Types</h2>
+    <ul>
+      <li><a href="../arrays.html">Arrays overview</a> — full discussion of array types including <code>ArraySegment</code>, <code>Buffer</code>, <code>Span&lt;T&gt;</code></li>
+      <li><a href="../modules/collections.html">Collections</a> — <code>List&lt;T&gt;</code>, <code>Dictionary&lt;K,V&gt;</code> etc.</li>
+    </ul>
+
+    <div class="nav-links">
+      <a class="prev" href="string.html">← System::String</a>
+      <a class="next" href="eventhandler.html">System::EventHandler →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

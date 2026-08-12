@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Macros — sharp-runtime Internals</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li class="nav-section">Internals</li>
+    <li><a href="index.html">Internals Index</a></li>
+    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
+    <li><a href="property-macros.html">Property Macros</a></li>
+    <li><a href="string-internals.html">String Internals</a></li>
+    <li><a href="array-internals.html">Array Internals</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Internals</a></span><span>Property Macros</span></div>
+    <div id="search-results"></div>
+    <h1>Property Macros</h1>
+    <p class="page-subtitle">The <code>Prop.hpp</code> macro system that implements .NET-style properties in C++23.</p>
+    <p class="file-path">modules/core/include/SharpRuntime/Prop.hpp</p>
+
+    <h2>Motivation</h2>
+    <p>C++ has no built-in property syntax. C# properties like <code>obj.Width</code> (which call
+    getter/setter methods transparently) become explicit method calls in C++. The sharp-runtime
+    coding convention is to expose properties as <code>getXxxProperty()</code> / <code>setXxxProperty()</code>
+    methods, and the <code>Prop.hpp</code> macros generate the required boilerplate.</p>
+
+    <p>This naming convention is enforced by <code>CLAUDE.md</code> — it is non-negotiable for all
+    new code in the project.</p>
+
+    <h2>Source Macros (in .hpp files)</h2>
+
+    <h3>DDATA — Declare data member + getter + setter</h3>
+    <pre><code>DDATA(type, Name)</code></pre>
+    <p>Expands to:</p>
+    <ul>
+      <li>A <code>private</code> data member: <code>type name_;</code></li>
+      <li>A public getter: <code>type getNameProperty() const;</code></li>
+      <li>A public setter: <code>void setNameProperty(type value);</code></li>
+    </ul>
+    <pre><code>class Rectangle : public System::Object {
+public:
+    DDATA(int, Width)
+    DDATA(int, Height)
+    GetTypeNameHPP();
+};</code></pre>
+
+    <h3>DGETTER — Declare getter only (read-only property)</h3>
+    <pre><code>DGETTER(type, Name)</code></pre>
+    <p>Expands to a public getter declaration only. No setter is generated.
+    Use for computed or read-only properties.</p>
+    <pre><code>class Rectangle : public System::Object {
+public:
+    DDATA(int, Width)
+    DDATA(int, Height)
+    DGETTER(int, Area)   // computed: Width * Height
+    GetTypeNameHPP();
+};</code></pre>
+
+    <h3>DGETTERSTATIC — Declare static getter</h3>
+    <pre><code>DGETTERSTATIC(type, Name)</code></pre>
+    <p>Declares a static getter method: <code>static type getNameProperty();</code>
+    Used for static properties like <code>DateTime::Now</code> → <code>DateTime::getNowProperty()</code>.</p>
+
+    <h2>Implementation Macros (in .cpp files)</h2>
+
+    <h3>IDATA — Implement getter + setter</h3>
+    <pre><code>IDATA(ClassName, type, Name)</code></pre>
+    <p>Provides default getter (returns the backing field) and setter (assigns to the backing field).
+    Most properties use this — it is the standard implementation for simple value properties.</p>
+    <pre><code>// Rectangle.cpp
+IDATA(Rectangle, int, Width)
+IDATA(Rectangle, int, Height)</code></pre>
+    <p>Expands to approximately:</p>
+    <pre><code>int Rectangle::getWidthProperty() const { return width_; }
+void Rectangle::setWidthProperty(int value) { width_ = value; }
+int Rectangle::getHeightProperty() const { return height_; }
+void Rectangle::setHeightProperty(int value) { height_ = value; }</code></pre>
+
+    <h3>IGETTER — Implement getter only</h3>
+    <pre><code>IGETTER(ClassName, type, Name, expression)</code></pre>
+    <p>Provides the getter with a custom expression. Use for computed properties.</p>
+    <pre><code>IGETTER(Rectangle, int, Area, width_ * height_)</code></pre>
+
+    <h3>IGETTERSTATIC — Implement static getter</h3>
+    <pre><code>IGETTERSTATIC(ClassName, type, Name, expression)</code></pre>
+    <p>Implements a static property getter.</p>
+
+    <h2>GetTypeName Macros</h2>
+    <p>Two macros handle the pure virtual <code>GetTypeName()</code> from <code>System::Object</code>:</p>
+
+    <h3>GetTypeNameHPP()</h3>
+    <pre><code>GetTypeNameHPP()</code></pre>
+    <p>Placed in the class body in the <code>.hpp</code> file. Expands to:</p>
+    <pre><code>std::string GetTypeName() const override;</code></pre>
+
+    <h3>GetTypeNameCPP(CLASS, NAME)</h3>
+    <pre><code>GetTypeNameCPP(Rectangle, "System.Drawing.Rectangle")</code></pre>
+    <p>Placed in the <code>.cpp</code> file. Expands to:</p>
+    <pre><code>std::string Rectangle::GetTypeName() const { return "System.Drawing.Rectangle"; }</code></pre>
+
+    <h2>Naming Convention</h2>
+    <p>The naming rule for a property named <code>Width</code>:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>What</th><th>C++ name</th></tr>
+      <tr><td>Backing field</td><td><code>width_</code> (lowercase first letter + underscore)</td></tr>
+      <tr><td>Getter method</td><td><code>getWidthProperty()</code></td></tr>
+      <tr><td>Setter method</td><td><code>setWidthProperty(value)</code></td></tr>
+    </table>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-title">Why not operator overloading or template magic?</div>
+      <code>modules/core/include/SharpRuntime/Experimental/Property.hpp</code> contains an experimental
+      <code>std::function</code>-based property wrapper, but it is NOT used in the main
+      sharp-runtime codebase. The macro approach was chosen for simplicity, zero overhead,
+      and debuggability.
+    </div>
+
+    <h2>Example: Complete Class</h2>
+    <pre><code>// --- Vector2D.hpp ---
+#pragma once
+#include &lt;SharpRuntime/Prop.hpp&gt;
+#include &lt;System/Object.hpp&gt;
+
+namespace MyLib {
+class Vector2D : public System::Object {
+public:
+    DDATA(float, X)
+    DDATA(float, Y)
+    DGETTER(float, Length)
+    GetTypeNameHPP();
+    std::string ToString() const override;
+};
+}
+
+// --- Vector2D.cpp ---
+#include "Vector2D.hpp"
+#include &lt;cmath&gt;
+
+namespace MyLib {
+IDATA(Vector2D, float, X)
+IDATA(Vector2D, float, Y)
+IGETTER(Vector2D, float, Length, std::sqrt(x_ * x_ + y_ * y_))
+GetTypeNameCPP(Vector2D, "MyLib.Vector2D")
+std::string Vector2D::ToString() const {
+    return "(" + std::to_string(x_) + ", " + std::to_string(y_) + ")";
+}
+}</code></pre>
+
+    <div class="nav-links">
+      <a class="prev" href="object-lifecycle.html">← Object Lifecycle</a>
+      <a class="next" href="string-internals.html">String Internals →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

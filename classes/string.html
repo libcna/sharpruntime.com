@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::String — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::String</span></div>
+    <div id="search-results"></div>
+    <h1>System::String</h1>
+    <p class="page-subtitle">Static string utility class. The actual string type is <code>std::string</code>.</p>
+    <p class="file-path">modules/core/include/System/String.hpp</p>
+
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+
+    <div class="callout warning">
+      <div class="callout-title">Key Design Choice</div>
+      In sharp-runtime, C# <code>string</code> maps to <code>std::string</code>, <strong>not</strong>
+      to <code>System::String</code>. The <code>System::String</code> class contains only
+      <strong>static utility methods</strong>. Its constructor is deleted — you cannot instantiate it.
+    </div>
+
+    <h2>Overview</h2>
+    <p>When porting C# code, replace all uses of C# <code>string</code> (the type) with <code>std::string</code>.
+    Static methods that C# calls as <code>string.IsNullOrEmpty(s)</code> become
+    <code>System::String::IsNullOrEmpty(s)</code> in sharp-runtime.</p>
+
+    <h2>Static Methods</h2>
+
+    <h3>IsNullOrEmpty / IsNullOrWhiteSpace</h3>
+    <pre><code>static bool IsNullOrEmpty(const std::string&amp; s);
+static bool IsNullOrWhiteSpace(const std::string&amp; s);</code></pre>
+    <p><code>IsNullOrEmpty</code> returns <code>true</code> if the string is empty (there is no null
+    in C++; "null" strings map to empty strings by convention).</p>
+
+    <h3>IsEmpty</h3>
+    <pre><code>static bool IsEmpty(const std::string&amp; s);</code></pre>
+    <p>Equivalent to <code>s.empty()</code>.</p>
+
+    <h3>StartsWith / EndsWith</h3>
+    <pre><code>static bool StartsWith(const std::string&amp; s, const std::string&amp; prefix);
+static bool EndsWith(const std::string&amp; s, const std::string&amp; suffix);</code></pre>
+    <p>Checks if the string starts or ends with the given substring.</p>
+
+    <h3>Contains</h3>
+    <pre><code>static bool Contains(const std::string&amp; s, const std::string&amp; value);</code></pre>
+    <p>Returns <code>true</code> if <code>value</code> is found within <code>s</code>.</p>
+
+    <h3>Split</h3>
+    <pre><code>static std::vector&lt;std::string&gt; Split(const std::string&amp; s, char delimiter);
+static std::vector&lt;std::string&gt; Split(const std::string&amp; s, const std::string&amp; delimiter);</code></pre>
+    <p>Splits the string on a delimiter. Returns a <code>std::vector&lt;std::string&gt;</code>
+    (maps to C# <code>string[]</code>).</p>
+
+    <h3>Format</h3>
+    <pre><code>template&lt;typename... Args&gt;
+static std::string Format(const std::string&amp; format, Args&amp;&amp;... args);</code></pre>
+    <p>C#-style format string. Placeholder syntax: <code>{0}</code>, <code>{1}</code>, etc.</p>
+    <pre><code>std::string s = System::String::Format("Hello {0}, you are {1} years old", name, age);</code></pre>
+
+    <h3>ToString</h3>
+    <pre><code>template&lt;typename T&gt;
+static std::string ToString(T value);</code></pre>
+    <p>Converts a value to its string representation.</p>
+
+    <h3>Join</h3>
+    <pre><code>static std::string Join(const std::string&amp; separator,
+                        const std::vector&lt;std::string&gt;&amp; values);</code></pre>
+    <p>Joins vector elements with a separator string.</p>
+
+    <h3>Trim / TrimStart / TrimEnd</h3>
+    <pre><code>static std::string Trim(const std::string&amp; s);
+static std::string TrimStart(const std::string&amp; s);
+static std::string TrimEnd(const std::string&amp; s);</code></pre>
+    <p>Removes leading/trailing whitespace.</p>
+
+    <h3>ToUpper / ToLower</h3>
+    <pre><code>static std::string ToUpper(const std::string&amp; s);
+static std::string ToLower(const std::string&amp; s);</code></pre>
+    <p>Case conversion. <span class="badge badge-needs-verification">Needs verification</span> — locale behavior may differ from .NET.</p>
+
+    <h3>Replace</h3>
+    <pre><code>static std::string Replace(const std::string&amp; s,
+                           const std::string&amp; oldValue,
+                           const std::string&amp; newValue);</code></pre>
+    <p>Returns a new string with all occurrences of <code>oldValue</code> replaced.</p>
+
+    <h3>Substring</h3>
+    <pre><code>static std::string Substring(const std::string&amp; s, int startIndex);
+static std::string Substring(const std::string&amp; s, int startIndex, int length);</code></pre>
+    <p>Extracts a substring. Delegates to <code>std::string::substr</code>.</p>
+
+    <h2>String Comparisons</h2>
+    <p>Use standard C++ equality operators for string comparison:</p>
+    <pre><code>// C# equality:  s1 == s2
+// sharp-runtime: s1 == s2   (std::string operator==)
+
+// C# ordinal ignore case:  string.Equals(a, b, StringComparison.OrdinalIgnoreCase)
+// sharp-runtime:
+bool eq = System::String::Equals(a, b, System::StringComparison::OrdinalIgnoreCase);</code></pre>
+
+    <h2>Mapping from C#</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>sharp-runtime equivalent</th></tr>
+      <tr><td><code>string s = "hello";</code></td><td><code>std::string s = "hello";</code></td></tr>
+      <tr><td><code>string.IsNullOrEmpty(s)</code></td><td><code>System::String::IsNullOrEmpty(s)</code></td></tr>
+      <tr><td><code>s.StartsWith("x")</code></td><td><code>System::String::StartsWith(s, "x")</code></td></tr>
+      <tr><td><code>s.Split(',')</code></td><td><code>System::String::Split(s, ',')</code></td></tr>
+      <tr><td><code>string.Format("{0}", x)</code></td><td><code>System::String::Format("{0}", x)</code></td></tr>
+      <tr><td><code>s.Length</code></td><td><code>s.size()</code> or <code>s.length()</code></td></tr>
+      <tr><td><code>s[i]</code></td><td><code>s[i]</code> (same)</td></tr>
+      <tr><td><code>s1 + s2</code></td><td><code>s1 + s2</code> (same)</td></tr>
+      <tr><td><code>s == null</code></td><td><code>s.empty()</code> (by convention)</td></tr>
+    </table>
+    </div>
+
+    <h2>char type</h2>
+    <p>C# <code>char</code> is a 16-bit Unicode value. In sharp-runtime the alias <code>charcs</code>
+    maps to <code>char16_t</code>. The underlying <code>std::string</code> uses 8-bit <code>char</code>
+    (UTF-8 bytes). See <a href="../strings.html">Strings</a> for the encoding discussion.</p>
+
+    <div class="nav-links">
+      <a class="prev" href="exception.html">← System::Exception</a>
+      <a class="next" href="array.html">System::Array →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

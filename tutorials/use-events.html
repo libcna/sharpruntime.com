@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using Events — sharp-runtime Tutorials</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="index.html">Tutorials Index</a></li>
+    <li><a href="use-collections.html">Using Collections</a></li>
+    <li><a href="port-csharp-class.html">Porting a C# Class</a></li>
+    <li><a href="work-with-files.html">Working with Files</a></li>
+    <li><a href="use-events.html">Using Events</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Tutorials</a></span><span>Using Events</span></div>
+    <div id="search-results"></div>
+    <h1>Using Events</h1>
+    <p class="page-subtitle">Declaring, subscribing to, and firing events using <code>EventHandler&lt;T&gt;</code>.</p>
+
+    <h2>Includes</h2>
+    <pre><code>#include &lt;System/EventHandler.hpp&gt;
+#include &lt;System/EventArgs.hpp&gt;</code></pre>
+
+    <h2>Step 1: Define EventArgs</h2>
+    <p>Create a class that inherits <code>System::EventArgs</code> to carry event data:</p>
+    <pre><code>class ButtonClickArgs : public System::EventArgs {
+public:
+    int x, y;
+    ButtonClickArgs(int x, int y) : x(x), y(y) {}
+    GetTypeNameHPP();
+};
+
+// In .cpp:
+GetTypeNameCPP(ButtonClickArgs, "UI.ButtonClickArgs")</code></pre>
+    <p>If the event carries no data, use <code>System::EventArgs</code> directly.</p>
+
+    <h2>Step 2: Declare the Event</h2>
+    <p>Add an <code>EventHandler&lt;T&gt;</code> public field to your class:</p>
+    <pre><code>class Button : public System::Object {
+public:
+    System::EventHandler&lt;ButtonClickArgs&gt; Click;
+    GetTypeNameHPP();
+
+    void press(int x, int y);
+};</code></pre>
+
+    <h2>Step 3: Fire the Event</h2>
+    <pre><code>void Button::press(int x, int y) {
+    if (!Click.Empty()) {
+        Click.Raise(this, ButtonClickArgs(x, y));
+    }
+}</code></pre>
+    <p>Always check <code>Empty()</code> before raising to avoid firing with zero subscribers
+    (while not harmful, it saves the function call overhead).</p>
+
+    <h2>Step 4: Subscribe</h2>
+    <pre><code>Button btn;
+
+// Subscribe with a lambda
+btn.Click += [](System::Object* sender, ButtonClickArgs args) {
+    std::cout &lt;&lt; "Clicked at " &lt;&lt; args.x &lt;&lt; "," &lt;&lt; args.y &lt;&lt; "\n";
+};
+
+// Subscribe with a named function
+void onButtonClick(System::Object* sender, ButtonClickArgs args) {
+    // ...
+}
+btn.Click.Add(onButtonClick);
+
+// Fire
+btn.press(10, 20); // calls all subscribers</code></pre>
+
+    <h2>Multiple Subscribers</h2>
+    <pre><code>Button btn;
+
+btn.Click += [](System::Object* sender, ButtonClickArgs args) {
+    std::cout &lt;&lt; "Handler 1\n";
+};
+btn.Click += [](System::Object* sender, ButtonClickArgs args) {
+    std::cout &lt;&lt; "Handler 2\n";
+};
+
+btn.press(0, 0);
+// Output:
+// Handler 1
+// Handler 2</code></pre>
+
+    <h2>Checking Subscriber Count</h2>
+    <pre><code>int count = btn.Click.Size();   // number of subscribers
+bool empty = btn.Click.Empty(); // true if no subscribers</code></pre>
+
+    <h2>EventArgs with No Data</h2>
+    <p>When the event carries no extra data, use <code>System::EventArgs</code> directly:</p>
+    <pre><code>class Timer : public System::Object {
+public:
+    System::EventHandler&lt;System::EventArgs&gt; Tick;
+    GetTypeNameHPP();
+    void fire() {
+        if (!Tick.Empty())
+            Tick.Raise(this, System::EventArgs{});
+    }
+};
+
+Timer t;
+t.Tick += [](System::Object*, System::EventArgs) {
+    std::cout &lt;&lt; "Tick!\n";
+};</code></pre>
+
+    <h2>Comparison with C#</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C#</th><th>sharp-runtime</th></tr>
+      <tr><td><code>event EventHandler&lt;T&gt; E;</code></td><td><code>EventHandler&lt;T&gt; E;</code></td></tr>
+      <tr><td><code>E += handler;</code></td><td><code>E += handler;</code> (same)</td></tr>
+      <tr><td><code>E?.Invoke(sender, args);</code></td><td><code>if (!E.Empty()) E.Raise(sender, args);</code></td></tr>
+      <tr><td><code>E -= handler;</code></td><td><code>E.Remove(handler);</code></td></tr>
+    </table>
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="work-with-files.html">← Working with Files</a>
+      <a class="next" href="../development/index.html">Developer Guide →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

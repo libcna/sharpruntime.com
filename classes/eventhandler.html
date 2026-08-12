@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::EventHandler — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::EventHandler&lt;T&gt;</span></div>
+    <div id="search-results"></div>
+    <h1>System::EventHandler&lt;T&gt;</h1>
+    <p class="page-subtitle">Combined delegate type and event subscriber list. Wraps <code>std::function</code> subscribers.</p>
+    <p class="file-path">modules/core/include/System/EventHandler.hpp</p>
+
+    <p>Status: <span class="badge badge-done">Implemented</span></p>
+
+    <h2>Overview</h2>
+    <p>C# has separate concepts for the delegate type and the <code>event</code> keyword, which enforces
+    encapsulation. sharp-runtime folds both into a single <code>EventHandler&lt;T&gt;</code> class that
+    acts as both the delegate type and the subscriber list.</p>
+
+    <p>The template parameter <code>T</code> must derive from <code>System::EventArgs</code>.</p>
+
+    <h2>Class Definition (abbreviated)</h2>
+    <pre><code>namespace System {
+    template&lt;typename T&gt;
+    class EventHandler {
+    public:
+        using HandlerType = std::function&lt;void(Object*, T)&gt;;
+
+        void Add(HandlerType handler);
+        void Remove(HandlerType handler);
+        void Raise(Object* sender, T args);
+        void Invoke(Object* sender, T args); // alias for Raise
+        EventHandler&lt;T&gt;&amp; operator+=(HandlerType handler);
+        EventHandler&lt;T&gt;&amp; operator-=(HandlerType handler); // needs verification
+        int Size() const;
+        bool Empty() const;
+    private:
+        std::vector&lt;HandlerType&gt; handlers_;
+    };
+}</code></pre>
+
+    <h2>Methods</h2>
+
+    <h3>Add()</h3>
+    <pre><code>void Add(HandlerType handler);</code></pre>
+    <p>Appends a subscriber function to the internal list. Same as <code>operator+=</code>.</p>
+
+    <h3>Remove()</h3>
+    <pre><code>void Remove(HandlerType handler);</code></pre>
+    <p>Removes a previously added subscriber. Note: removing <code>std::function</code> objects
+    requires matching by address or wrapping — see the note below.</p>
+
+    <h3>Raise() / Invoke()</h3>
+    <pre><code>void Raise(Object* sender, T args);
+void Invoke(Object* sender, T args);</code></pre>
+    <p>Calls all registered subscribers in order with the given sender and args.</p>
+
+    <h3>operator+=</h3>
+    <pre><code>EventHandler&lt;T&gt;&amp; operator+=(HandlerType handler);</code></pre>
+    <p>Adds a subscriber. Mirrors C# <code>myEvent += handler;</code> syntax.</p>
+
+    <h3>Size() / Empty()</h3>
+    <pre><code>int Size() const;
+bool Empty() const;</code></pre>
+    <p>Returns the number of registered subscribers / whether the list is empty.</p>
+
+    <h2>Usage Example</h2>
+    <pre><code>// EventArgs subclass
+class ButtonClickArgs : public System::EventArgs {
+public:
+    int x, y;
+    ButtonClickArgs(int x, int y) : x(x), y(y) {}
+};
+
+// Class with an event
+class Button : public System::Object {
+public:
+    System::EventHandler&lt;ButtonClickArgs&gt; Click;
+    GetTypeNameHPP();
+
+    void press(int x, int y) {
+        if (!Click.Empty()) {
+            Click.Raise(this, ButtonClickArgs(x, y));
+        }
+    }
+};
+
+// Subscribing
+Button btn;
+btn.Click += [](System::Object* sender, ButtonClickArgs args) {
+    std::cout &lt;&lt; "Clicked at " &lt;&lt; args.x &lt;&lt; "," &lt;&lt; args.y &lt;&lt; "\n";
+};
+
+// Firing
+btn.press(10, 20);</code></pre>
+
+    <h2>Comparison with C#</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# concept</th><th>sharp-runtime equivalent</th></tr>
+      <tr><td><code>delegate void Eh(object s, EventArgs e)</code></td><td><code>EventHandler&lt;T&gt;::HandlerType</code> (std::function)</td></tr>
+      <tr><td><code>event EventHandler&lt;T&gt; Click</code></td><td><code>EventHandler&lt;T&gt; Click</code> (public field)</td></tr>
+      <tr><td><code>Click += handler</code></td><td><code>Click += handler</code> (same)</td></tr>
+      <tr><td><code>Click -= handler</code></td><td><code>Click.Remove(handler)</code> or <code>Click -= handler</code></td></tr>
+      <tr><td><code>Click?.Invoke(this, args)</code></td><td><code>if (!Click.Empty()) Click.Raise(this, args)</code></td></tr>
+    </table>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-title">No C++ event keyword</div>
+      C++ has no <code>event</code> keyword. sharp-runtime does not enforce that only the
+      declaring class can <code>Raise</code> the event — all access is public on the
+      <code>EventHandler&lt;T&gt;</code> object. For encapsulation, expose only the <code>operator+=</code>
+      in the public interface if needed.
+    </div>
+
+    <div class="callout note">
+      <div class="callout-title">Removing std::function subscribers</div>
+      <code>std::function</code> objects are not equality-comparable, which makes <code>Remove</code>
+      tricky. A common pattern is to store the handler in a variable and remove by the same address,
+      or use a wrapper with an ID. The exact mechanism in sharp-runtime's <code>Remove</code>
+      implementation is: <span class="badge badge-needs-verification">Needs verification</span>
+    </div>
+
+    <h2>Related</h2>
+    <ul>
+      <li><a href="../delegates.html">Delegates</a> — full discussion of Action, Func, Predicate, EventArgs, EventHandler</li>
+      <li><code>System::EventArgs</code> — base class for all event argument types (<code>System/EventArgs.hpp</code>)</li>
+    </ul>
+
+    <div class="nav-links">
+      <a class="prev" href="array.html">← System::Array</a>
+      <a class="next" href="nullable.html">System::Nullable →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

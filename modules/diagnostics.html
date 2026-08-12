@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostics Module — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li class="nav-section">Modules</li>
+    <li><a href="index.html">Modules Index</a></li>
+    <li><a href="collections.html">Collections</a></li>
+    <li><a href="numerics.html">Numerics</a></li>
+    <li><a href="text.html">Text</a></li>
+    <li><a href="globalization.html">Globalization</a></li>
+    <li><a href="diagnostics.html">Diagnostics</a></li>
+    <li><a href="net.html">Net.Sockets</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Modules</a></span><span>Diagnostics</span></div>
+    <div id="search-results"></div>
+    <h1>Diagnostics Module</h1>
+    <p class="page-subtitle">Debug, Trace, Stopwatch, StackTrace, and debugger attributes.</p>
+
+    <p class="file-path">Component: SharpRuntime::Diagnostics | physical owner: modules/diagnostics/</p>
+
+    <h2>Debug and Trace</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debug.hpp | modules/diagnostics/include/System/Diagnostics/Trace.hpp</p>
+    <p>Header-only static classes. Provide assertions and trace output that mirror .NET's Debug/Trace API.</p>
+    <ul>
+      <li><code>Debug::Assert(condition)</code></li>
+      <li><code>Debug::Assert(condition, message)</code></li>
+      <li><code>Debug::WriteLine(message)</code></li>
+      <li><code>Debug::Fail(message)</code></li>
+      <li><code>Trace::WriteLine(message)</code></li>
+    </ul>
+
+    <h2>Stopwatch</h2>
+    <p class="file-path">modules/core/include/System/Diagnostics/Stopwatch.hpp</p>
+    <p>Measures elapsed time. Backed by C++ <code>std::chrono</code>.</p>
+    <pre><code>System::Diagnostics::Stopwatch sw;
+sw.Start();
+// ... code to measure ...
+sw.Stop();
+long ms = sw.ElapsedMilliseconds;</code></pre>
+
+    <h2>Debugger</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/Debugger.hpp</p>
+    <p>Static class with <code>Break()</code> (calls platform breakpoint) and <code>IsAttached</code>.</p>
+
+    <h2>StackTrace and StackFrame</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/StackTrace.hpp | StackFrame.hpp</p>
+    <p>Status: <span class="badge badge-stub">Stub</span></p>
+    <p>Exist for API compatibility. Stack capture is platform-specific and not fully implemented.</p>
+
+    <h2>Diagnostic Attributes (Stubs)</h2>
+    <p>Many diagnostic attributes exist as stub classes for API compatibility:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Attribute</th><th>Header</th></tr>
+      <tr><td><code>ConditionalAttribute</code></td><td><code>System/Diagnostics/ConditionalAttribute.hpp</code></td></tr>
+      <tr><td><code>DebuggableAttribute</code></td><td><code>System/Diagnostics/DebuggableAttribute.hpp</code></td></tr>
+      <tr><td><code>DebuggerDisplayAttribute</code></td><td><code>System/Diagnostics/DebuggerDisplayAttribute.hpp</code></td></tr>
+      <tr><td><code>DebuggerHiddenAttribute</code></td><td><code>System/Diagnostics/DebuggerHiddenAttribute.hpp</code></td></tr>
+      <tr><td><code>DebuggerBrowsableAttribute</code></td><td><code>System/Diagnostics/DebuggerBrowsableAttribute.hpp</code></td></tr>
+      <tr><td><code>StackTraceHiddenAttribute</code></td><td><code>System/Diagnostics/StackTraceHiddenAttribute.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Code Analysis Attributes</h2>
+    <p class="file-path">modules/diagnostics/include/System/Diagnostics/CodeAnalysis/CodeAnalysisAttributes.hpp</p>
+    <p>Nullable analysis and code flow attributes: <code>NotNull</code>, <code>MaybeNull</code>, <code>AllowNull</code>, etc.</p>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

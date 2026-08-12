@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Developer Guide — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Development</li>
+    <li><a href="index.html">Developer Guide</a></li>
+    <li><a href="coding-style.html">Coding Style</a></li>
+    <li><a href="debugging.html">Debugging</a></li>
+    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="known-limitations.html">Known Limitations</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="../tutorials/index.html">Tutorials</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span>Developer Guide</span></div>
+    <div id="search-results"></div>
+    <h1>Developer Guide</h1>
+    <p class="page-subtitle">Contributing to sharp-runtime: conventions, debugging, porting, and limitations.</p>
+
+    <div class="card-grid">
+      <a class="card" href="coding-style.html">
+        <h3>Coding Style</h3>
+        <p>Non-negotiable rules enforced by CLAUDE.md: naming conventions, namespace syntax, zero warnings policy, property macros.</p>
+      </a>
+      <a class="card" href="debugging.html">
+        <h3>Debugging</h3>
+        <p>How to debug sharp-runtime code: Debug/Trace/Stopwatch utilities, assertions, GDB/LLDB tips.</p>
+      </a>
+      <a class="card" href="porting-csharp-code.html">
+        <h3>Porting C# Code</h3>
+        <p>A systematic guide to porting .NET code to sharp-runtime. Type mappings, platform gaps, and common pitfalls.</p>
+      </a>
+      <a class="card" href="adding-runtime-features.html">
+        <h3>Adding Runtime Features</h3>
+        <p>How to add new classes to sharp-runtime following project conventions. File structure, macros, test requirements.</p>
+      </a>
+      <a class="card" href="known-limitations.html">
+        <h3>Known Limitations</h3>
+        <p>Platform gaps, missing features, stub-only classes, and known differences from .NET behavior.</p>
+      </a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

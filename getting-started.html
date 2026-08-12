@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Getting Started</span></div>
+    <div id="search-results"></div>
+    <h1>Getting Started</h1>
+    <p class="page-subtitle">How to obtain, build, and start using sharp-runtime in your project.</p>
+
+    <h2>Prerequisites</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Tool</th><th>Required Version</th><th>Notes</th></tr>
+      <tr><td>CMake</td><td>≥ 3.20</td><td>Build system</td></tr>
+      <tr><td>C++ compiler</td><td>C++23 capable</td><td>GCC 13+, Clang 17+, MSVC 2022 17.5+</td></tr>
+      <tr><td>ZLIB</td><td>any modern</td><td>Needed only when selecting <code>IO.Compression</code></td></tr>
+      <tr><td>Git</td><td>any</td><td>For submodule initialization</td></tr>
+    </table>
+    </div>
+
+    <p>On Debian/Ubuntu, install dependencies:</p>
+    <pre><code>sudo apt-get install cmake g++ zlib1g-dev</code></pre>
+
+    <h2>Step 1: Clone with Submodules</h2>
+    <p>sharp-runtime uses git submodules for vendored dependencies (GoogleTest). Always clone with <code>--recurse-submodules</code>:</p>
+    <pre><code>git clone --recurse-submodules https://github.com/openeggbert/sharp-runtime.git
+cd sharp-runtime</code></pre>
+    <p>If you already cloned without submodules, run:</p>
+    <pre><code>git submodule update --init --recursive</code></pre>
+
+    <h2>Step 2: Build</h2>
+    <pre><code># Configure the complete runtime (the standalone default is also All)
+cmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All
+
+# Build the selected component targets
+cmake --build build --parallel 4</code></pre>
+    <p>Each selected implementation component has its own CMake target and archive. The public aggregate target for the complete runtime is <code>SharpRuntime::All</code>.</p>
+
+    <h2>Step 3: Run Tests</h2>
+    <pre><code>cmake --build build --target SharpRuntimeTests --parallel 4
+scripts/run_component_tests.sh build</code></pre>
+    <p>The aggregate build target builds the component test executables. The script runs each selected executable and returns a non-zero status if any test fails.</p>
+
+    <h2>Step 4: Use in Your Project</h2>
+    <p>If your project uses CMake, select the components it uses before adding sharp-runtime as a subdirectory:</p>
+    <pre><code># In your CMakeLists.txt
+set(SHARP_RUNTIME_COMPONENTS
+    Text.Json
+    IO.Hashing
+)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(vendor/sharp-runtime)
+target_link_libraries(MyApp PRIVATE
+    SharpRuntime::Text.Json
+    SharpRuntime::IO.Hashing
+)</code></pre>
+    <p>You list direct components only. Their public dependency closure is enabled and linked automatically.</p>
+    <p>Then include headers:</p>
+    <pre><code>#include "System/String.hpp"
+#include "System/Collections/Generic/List.hpp"
+#include "System/Exception.hpp"
+#include "SharpRuntime/SharpRuntimeHelper.hpp"
+
+using namespace System;
+using SharpRuntime::intcs;
+
+int main() {
+    intcs x = 42;
+    std::string s = "hello";
+    auto parts = String::Split(s + " world", ' ');
+    return 0;
+}</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">ℹ Stable include spelling</div>
+      Public headers are physically owned by their components under <code>modules/*/include/</code>,
+      but consumer include spellings remain unchanged: use paths such as
+      <code>System/String.hpp</code> and <code>SharpRuntime/SharpRuntimeHelper.hpp</code>.
+      The linked <code>SharpRuntime::*</code> target supplies the required include roots.
+    </div>
+
+    <h2>Build Options</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Option</th><th>Default</th><th>Description</th></tr>
+      <tr><td><code>SHARP_RUNTIME_COMPONENTS</code></td><td><code>All</code> for a standalone build</td><td>Semicolon-separated component list. Set this explicitly in a parent project.</td></tr>
+      <tr><td><code>SHARP_RUNTIME_BUILD_TESTS</code></td><td>ON</td><td>Build test executables for the selected components.</td></tr>
+      <tr><td><code>SHARP_RUNTIME_BUILD_BENCHMARKS</code></td><td>OFF</td><td>Build standalone micro-benchmarks; this enables all components.</td></tr>
+    </table>
+    </div>
+    <pre><code># A lean standalone configuration
+cmake -S . -B build-json \
+  -DSHARP_RUNTIME_BUILD_TESTS=OFF \
+  '-DSHARP_RUNTIME_COMPONENTS=Text.Json'
+cmake --build build-json --parallel 4</code></pre>
+
+    <h2>Next Steps</h2>
+    <div class="card-grid">
+      <a class="card" href="build.html"><h3>Build Details</h3><p>CMake options, compiler flags, platform notes.</p></a>
+      <a class="card" href="modules/index.html"><h3>Component Catalogue</h3><p>Choose narrow targets and see their dependency closures.</p></a>
+      <a class="card" href="architecture.html"><h3>Architecture</h3><p>Understand how the library is structured.</p></a>
+      <a class="card" href="development/porting-csharp-code.html"><h3>Porting Guide</h3><p>How to port C# code using sharp-runtime.</p></a>
+      <a class="card" href="tutorials/index.html"><h3>Tutorials</h3><p>Step-by-step examples.</p></a>
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="overview.html"><span class="page-nav-label">← Previous</span>Overview</a>
+      <a class="next" href="build.html"><span class="page-nav-label">Next →</span>Build</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

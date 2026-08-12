@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I/O Subsystem — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>I/O</span></div>
+    <div id="search-results"></div>
+    <h1>I/O Subsystem</h1>
+    <p class="page-subtitle">Stream, File, Directory, BinaryReader, Compression, Hashing, and IsolatedStorage.</p>
+
+    <h2>Component Selection</h2>
+    <div class="table-wrap"><table>
+      <tr><th>API area</th><th>Component target</th><th>Notes</th></tr>
+      <tr><td>Streams, files, and binary I/O</td><td><code>SharpRuntime::IO</code></td><td>Core I/O surface</td></tr>
+      <tr><td>GZip and Deflate</td><td><code>SharpRuntime::IO.Compression</code></td><td>Configures ZLIB only when selected</td></tr>
+      <tr><td>ZIP archives</td><td><code>SharpRuntime::IO.Compression.Zip</code></td><td>Owns the private miniz dependency</td></tr>
+      <tr><td>Non-cryptographic hashes</td><td><code>SharpRuntime::IO.Hashing</code></td><td>Builds on the I/O component</td></tr>
+      <tr><td>Isolated storage</td><td><code>SharpRuntime::IO.IsolatedStorage</code></td><td>Uses the storage component privately</td></tr>
+    </table></div>
+
+    <h2>System::IO::Stream</h2>
+    <p class="file-path">modules/io/include/System/IO/Stream.hpp | modules/io/src/System/IO/Stream.cpp</p>
+    <p>Abstract base class for all streams. Status: <span class="badge badge-partial">Partial</span></p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>Read(buffer, offset, count)</code></td><td>Pure virtual. Read bytes into buffer.</td></tr>
+      <tr><td><code>Close()</code></td><td>Close the stream.</td></tr>
+      <tr><td><code>Length</code></td><td>Stream length in bytes (property).</td></tr>
+      <tr><td><code>Position</code></td><td>Current position (property).</td></tr>
+      <tr><td><code>Seek(offset, origin)</code></td><td>Set position relative to origin.</td></tr>
+    </table>
+    </div>
+
+    <h2>Concrete Stream Types</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>FileStream</code></td><td><code>System/IO/FileStream.hpp</code></td><td>File-backed stream. Read, Write, Seek.</td></tr>
+      <tr><td><code>MemoryStream</code></td><td><code>System/IO/MemoryStream.hpp</code></td><td>In-memory byte buffer stream.</td></tr>
+      <tr><td><code>BufferedStream</code></td><td><code>System/IO/BufferedStream.hpp</code></td><td>Buffered wrapper around another stream.</td></tr>
+      <tr><td><code>IO::Compression::GZipStream</code></td><td><code>System/IO/Compression/GZipStream.hpp</code></td><td>gzip compression/decompression (ZLIB, PIMPL, 64KB buffers).</td></tr>
+      <tr><td><code>IO::Compression::DeflateStream</code></td><td><code>System/IO/Compression/DeflateStream.hpp</code></td><td>Raw DEFLATE stream (-MAX_WBITS), XNB-compatible.</td></tr>
+      <tr><td><code>IsolatedStorage::IsolatedStorageFileStream</code></td><td><code>System/IO/IsolatedStorage/IsolatedStorageFileStream.hpp</code></td><td>File stream within isolated storage.</td></tr>
+    </table>
+    </div>
+
+    <h2>Text Readers and Writers</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>TextReader</code></td><td><code>System/IO/TextReader.hpp</code></td><td>Abstract text reader</td></tr>
+      <tr><td><code>TextWriter</code></td><td><code>System/IO/TextWriter.hpp</code></td><td>Abstract text writer</td></tr>
+      <tr><td><code>StreamReader</code></td><td><code>System/IO/StreamReader.hpp</code></td><td>Reads text from a stream</td></tr>
+      <tr><td><code>StreamWriter</code></td><td><code>System/IO/StreamWriter.hpp</code></td><td>Writes text to a stream</td></tr>
+      <tr><td><code>StringReader</code></td><td><code>System/IO/StringReader.hpp</code></td><td>Reads from a string</td></tr>
+      <tr><td><code>StringWriter</code></td><td><code>System/IO/StringWriter.hpp</code></td><td>Writes to a string</td></tr>
+    </table>
+    </div>
+
+    <h2>Binary I/O</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>BinaryReader</code></td><td><code>System/IO/BinaryReader.hpp</code></td><td>Reads primitive types from a stream in binary format</td></tr>
+      <tr><td><code>BinaryWriter</code></td><td><code>System/IO/BinaryWriter.hpp</code></td><td>Writes primitive types to a stream in binary format</td></tr>
+    </table>
+    </div>
+
+    <h2>File and Directory</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Key Methods</th></tr>
+      <tr><td><code>File</code></td><td><code>System/IO/File.hpp</code></td><td>ReadAllBytes, WriteAllBytes, ReadAllText, WriteAllText, Exists, Delete, Copy, Move</td></tr>
+      <tr><td><code>Directory</code></td><td><code>System/IO/Directory.hpp</code></td><td>Exists, Create, Delete, GetFiles, GetDirectories, GetCurrentDirectory</td></tr>
+      <tr><td><code>Path</code></td><td><code>System/IO/Path.hpp</code></td><td>Combine, GetFileName, GetExtension, GetDirectoryName, GetFullPath</td></tr>
+      <tr><td><code>FileInfo</code></td><td><code>System/IO/FileInfo.hpp</code></td><td>File metadata and operations</td></tr>
+      <tr><td><code>DirectoryInfo</code></td><td><code>System/IO/DirectoryInfo.hpp</code></td><td>Directory metadata and operations</td></tr>
+      <tr><td><code>DriveInfo</code></td><td><code>System/IO/DriveInfo.hpp</code></td><td>Drive information</td></tr>
+    </table>
+    </div>
+
+    <h2>Compression</h2>
+    <p class="file-path">modules/io-compression/include/System/IO/Compression/ (GZip and Deflate) | modules/io-compression-zip/include/System/IO/Compression/ (ZIP)</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Status</th><th>Description</th></tr>
+      <tr><td><code>GZipStream</code></td><td><span class="badge badge-done">Done</span></td><td>gzip; backed by ZLIB; PIMPL; 64KB buffers</td></tr>
+      <tr><td><code>DeflateStream</code></td><td><span class="badge badge-done">Done</span></td><td>Raw DEFLATE; -MAX_WBITS; XNB-compatible</td></tr>
+      <tr><td><code>ZipArchive</code></td><td><span class="badge badge-done">Done</span></td><td>ZIP read+create; backed by miniz; PIMPL</td></tr>
+      <tr><td><code>CompressionMode</code></td><td><span class="badge badge-done">Done</span></td><td>Compress / Decompress enum</td></tr>
+    </table>
+    </div>
+
+    <h2>Span and Memory</h2>
+    <p class="file-path">modules/core/include/System/</p>
+    <p>Sharp-runtime provides the core <code>Span&lt;T&gt;</code> / <code>Memory&lt;T&gt;</code> family for zero-copy buffer slicing:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Type</th><th>Header</th><th>Status</th><th>Description</th></tr>
+      <tr><td><code>Span&lt;T&gt;</code></td><td><code>System/Span.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Non-owning mutable view over contiguous memory</td></tr>
+      <tr><td><code>ReadOnlySpan&lt;T&gt;</code></td><td><code>System/ReadOnlySpan.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Non-owning read-only view</td></tr>
+      <tr><td><code>Memory&lt;T&gt;</code></td><td><code>System/Memory.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Owning or borrowed heap memory slice</td></tr>
+      <tr><td><code>ReadOnlyMemory&lt;T&gt;</code></td><td><code>System/ReadOnlyMemory.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Read-only memory slice</td></tr>
+      <tr><td><code>MemoryExtensions</code></td><td><code>System/MemoryExtensions.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>AsSpan, ContainsAny, IndexOf/LastIndexOf, BinarySearch, Trim, Overlaps…</td></tr>
+      <tr><td><code>SpanSplitEnumerator</code></td><td><code>System/SpanSplitEnumerator.hpp</code></td><td><span class="badge badge-done">Done</span></td><td>Iterates span split on delimiter</td></tr>
+    </table>
+    </div>
+    <pre><code>#include &lt;System/Span.hpp&gt;
+#include &lt;System/MemoryExtensions.hpp&gt;
+
+std::vector&lt;int&gt; data = {1, 2, 3, 4, 5};
+System::Span&lt;int&gt; span(data.data(), data.size());
+auto slice = span.Slice(1, 3);  // {2, 3, 4}</code></pre>
+
+    <h2>Hashing</h2>
+    <p class="file-path">modules/io-hashing/include/System/IO/Hashing/</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Status</th><th>Description</th></tr>
+      <tr><td><code>XxHash32</code></td><td><span class="badge badge-done">Done</span></td><td>xxHash 32-bit non-cryptographic hash</td></tr>
+      <tr><td><code>XxHash64</code></td><td><span class="badge badge-done">Done</span></td><td>xxHash 64-bit non-cryptographic hash</td></tr>
+      <tr><td><code>Crc32</code></td><td><span class="badge badge-done">Done</span></td><td>CRC-32 non-cryptographic hash</td></tr>
+      <tr><td><code>NonCryptographicHashAlgorithm</code></td><td><span class="badge badge-done">Done</span></td><td>Base class</td></tr>
+    </table>
+    </div>
+
+    <h2>RandomAccess</h2>
+    <p class="file-path">modules/io/include/System/IO/RandomAccess.hpp | modules/io/src/System/IO/RandomAccess.cpp</p>
+    <p>Status: <span class="badge badge-done">Done</span> — but <span class="badge badge-posix">POSIX-only</span> on Linux/macOS.</p>
+    <p>Uses <code>pread</code>/<code>pwrite</code>/<code>fsync</code> on POSIX, and Win32 <code>OVERLAPPED ReadFile/WriteFile</code> on Windows. Emscripten throws <code>PlatformNotSupportedException</code>.</p>
+
+    <h2>IsolatedStorage</h2>
+    <p class="file-path">modules/io-isolated-storage/include/System/IO/IsolatedStorage/</p>
+    <p>Provides sandboxed file storage. The storage root is determined by <code>SharpRuntime::Storage::StoragePaths::GetIsolatedStorageRoot()</code>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Status</th></tr>
+      <tr><td><code>IsolatedStorageFile</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
+      <tr><td><code>IsolatedStorageFileStream</code></td><td><span class="badge badge-partial">Partial</span></td></tr>
+      <tr><td><code>IsolatedStorageException</code></td><td><span class="badge badge-done">Done</span></td></tr>
+    </table>
+    </div>
+
+    <h2>Platform Notes</h2>
+    <div class="callout warning">
+      <div class="callout-title">⚠ POSIX-only subsystems</div>
+      <ul>
+        <li><code>System::IO::RandomAccess</code> — uses <code>pread</code>/<code>pwrite</code>; POSIX-only (has Win32 fallback)</li>
+        <li>Network streams — see <a href="platform-layer.html">Platform Layer</a></li>
+      </ul>
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="reflection.html"><span class="page-nav-label">← Previous</span>Reflection</a>
+      <a class="next" href="threading.html"><span class="page-nav-label">Next →</span>Threading</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

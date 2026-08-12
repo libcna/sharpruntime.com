@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classes Index — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span>Classes</span></div>
+    <div id="search-results"></div>
+    <h1>Classes Index</h1>
+    <p class="page-subtitle">Documentation for the most important public classes in sharp-runtime.</p>
+
+    <div class="card-grid">
+      <a class="card" href="../classes/object.html"><h3>System::Object</h3><p>Base class for all System types. ToString, Equals, GetHashCode, GetTypeName.</p></a>
+      <a class="card" href="../classes/exception.html"><h3>System::Exception</h3><p>Base exception class. Inherits std::exception. Exception hierarchy.</p></a>
+      <a class="card" href="../classes/string.html"><h3>System::String</h3><p>Static string utility class. Split, Format, IsNullOrEmpty, StartsWith.</p></a>
+      <a class="card" href="../classes/array.html"><h3>System::Array</h3><p>Static array helpers. Sort, Copy, Resize, IndexOf, Reverse, Clear.</p></a>
+      <a class="card" href="../classes/eventhandler.html"><h3>System::EventHandler&lt;T&gt;</h3><p>Combined delegate type and event subscriber list.</p></a>
+      <a class="card" href="../classes/nullable.html"><h3>System::Nullable&lt;T&gt;</h3><p>Value type that can be null. Wraps std::optional.</p></a>
+    </div>
+
+    <h2>All Important Classes by Category</h2>
+
+    <h3>Core Object Model</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th><th>Description</th></tr>
+      <tr><td><code>System::Object</code></td><td><code>System/Object.hpp</code></td><td>Base class</td></tr>
+      <tr><td><code>System::Exception</code></td><td><code>System/Exception.hpp</code></td><td>Base exception</td></tr>
+      <tr><td><code>System::EventArgs</code></td><td><code>System/EventArgs.hpp</code></td><td>Base event args</td></tr>
+      <tr><td><code>System::String</code></td><td><code>System/String.hpp</code></td><td>String utilities (static)</td></tr>
+      <tr><td><code>System::Array</code></td><td><code>System/Array.hpp</code></td><td>Array helpers (static)</td></tr>
+      <tr><td><code>System::Nullable&lt;T&gt;</code></td><td><code>System/Nullable.hpp</code></td><td>Nullable value type</td></tr>
+      <tr><td><code>System::EventHandler&lt;T&gt;</code></td><td><code>System/EventHandler.hpp</code></td><td>Event subscription and dispatch</td></tr>
+    </table>
+    </div>
+
+    <h3>Value Types</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>System::DateTime</code></td><td><code>System/DateTime.hpp</code></td></tr>
+      <tr><td><code>System::TimeSpan</code></td><td><code>System/TimeSpan.hpp</code></td></tr>
+      <tr><td><code>System::DateTimeOffset</code></td><td><code>System/DateTimeOffset.hpp</code></td></tr>
+      <tr><td><code>System::Guid</code></td><td><code>System/Guid.hpp</code></td></tr>
+      <tr><td><code>System::Version</code></td><td><code>System/Version.hpp</code></td></tr>
+      <tr><td><code>System::Decimal</code></td><td><code>System/Decimal.hpp</code></td></tr>
+      <tr><td><code>System::Uri</code></td><td><code>System/Uri.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h3>Utility Classes</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>System::Math</code></td><td><code>System/Math.hpp</code></td></tr>
+      <tr><td><code>System::MathF</code></td><td><code>System/MathF.hpp</code></td></tr>
+      <tr><td><code>System::Random</code></td><td><code>System/Random.hpp</code></td></tr>
+      <tr><td><code>System::Convert</code></td><td><code>System/Convert.hpp</code></td></tr>
+      <tr><td><code>System::BitConverter</code></td><td><code>System/BitConverter.hpp</code></td></tr>
+      <tr><td><code>System::Console</code></td><td><code>System/Console.hpp</code></td></tr>
+      <tr><td><code>System::Environment</code></td><td><code>System/Environment.hpp</code></td></tr>
+      <tr><td><code>System::AppDomain</code></td><td><code>System/AppDomain.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h3>Text</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Header</th></tr>
+      <tr><td><code>System::Text::StringBuilder</code></td><td><code>System/Text/StringBuilder.hpp</code></td></tr>
+      <tr><td><code>System::Text::Encoding</code></td><td><code>System/Text/Encoding.hpp</code></td></tr>
+      <tr><td><code>System::Text::UTF8Encoding</code></td><td><code>System/Text/UTF8Encoding.hpp</code></td></tr>
+    </table>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

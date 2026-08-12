@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# Compatibility — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>C# Compatibility</span></div>
+    <div id="search-results"></div>
+    <h1>C# Compatibility</h1>
+    <p class="page-subtitle">Mapping table from C# / .NET constructs to sharp-runtime C++ equivalents.</p>
+
+    <h2>Primitive Types</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# type</th><th>C++ / sharp-runtime</th><th>Notes</th></tr>
+      <tr><td><code>sbyte</code></td><td><code>SharpRuntime::sbytecs</code> / <code>int8_t</code></td><td></td></tr>
+      <tr><td><code>byte</code></td><td><code>SharpRuntime::bytecs</code> / <code>uint8_t</code></td><td>Most common in I/O</td></tr>
+      <tr><td><code>short</code></td><td><code>SharpRuntime::shortcs</code> / <code>int16_t</code></td><td></td></tr>
+      <tr><td><code>ushort</code></td><td><code>SharpRuntime::ushortcs</code> / <code>uint16_t</code></td><td></td></tr>
+      <tr><td><code>int</code></td><td><code>SharpRuntime::intcs</code> / <code>int32_t</code></td><td>Use in public APIs</td></tr>
+      <tr><td><code>uint</code></td><td><code>SharpRuntime::uintcs</code> / <code>uint32_t</code></td><td></td></tr>
+      <tr><td><code>long</code></td><td><code>SharpRuntime::longcs</code> / <code>int64_t</code></td><td></td></tr>
+      <tr><td><code>ulong</code></td><td><code>SharpRuntime::ulongcs</code> / <code>uint64_t</code></td><td></td></tr>
+      <tr><td><code>float</code></td><td><code>float</code></td><td>Native C++</td></tr>
+      <tr><td><code>double</code></td><td><code>double</code></td><td>Native C++</td></tr>
+      <tr><td><code>bool</code></td><td><code>bool</code></td><td>Native C++</td></tr>
+      <tr><td><code>char</code></td><td><code>SharpRuntime::charcs</code> / <code>char16_t</code></td><td>UTF-16 code unit</td></tr>
+      <tr><td><code>string</code></td><td><code>std::string</code></td><td>UTF-8 by convention</td></tr>
+    </table>
+    </div>
+
+    <h2>Object Model</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# construct</th><th>C++ / sharp-runtime equivalent</th></tr>
+      <tr><td><code>object</code> / <code>Object</code></td><td><code>System::Object</code></td></tr>
+      <tr><td><code>obj.GetType().Name</code></td><td><code>obj.GetTypeName()</code></td></tr>
+      <tr><td><code>obj.ToString()</code></td><td><code>obj.ToString()</code></td></tr>
+      <tr><td><code>obj.Equals(other)</code></td><td><code>obj.Equals(other)</code></td></tr>
+      <tr><td><code>Object.ReferenceEquals(a,b)</code></td><td><code>System::Object::ReferenceEquals(a,b)</code></td></tr>
+      <tr><td><code>obj.GetHashCode()</code></td><td><code>obj.GetHashCode()</code></td></tr>
+      <tr><td><code>null</code></td><td><code>nullptr</code></td></tr>
+      <tr><td><code>new MyClass()</code></td><td><code>new MyClass()</code> or <code>std::make_shared&lt;MyClass&gt;()</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Collections</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# type</th><th>C++ / sharp-runtime</th><th>Notes</th></tr>
+      <tr><td><code>T[]</code></td><td><code>std::vector&lt;T&gt;</code></td><td>Standard C++</td></tr>
+      <tr><td><code>List&lt;T&gt;</code></td><td><code>System::Collections::Generic::List&lt;T&gt;</code></td><td>Wraps std::vector</td></tr>
+      <tr><td><code>Dictionary&lt;K,V&gt;</code></td><td><code>System::Collections::Generic::Dictionary&lt;K,V&gt;</code></td><td>Wraps std::unordered_map</td></tr>
+      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>System::Collections::Generic::HashSet&lt;T&gt;</code></td><td>Wraps std::unordered_set</td></tr>
+      <tr><td><code>Queue&lt;T&gt;</code></td><td><code>System::Collections::Generic::Queue&lt;T&gt;</code></td><td></td></tr>
+      <tr><td><code>Stack&lt;T&gt;</code></td><td><code>System::Collections::Generic::Stack&lt;T&gt;</code></td><td></td></tr>
+      <tr><td><code>SortedDictionary&lt;K,V&gt;</code></td><td><code>System::Collections::Generic::SortedDictionary&lt;K,V&gt;</code></td><td>Wraps std::map</td></tr>
+      <tr><td><code>LinkedList&lt;T&gt;</code></td><td><code>System::Collections::Generic::LinkedList&lt;T&gt;</code></td><td></td></tr>
+      <tr><td><code>ImmutableArray&lt;T&gt;</code></td><td><code>System::Collections::Immutable::ImmutableArray&lt;T&gt;</code></td><td>shared_ptr&lt;const vector&lt;T&gt;&gt;</td></tr>
+    </table>
+    </div>
+
+    <h2>String Operations</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>C++ / sharp-runtime equivalent</th></tr>
+      <tr><td><code>string.Empty</code></td><td><code>""</code> or <code>std::string{}</code></td></tr>
+      <tr><td><code>String.IsNullOrEmpty(s)</code></td><td><code>System::String::IsNullOrEmpty(s)</code></td></tr>
+      <tr><td><code>s.Split(',')</code></td><td><code>System::String::Split(s, ',')</code></td></tr>
+      <tr><td><code>s.StartsWith("x")</code></td><td><code>System::String::StartsWith(s, "x")</code></td></tr>
+      <tr><td><code>String.Format("{0}", n)</code></td><td><code>System::String::Format("{0}", n)</code></td></tr>
+      <tr><td><code>s.Length</code></td><td><code>s.size()</code> or <code>s.length()</code></td></tr>
+      <tr><td><code>s.Substring(i, n)</code></td><td><code>s.substr(i, n)</code></td></tr>
+      <tr><td><code>s.ToLower()</code></td><td>No direct equivalent; use std algorithms</td></tr>
+      <tr><td><code>s.Trim()</code></td><td>No direct equivalent; implement manually</td></tr>
+      <tr><td><code>s.Contains("x")</code></td><td><code>s.find("x") != std::string::npos</code></td></tr>
+      <tr><td><code>new StringBuilder()</code></td><td><code>System::Text::StringBuilder sb;</code></td></tr>
+      <tr><td><code>sb.Append(x)</code></td><td><code>sb.Append(x)</code></td></tr>
+      <tr><td><code>sb.ToString()</code></td><td><code>sb.ToString()</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Exceptions</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>C++ / sharp-runtime</th></tr>
+      <tr><td><code>throw new ArgumentException("msg")</code></td><td><code>throw System::ArgumentException("msg")</code></td></tr>
+      <tr><td><code>catch (Exception e)</code></td><td><code>catch (const System::Exception&amp; e)</code></td></tr>
+      <tr><td><code>e.Message</code></td><td><code>e.getMessageProperty()</code></td></tr>
+      <tr><td><code>e.ToString()</code></td><td><code>e.what()</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Delegates and Events</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>C++ / sharp-runtime</th></tr>
+      <tr><td><code>Action action = () =&gt; { };</code></td><td><code>System::Action action = []{ };</code></td></tr>
+      <tr><td><code>Action&lt;T&gt; a = t =&gt; { };</code></td><td><code>System::ActionT&lt;T&gt; a = [](T t){ };</code></td></tr>
+      <tr><td><code>Func&lt;int&gt; f = () =&gt; 42;</code></td><td><code>System::Func&lt;int&gt; f = []{ return 42; };</code></td></tr>
+      <tr><td><code>Predicate&lt;T&gt; p = x =&gt; x &gt; 0;</code></td><td><code>System::Predicate&lt;T&gt; p = [](T x){ return x&gt;0; };</code></td></tr>
+      <tr><td><code>event EventHandler&lt;T&gt; E;</code></td><td><code>System::EventHandler&lt;T&gt; E;</code></td></tr>
+      <tr><td><code>E += handler;</code></td><td><code>E += handler;</code></td></tr>
+      <tr><td><code>E?.Invoke(sender, args)</code></td><td><code>if (!E.Empty()) E.Raise(sender, args);</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Properties</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>C++ / sharp-runtime</th></tr>
+      <tr><td><code>public int Width { get; set; }</code></td><td><code>DDATA(int, Width)</code> macro (with <code>getWidthProperty()</code> / <code>setWidthProperty()</code>)</td></tr>
+      <tr><td><code>public int Width { get; }</code></td><td><code>DGETTER(int, Width)</code> macro (read-only)</td></tr>
+      <tr><td><code>obj.Width</code></td><td><code>obj.getWidthProperty()</code></td></tr>
+      <tr><td><code>obj.Width = 5</code></td><td><code>obj.setWidthProperty(5)</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Nullable Types</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>C++ / sharp-runtime</th></tr>
+      <tr><td><code>int? x = null;</code></td><td><code>System::Nullable&lt;int&gt; x;</code></td></tr>
+      <tr><td><code>int? x = 42;</code></td><td><code>System::Nullable&lt;int&gt; x = 42;</code></td></tr>
+      <tr><td><code>x.HasValue</code></td><td><code>x.getHasValueProperty()</code></td></tr>
+      <tr><td><code>x.Value</code></td><td><code>x.getValueProperty()</code></td></tr>
+      <tr><td><code>x ?? 0</code></td><td><code>x.GetValueOrDefault(0)</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Not Supported</h2>
+    <div class="callout warning">
+      <div class="callout-title">⚠ Features not available in sharp-runtime</div>
+      <ul>
+        <li>Garbage collection — use RAII and smart pointers</li>
+        <li>LINQ — use <code>std::ranges</code></li>
+        <li>async/await — no compiler support in C++</li>
+        <li>Full reflection (member enumeration, dynamic invocation)</li>
+        <li>Activator.CreateInstance()</li>
+        <li>Dynamic types (<code>dynamic</code>)</li>
+        <li>Checked arithmetic (except via explicit checks)</li>
+        <li>Operator overloading on delegates (only <code>operator+=</code> on EventHandler)</li>
+        <li>Extension methods (no language support)</li>
+        <li>Iterator blocks (<code>yield return</code>)</li>
+      </ul>
+    </div>
+
+    <div class="page-nav">
+      <a class="prev" href="platform-layer.html"><span class="page-nav-label">← Previous</span>Platform Layer</a>
+      <a class="next" href="cna-integration.html"><span class="page-nav-label">Next →</span>CNA Integration</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::Object — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::Object</span></div>
+    <div id="search-results"></div>
+    <h1>System::Object</h1>
+    <p class="page-subtitle">Base class for all managed System types in sharp-runtime.</p>
+    <p class="file-path">modules/core/include/System/Object.hpp</p>
+
+    <p>Status: <span class="badge badge-done">Implemented</span></p>
+
+    <h2>Overview</h2>
+    <p><code>System::Object</code> mirrors <code>System.Object</code> from .NET and serves as the root of the
+    sharp-runtime type hierarchy. All classes that want runtime type identification or polymorphic equality
+    should inherit from it.</p>
+
+    <p>Unlike .NET, <code>Object</code> does <strong>not</strong> have a garbage collector behind it.
+    Memory management follows standard C++ RAII rules — see <a href="../memory-management.html">Memory Management</a>.</p>
+
+    <h2>Class Definition</h2>
+    <pre><code>namespace System {
+    class Object {
+    public:
+        virtual ~Object() = default;
+        virtual std::string ToString() const;
+        virtual bool Equals(const Object&amp; other) const;
+        virtual intcs GetHashCode() const;
+        virtual std::string GetTypeName() const = 0; // pure virtual
+    };
+}</code></pre>
+
+    <div class="callout note">
+      <div class="callout-title">Pure Virtual GetTypeName</div>
+      <code>GetTypeName()</code> is pure virtual — every concrete subclass must implement it.
+      In practice this is done with the <code>GetTypeNameHPP()</code> / <code>GetTypeNameCPP()</code>
+      macros rather than writing the implementation by hand.
+      See <a href="../internals/property-macros.html">Internals: Property Macros</a>.
+    </div>
+
+    <h2>Methods</h2>
+
+    <h3>ToString()</h3>
+    <pre><code>virtual std::string ToString() const;</code></pre>
+    <p>Returns a string representation of the object. Default implementation returns the type name.
+    Subclasses should override for meaningful output.</p>
+
+    <h3>Equals()</h3>
+    <pre><code>virtual bool Equals(const Object&amp; other) const;</code></pre>
+    <p>Tests equality. Default compares object identity (pointer). Subclasses (e.g., value-type wrappers)
+    override for value equality.</p>
+
+    <h3>GetHashCode()</h3>
+    <pre><code>virtual intcs GetHashCode() const;</code></pre>
+    <p>Returns a hash code. Default implementation is based on identity. Subclasses with custom <code>Equals</code>
+    should also override <code>GetHashCode</code>.</p>
+
+    <h3>GetTypeName()</h3>
+    <pre><code>virtual std::string GetTypeName() const = 0;</code></pre>
+    <p>Returns the runtime type name as a string (e.g., <code>"System.Int32"</code>).
+    Pure virtual — must be implemented by every subclass.</p>
+
+    <h2>GetTypeName Macros</h2>
+    <p>Two macros simplify the required boilerplate:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Macro</th><th>Where Used</th><th>Effect</th></tr>
+      <tr><td><code>GetTypeNameHPP()</code></td><td><code>.hpp</code> class body</td><td>Declares the override</td></tr>
+      <tr><td><code>GetTypeNameCPP(CLASS, NAME)</code></td><td><code>.cpp</code> file</td><td>Provides the implementation returning <code>NAME</code></td></tr>
+    </table>
+    </div>
+
+    <h4>Example</h4>
+    <pre><code>// In MyClass.hpp
+class MyClass : public System::Object {
+public:
+    GetTypeNameHPP();
+};
+
+// In MyClass.cpp
+GetTypeNameCPP(MyClass, "MyNamespace.MyClass");</code></pre>
+
+    <h2>Ownership and Lifetime</h2>
+    <p>Objects are value-managed by default. Pass by reference for polymorphism, or use
+    <code>std::shared_ptr&lt;Object&gt;</code> when shared ownership is needed.
+    There is no garbage collector — all destructors run deterministically at scope end or
+    <code>shared_ptr</code> reference count drop.</p>
+
+    <h2>Inheritance</h2>
+    <p>The common inheritance pattern:</p>
+    <pre><code>class MyClass : public System::Object {
+public:
+    GetTypeNameHPP();
+    std::string ToString() const override { return "MyClass"; }
+};</code></pre>
+
+    <p>For value-type-like wrappers (Int32, Boolean, etc.) the class still inherits Object
+    to retain the polymorphic interface.</p>
+
+    <div class="nav-links">
+      <a class="prev" href="index.html">← Classes Index</a>
+      <a class="next" href="exception.html">System::Exception →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

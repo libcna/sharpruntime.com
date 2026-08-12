@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reflection — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Reflection</span></div>
+    <div id="search-results"></div>
+    <h1>Reflection</h1>
+    <p class="page-subtitle">Limited runtime type information, GetTypeName, Type class, and attributes.</p>
+
+    <div class="callout warning">
+      <div class="callout-title">⚠ Very limited reflection</div>
+      sharp-runtime provides <strong>no real .NET-style reflection</strong>. C++ does not have a CLR metadata system.
+      Only very basic runtime type name retrieval is available.
+    </div>
+
+    <h2>Runtime Type Name via GetTypeName()</h2>
+    <p class="file-path">modules/core/include/System/Object.hpp</p>
+    <p>
+      Every <code>System::Object</code> subclass must implement the pure virtual <code>GetTypeName()</code>.
+      This returns a static string with the type name — it is the closest analog to
+      <code>GetType().Name</code> in .NET.
+    </p>
+    <pre><code>System::Object* obj = new MyClass();
+const std::string&amp; name = obj-&gt;GetTypeName();  // "MyClass"</code></pre>
+    <p>Implementation is assisted by macros:</p>
+    <pre><code>// In .hpp:
+GetTypeNameHPP()
+// expands to: [[nodiscard]] virtual const std::string&amp; GetTypeName() const override;
+
+// In .cpp:
+GetTypeNameCPP(MyClass, MyClass)
+// expands to: const std::string&amp; MyClass::GetTypeName() const {
+//               const static std::string type_name = "MyClass";
+//               return type_name; }</code></pre>
+
+    <h2>System::Type</h2>
+    <p class="file-path">modules/core/include/System/Type.hpp</p>
+    <p>
+      A partial stub for the .NET <code>System.Type</code> class. C++ cannot provide full runtime type metadata
+      (member enumeration, method invocation by name, assembly metadata, etc.).
+      The stub exists for compatibility — code that references <code>System::Type</code> will compile, but
+      most functionality is not implemented.
+    </p>
+    <div class="callout needs-verification">
+      <div class="callout-title">Needs verification</div>
+      The exact API surface of <code>System::Type</code> in sharp-runtime needs review from the header file.
+      It is expected to be a minimal stub.
+    </div>
+
+    <h2>Attribute Classes</h2>
+    <p>sharp-runtime provides many attribute header files for API compatibility. These are empty or near-empty stub classes — they allow code to compile but do not implement runtime attribute inspection:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Attribute</th><th>Header</th></tr>
+      <tr><td><code>System::Attribute</code></td><td><code>System/Attribute.hpp</code></td></tr>
+      <tr><td><code>ObsoleteAttribute</code></td><td><code>System/ObsoleteAttribute.hpp</code></td></tr>
+      <tr><td><code>FlagsAttribute</code></td><td><code>System/FlagsAttribute.hpp</code></td></tr>
+      <tr><td><code>SerializableAttribute</code></td><td><code>System/SerializableAttribute.hpp</code></td></tr>
+      <tr><td><code>CLSCompliantAttribute</code></td><td><code>System/CLSCompliantAttribute.hpp</code></td></tr>
+      <tr><td><code>AttributeUsageAttribute</code></td><td><code>System/AttributeUsageAttribute.hpp</code></td></tr>
+      <tr><td><code>Diagnostics::ConditionalAttribute</code></td><td><code>System/Diagnostics/ConditionalAttribute.hpp</code></td></tr>
+      <tr><td><code>Runtime::CompilerServices::MethodImplAttribute</code></td><td><code>System/Runtime/CompilerServices/MethodImplAttribute.hpp</code></td></tr>
+    </table>
+    </div>
+
+    <h2>No Dynamic Invocation</h2>
+    <p>
+      .NET <code>Activator.CreateInstance()</code>, <code>MethodInfo.Invoke()</code>, and similar
+      reflection-based dynamic invocation are <strong>not available</strong>.
+      These are listed as <code>❌ IGNORE</code> in the porting plan, as they require managed runtime support
+      that cannot be replicated in C++.
+    </p>
+
+    <h2>What to Use Instead</h2>
+    <ul>
+      <li>Use virtual dispatch (virtual functions) instead of reflection-based dispatch</li>
+      <li>Use <code>dynamic_cast&lt;T*&gt;</code> for runtime type checking</li>
+      <li>Use <code>typeid</code> for C++ RTTI if needed</li>
+      <li>Use factory functions or <code>std::function</code> instead of <code>Activator.CreateInstance()</code></li>
+    </ul>
+
+    <div class="page-nav">
+      <a class="prev" href="delegates.html"><span class="page-nav-label">← Previous</span>Delegates &amp; Events</a>
+      <a class="next" href="io.html"><span class="page-nav-label">Next →</span>I/O</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

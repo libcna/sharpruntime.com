@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arrays — sharp-runtime</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="overview.html">Overview</a></li>
+    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="build.html">Build</a></li>
+    <li><a href="running-tests.html">Running Tests</a></li>
+    <li class="nav-section">Architecture</li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="project-structure.html">Project Structure</a></li>
+    <li><a href="runtime-overview.html">Runtime Overview</a></li>
+    <li class="nav-section">Core Runtime</li>
+    <li><a href="type-system.html">Type System</a></li>
+    <li><a href="memory-management.html">Memory Management</a></li>
+    <li><a href="exceptions.html">Exceptions</a></li>
+    <li><a href="strings.html">Strings</a></li>
+    <li><a href="arrays.html">Arrays</a></li>
+    <li><a href="delegates.html">Delegates &amp; Events</a></li>
+    <li><a href="reflection.html">Reflection</a></li>
+    <li><a href="io.html">I/O</a></li>
+    <li><a href="threading.html">Threading</a></li>
+    <li><a href="platform-layer.html">Platform Layer</a></li>
+    <li class="nav-section">Compatibility</li>
+    <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+    <li><a href="cna-integration.html">CNA Integration</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="modules/index.html">Modules</a></li>
+    <li><a href="classes/index.html">Classes</a></li>
+    <li><a href="api/index.html">API Reference</a></li>
+    <li><a href="internals/index.html">Internals</a></li>
+    <li class="nav-section">Tutorials</li>
+    <li><a href="tutorials/index.html">All Tutorials</a></li>
+    <li class="nav-section">Developer Guide</li>
+    <li><a href="development/index.html">Overview</a></li>
+    <li><a href="development/coding-style.html">Coding Style</a></li>
+    <li><a href="development/debugging.html">Debugging</a></li>
+    <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="development/known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="index.html">Home</a></span><span>Arrays</span></div>
+    <div id="search-results"></div>
+    <h1>Arrays</h1>
+    <p class="page-subtitle">Array representation, System::Array static helpers, ArraySegment, Buffer, and Span.</p>
+
+    <h2>The Array Type: std::vector&lt;T&gt;</h2>
+    <p>
+      In sharp-runtime, C# <code>T[]</code> (single-dimensional arrays) map to <code>std::vector&lt;T&gt;</code>.
+      There is no custom array object type. Most ported code that uses <code>int[]</code>, <code>byte[]</code>, or <code>string[]</code>
+      will use <code>std::vector&lt;intcs&gt;</code>, <code>std::vector&lt;bytecs&gt;</code>, or <code>std::vector&lt;std::string&gt;</code> respectively.
+    </p>
+
+    <h2>System::Array — Static Helper Class</h2>
+    <p class="file-path">modules/core/include/System/Array.hpp</p>
+    <p>
+      <code>System::Array</code> is a <strong>static template class</strong> — it cannot be instantiated.
+      It provides static template helpers operating on <code>std::vector&lt;T&gt;</code>.
+    </p>
+    <p>Status: <span class="badge badge-partial">Partial</span></p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Method</th><th>Description</th></tr>
+      <tr><td><code>Sort(vector&lt;T&gt;&amp;)</code></td><td>Sorts in-place using default comparer</td></tr>
+      <tr><td><code>Sort(vector&lt;T&gt;&amp;, comparison)</code></td><td>Sorts using a custom <code>std::function&lt;int(T,T)&gt;</code></td></tr>
+      <tr><td><code>Copy(src, srcIndex, dst, dstIndex, length)</code></td><td>Copies a range between vectors</td></tr>
+      <tr><td><code>Copy(T* src, srcIndex, T* dst, dstIndex, length)</code></td><td>Copies between raw C-arrays via <code>memcpy</code></td></tr>
+      <tr><td><code>Resize(vector&lt;T&gt;&amp;, intcs newSize)</code></td><td>Resizes vector, preserving elements</td></tr>
+      <tr><td><code>IndexOf(const vector&lt;T&gt;&amp;, const T&amp;)</code></td><td>First index of element, or -1</td></tr>
+      <tr><td><code>Reverse(vector&lt;T&gt;&amp;)</code></td><td>Reverses in-place</td></tr>
+      <tr><td><code>Clear(vector&lt;T&gt;&amp;, intcs index, intcs length)</code></td><td>Sets range to default value</td></tr>
+    </table>
+    </div>
+    <pre><code>using namespace System;
+using SharpRuntime::intcs;
+
+std::vector&lt;intcs&gt; v = {3, 1, 4, 1, 5, 9};
+Array::Sort(v);              // {1, 1, 3, 4, 5, 9}
+Array::Reverse(v);           // {9, 5, 4, 3, 1, 1}
+intcs idx = Array::IndexOf(v, 4); // 2
+Array::Resize(v, 4);         // {9, 5, 4, 3}
+Array::Clear(v, 0, 2);       // {0, 0, 4, 3}</code></pre>
+
+    <h2>ArraySegment&lt;T&gt;</h2>
+    <p class="file-path">modules/core/include/System/ArraySegment.hpp</p>
+    <p>A struct representing a view into a portion of an array (vector). Provides <code>Array</code>, <code>Offset</code>, <code>Count</code> members.</p>
+
+    <h2>Buffer</h2>
+    <p class="file-path">modules/core/include/System/Buffer.hpp</p>
+    <p>Header-only static utility class for raw byte-level operations:</p>
+    <ul>
+      <li><code>BlockCopy(src, srcOffset, dst, dstOffset, count)</code> — byte-level copy</li>
+      <li><code>ByteLength&lt;T&gt;(vector)</code> — total byte size of vector's data</li>
+      <li><code>GetByte&lt;T&gt;(vector, index)</code> / <code>SetByte&lt;T&gt;(vector, index, value)</code></li>
+    </ul>
+
+    <h2>Span&lt;T&gt; and ReadOnlySpan&lt;T&gt;</h2>
+    <p class="file-path">modules/core/include/System/Span.hpp</p>
+    <p>A non-owning view over a contiguous region of memory, similar to C# <code>Span&lt;T&gt;</code>. Supports:</p>
+    <ul>
+      <li><code>Slice(start)</code> and <code>Slice(start, length)</code></li>
+      <li>Range-for iteration</li>
+      <li>Bounds checking</li>
+      <li><code>Length</code>, <code>IsEmpty</code></li>
+    </ul>
+    <pre><code>std::vector&lt;int&gt; data = {1, 2, 3, 4, 5};
+System::Span&lt;int&gt; span(data.data(), data.size());
+auto sub = span.Slice(1, 3);  // view of {2, 3, 4}</code></pre>
+
+    <h2>Collections (Higher Level)</h2>
+    <p>For richer collection semantics (adding/removing elements, dictionaries, etc.), see the collections module:</p>
+    <ul>
+      <li><code>System::Collections::Generic::List&lt;T&gt;</code> — dynamic array with .NET API</li>
+      <li><code>System::Collections::Generic::Dictionary&lt;K,V&gt;</code> — hash table</li>
+      <li><code>System::Collections::Generic::HashSet&lt;T&gt;</code> — hash set</li>
+    </ul>
+    <p>See <a href="modules/collections.html">Collections Module</a>.</p>
+
+    <div class="page-nav">
+      <a class="prev" href="strings.html"><span class="page-nav-label">← Previous</span>Strings</a>
+      <a class="next" href="delegates.html"><span class="page-nav-label">Next →</span>Delegates &amp; Events</a>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>

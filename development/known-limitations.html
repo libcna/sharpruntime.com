@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Known Limitations — sharp-runtime Developer Guide</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Development</li>
+    <li><a href="index.html">Developer Guide</a></li>
+    <li><a href="coding-style.html">Coding Style</a></li>
+    <li><a href="debugging.html">Debugging</a></li>
+    <li><a href="porting-csharp-code.html">Porting C# Code</a></li>
+    <li><a href="adding-runtime-features.html">Adding Features</a></li>
+    <li><a href="known-limitations.html">Known Limitations</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Developer Guide</a></span><span>Known Limitations</span></div>
+    <div id="search-results"></div>
+    <h1>Known Limitations</h1>
+    <p class="page-subtitle">Platform gaps, missing features, stub-only classes, and known differences from .NET.</p>
+
+    <h2>No Garbage Collector</h2>
+    <p>sharp-runtime has no garbage collector. <code>System::GC</code> is a stub that does nothing.
+    All memory management is explicit C++ RAII. This is intentional — GC adds complexity and latency
+    that is unacceptable in game runtime code (the primary use case via CNA).</p>
+    <p><strong>Impact:</strong> Circular reference cycles with <code>shared_ptr</code> cause memory leaks.
+    Code that assumes GC will clean up must be refactored to use RAII patterns.</p>
+
+    <h2>POSIX-only Subsystems</h2>
+    <p>The following subsystems work on Linux, macOS, and Android (via NDK) only:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Subsystem</th><th>Reason</th><th>Windows/Emscripten status</th></tr>
+      <tr><td><code>System::Net::Sockets</code></td><td>Uses POSIX socket APIs</td><td>Not implemented</td></tr>
+      <tr><td><code>System::IO::RandomAccess</code></td><td>Uses <code>pread</code>/<code>pwrite</code></td><td>Has Win32 fallback (<span class="badge badge-needs-verification">needs verification</span>)</td></tr>
+      <tr><td><code>System::AppDomain</code></td><td>Uses POSIX process/env APIs</td><td>Not fully implemented</td></tr>
+      <tr><td><code>System::AppContext</code></td><td>Uses POSIX paths</td><td>Not fully implemented</td></tr>
+      <tr><td><code>System::TimeZoneInfo</code></td><td>Uses <code>localtime_r</code>, <code>/usr/share/zoneinfo</code></td><td>Not portable</td></tr>
+    </table>
+    </div>
+
+    <h2>No Reflection</h2>
+    <p><code>System::Type</code> is a stub. There is no runtime type metadata, no dynamic method invocation,
+    no <code>Activator.CreateInstance</code>, and no attribute inspection at runtime.
+    Only <code>GetTypeName()</code> (returns a string) is available for type identification.
+    See <a href="../reflection.html">Reflection</a>.</p>
+
+    <h2>Stub-only Classes</h2>
+    <p>These classes exist as headers for API compatibility but have minimal or no implementation:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Class</th><th>Notes</th></tr>
+      <tr><td><code>System::GC</code></td><td>No garbage collection; all methods are no-ops</td></tr>
+      <tr><td><code>System::Type</code></td><td>No runtime type metadata</td></tr>
+      <tr><td><code>System::Activator</code></td><td>CreateInstance not implementable without reflection</td></tr>
+      <tr><td><code>System::Threading::SynchronizationContext</code></td><td>Stub; <code>Progress&lt;T&gt;</code> calls handlers synchronously</td></tr>
+      <tr><td><code>System::Diagnostics::StackTrace</code></td><td>No stack capture</td></tr>
+      <tr><td><code>System::Diagnostics::StackFrame</code></td><td>No frame info</td></tr>
+      <tr><td>Attribute classes (all)</td><td>Exist for syntax, no runtime effect</td></tr>
+    </table>
+    </div>
+
+    <h2>HttpClient — No TLS / HTTPS</h2>
+    <p><code>System::Net::Http::HttpClient</code> is implemented but supports <strong>plain HTTP only</strong>.
+    HTTPS (TLS/SSL) is not implemented. Do not use for production HTTPS requests.
+    A future improvement would require linking an SSL library (e.g., OpenSSL or mbedTLS) which has not been approved as a dependency yet.</p>
+
+    <h2>Regex Limitations</h2>
+    <p><code>System::Text::RegularExpressions::Regex</code> uses <code>std::regex</code> as its backend.
+    Known limitations compared to .NET Regex:</p>
+    <ul>
+      <li>No named capture groups (<code>(?&lt;name&gt;...)</code>)</li>
+      <li>No lookbehind assertions</li>
+      <li><code>std::regex</code> can be significantly slower than .NET's regex engine for complex patterns</li>
+    </ul>
+
+    <h2>No LINQ</h2>
+    <p>There is no LINQ implementation. C# code using <code>.Where()</code>, <code>.Select()</code>,
+    <code>.GroupBy()</code>, etc. must be rewritten as explicit loops or use C++ standard algorithm
+    functions (<code>std::find_if</code>, <code>std::transform</code>, etc.).</p>
+
+    <h2>No C# async/await Syntax</h2>
+    <p>C# async/await coroutines have no direct language equivalent in C++. Task and ValueTask APIs are provided by the <code>SharpRuntime::Threading.Tasks</code> component, but they do not reproduce the full C# awaitable pattern. Ported asynchronous code may need threads, callbacks, or a C++-native asynchronous design.</p>
+
+    <h2>SynchronizationContext</h2>
+    <p><code>System::Threading::SynchronizationContext</code> is a stub.
+    <code>Progress&lt;T&gt;</code> calls its handlers synchronously rather than marshalling them to a context.
+    For single-threaded game use (the primary use case) this is the correct behavior.</p>
+
+    <h2>AppDomain — Linux-only getBaseDirectory</h2>
+    <p><code>AppDomain::getBaseDirectoryProperty()</code> reads <code>/proc/self/exe</code> to determine
+    the executable path. This works on Linux but not on macOS (which uses <code>_NSGetExecutablePath</code>)
+    or Windows. The method may return an incorrect or empty path on non-Linux platforms.</p>
+    <p>Additionally, <code>extern char** environ</code> in <code>Environment.cpp</code> must remain at
+    file scope (not inside <code>namespace System</code>) — moving it causes a PIE relocation error.</p>
+
+    <h2>String Encoding Differences</h2>
+    <ul>
+      <li>C# <code>string</code> is UTF-16; sharp-runtime <code>std::string</code> is UTF-8 by convention</li>
+      <li>C# <code>char</code> is 16-bit; <code>charcs</code> = <code>char16_t</code> in sharp-runtime</li>
+      <li>String <code>Length</code> in .NET = UTF-16 code units; <code>size()</code> in C++ = bytes</li>
+      <li>Multi-byte UTF-8 characters will have <code>size()</code> &gt; character count</li>
+    </ul>
+
+    <h2>No String Null</h2>
+    <p>In C#, a <code>string</code> variable can be <code>null</code>. In sharp-runtime,
+    <code>std::string</code> cannot be null — the convention is to use empty string (<code>""</code>)
+    where C# would use <code>null</code>.</p>
+
+    <h2>Array Fixed Size</h2>
+    <p>C# arrays are fixed-size after creation. <code>std::vector&lt;T&gt;</code> is dynamic.
+    While this is more flexible, code that relies on array length staying constant must be careful
+    not to accidentally resize the vector.</p>
+
+    <h2>No Checked Arithmetic</h2>
+    <p>C# has <code>checked</code> / <code>unchecked</code> contexts for integer overflow detection.
+    C++ has no equivalent. Integer overflow is undefined behavior for signed types in C++ —
+    use <code>OverflowException</code> manually if overflow detection is needed.</p>
+
+    <h2>Thread Safety</h2>
+    <p>Thread safety of individual classes is not guaranteed unless explicitly documented.
+    The standard collections (<code>List&lt;T&gt;</code>, <code>Dictionary&lt;K,V&gt;</code>, etc.)
+    are not thread-safe for concurrent writes — use <code>System::Collections::Concurrent</code>
+    types or external synchronization.</p>
+
+    <h2>WeakReference Generic Form</h2>
+    <p><code>WeakReferenceT&lt;T&gt;</code> is the generic form (not <code>WeakReference&lt;T&gt;</code>)
+    because C++ cannot have a class template and a plain class with the same name in the same namespace.
+    Replace <code>WeakReference&lt;T&gt;</code> with <code>WeakReferenceT&lt;T&gt;</code> when porting.</p>
+
+    <h2>Emscripten Build</h2>
+    <p>Emscripten (WebAssembly) compilation has never been CI-tested in this repository.
+    Platform guards exist but are not validated. POSIX-only subsystems would fail to link.</p>
+
+    <div class="nav-links">
+      <a class="prev" href="adding-runtime-features.html">← Adding Features</a>
+      <a class="next" href="../index.html">Home →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

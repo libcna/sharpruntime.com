@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System::Nullable — sharp-runtime</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../overview.html">Overview</a></li>
+    <li><a href="../getting-started.html">Getting Started</a></li>
+    <li class="nav-section">Reference</li>
+    <li><a href="../modules/index.html">Modules</a></li>
+    <li><a href="index.html">Classes</a></li>
+    <li><a href="../api/index.html">API Reference</a></li>
+    <li><a href="../internals/index.html">Internals</a></li>
+    <li class="nav-section">Classes</li>
+    <li><a href="object.html">System::Object</a></li>
+    <li><a href="exception.html">System::Exception</a></li>
+    <li><a href="string.html">System::String</a></li>
+    <li><a href="array.html">System::Array</a></li>
+    <li><a href="eventhandler.html">System::EventHandler</a></li>
+    <li><a href="nullable.html">System::Nullable</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Classes</a></span><span>System::Nullable&lt;T&gt;</span></div>
+    <div id="search-results"></div>
+    <h1>System::Nullable&lt;T&gt;</h1>
+    <p class="page-subtitle">Value type that can hold null. Wraps <code>std::optional&lt;T&gt;</code>.</p>
+    <p class="file-path">modules/core/include/System/Nullable.hpp</p>
+
+    <p>Status: <span class="badge badge-done">Implemented</span></p>
+
+    <h2>Overview</h2>
+    <p><code>System::Nullable&lt;T&gt;</code> is a thin wrapper around <code>std::optional&lt;T&gt;</code>
+    that provides a .NET-compatible API surface. Use it when porting C# code that uses
+    <code>int?</code>, <code>bool?</code>, <code>DateTime?</code>, or other nullable value types.</p>
+
+    <h2>Class Definition (abbreviated)</h2>
+    <pre><code>namespace System {
+    template&lt;typename T&gt;
+    class Nullable {
+    public:
+        Nullable();                     // null / no value
+        Nullable(T value);              // has value
+        Nullable(std::nullopt_t);       // explicit null
+
+        bool HasValue() const;
+        T Value() const;                // throws if no value
+        T GetValueOrDefault() const;
+        T GetValueOrDefault(T defaultValue) const;
+
+        operator bool() const;          // same as HasValue()
+        explicit operator T() const;    // same as Value()
+    private:
+        std::optional&lt;T&gt; opt_;
+    };
+}</code></pre>
+
+    <h2>Methods</h2>
+
+    <h3>HasValue</h3>
+    <pre><code>bool HasValue() const;</code></pre>
+    <p>Returns <code>true</code> if the object contains a value. Equivalent to C# <code>nullable.HasValue</code>.</p>
+
+    <h3>Value</h3>
+    <pre><code>T Value() const;</code></pre>
+    <p>Returns the value. Throws <code>InvalidOperationException</code> if the object has no value.
+    Equivalent to C# <code>nullable.Value</code>.</p>
+
+    <h3>GetValueOrDefault</h3>
+    <pre><code>T GetValueOrDefault() const;
+T GetValueOrDefault(T defaultValue) const;</code></pre>
+    <p>Returns the value if present, otherwise the default for <code>T</code> (or the supplied <code>defaultValue</code>).
+    Does not throw. Equivalent to C# <code>nullable.GetValueOrDefault()</code>.</p>
+
+    <h2>Usage Examples</h2>
+    <pre><code>// Create null
+System::Nullable&lt;int&gt; n;          // no value
+System::Nullable&lt;int&gt; n2 = std::nullopt;
+
+// Create with value
+System::Nullable&lt;int&gt; n3 = 42;
+
+// Check
+if (n3.HasValue()) {
+    int v = n3.Value();   // 42
+}
+
+// Safe access
+int v = n.GetValueOrDefault(-1);   // returns -1
+
+// Conversion
+if (n3) {                          // operator bool
+    int v = static_cast&lt;int&gt;(n3); // explicit cast
+}</code></pre>
+
+    <h2>Mapping from C#</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>C# code</th><th>sharp-runtime equivalent</th></tr>
+      <tr><td><code>int? n = null;</code></td><td><code>System::Nullable&lt;int&gt; n;</code></td></tr>
+      <tr><td><code>int? n = 42;</code></td><td><code>System::Nullable&lt;int&gt; n = 42;</code></td></tr>
+      <tr><td><code>n.HasValue</code></td><td><code>n.HasValue()</code></td></tr>
+      <tr><td><code>n.Value</code></td><td><code>n.Value()</code></td></tr>
+      <tr><td><code>n.GetValueOrDefault()</code></td><td><code>n.GetValueOrDefault()</code></td></tr>
+      <tr><td><code>n == null</code></td><td><code>!n.HasValue()</code></td></tr>
+      <tr><td><code>n ?? defaultVal</code></td><td><code>n.GetValueOrDefault(defaultVal)</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Underlying std::optional</h2>
+    <p>Since <code>Nullable&lt;T&gt;</code> wraps <code>std::optional&lt;T&gt;</code>, you can also use
+    <code>std::optional</code> directly in code that does not need C# API compatibility. The two types
+    are interchangeable for most practical purposes.</p>
+
+    <div class="callout note">
+      <div class="callout-title">Reference types</div>
+      In C#, reference types are nullable by default (they can be null). In sharp-runtime, reference
+      types are C++ pointers or <code>std::shared_ptr</code> — they can be <code>nullptr</code> without
+      any wrapper. <code>Nullable&lt;T&gt;</code> is only needed for value types (primitives, structs).
+    </div>
+
+    <div class="nav-links">
+      <a class="prev" href="eventhandler.html">← System::EventHandler</a>
+      <a class="next" href="../api/index.html">API Reference →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

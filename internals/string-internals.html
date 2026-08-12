@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Internals — sharp-runtime Internals</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search"><input type="text" placeholder="Search docs…" id="search-input" autocomplete="off"></div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar"><nav><ul>
+    <li class="nav-section">Getting Started</li>
+    <li><a href="../index.html">Home</a></li>
+    <li class="nav-section">Internals</li>
+    <li><a href="index.html">Internals Index</a></li>
+    <li><a href="object-lifecycle.html">Object Lifecycle</a></li>
+    <li><a href="property-macros.html">Property Macros</a></li>
+    <li><a href="string-internals.html">String Internals</a></li>
+    <li><a href="array-internals.html">Array Internals</a></li>
+  </ul></nav></aside>
+  <main class="content">
+    <div class="breadcrumb"><span><a href="../index.html">Home</a></span><span><a href="index.html">Internals</a></span><span>String Internals</span></div>
+    <div id="search-results"></div>
+    <h1>String Internals</h1>
+    <p class="page-subtitle">How C# string semantics are mapped to <code>std::string</code> in sharp-runtime.</p>
+
+    <h2>The Core Mapping</h2>
+    <p>C# <code>string</code> (reference type, immutable, UTF-16 encoded) maps to C++ <code>std::string</code>
+    (value type by default, mutable, typically UTF-8 or unspecified encoding). This is the most significant
+    semantic difference in the string story.</p>
+
+    <div class="table-wrap">
+    <table>
+      <tr><th>Property</th><th>C# string</th><th>sharp-runtime std::string</th></tr>
+      <tr><td>Type category</td><td>Reference type</td><td>Value type (copyable)</td></tr>
+      <tr><td>Mutability</td><td>Immutable</td><td>Mutable</td></tr>
+      <tr><td>Encoding</td><td>UTF-16</td><td>UTF-8 (by convention)</td></tr>
+      <tr><td>Null</td><td>Can be null</td><td>Cannot be null (empty string is the convention)</td></tr>
+      <tr><td>Char type</td><td><code>char</code> = UTF-16 code unit</td><td><code>char</code> = 8-bit byte</td></tr>
+      <tr><td>Length</td><td><code>s.Length</code> = UTF-16 code units</td><td><code>s.size()</code> = bytes</td></tr>
+      <tr><td>Equality</td><td>Value equality by default</td><td>Value equality via <code>==</code></td></tr>
+    </table>
+    </div>
+
+    <h2>Why std::string?</h2>
+    <p>Using <code>std::string</code> rather than a custom class avoids the overhead and complexity
+    of a managed string type. It interoperates naturally with all C++ standard library APIs.
+    The trade-off is that callers must be aware of the encoding difference when dealing with
+    non-ASCII characters.</p>
+
+    <h2>System::String Role</h2>
+    <p><code>System::String</code> is a static utility class with a deleted constructor.
+    It provides the .NET-style static API (<code>String.IsNullOrEmpty</code>, <code>String.Format</code>, etc.)
+    but does not hold any string data. All string data lives in <code>std::string</code> instances.</p>
+    <p class="file-path">modules/core/include/System/String.hpp</p>
+
+    <h2>Null vs Empty</h2>
+    <p>In C#, <code>null</code> and <code>""</code> are different string values.
+    In sharp-runtime, because <code>std::string</code> cannot be null, the convention is:</p>
+    <ul>
+      <li>A "null" C# string maps to an empty <code>std::string</code></li>
+      <li><code>String::IsNullOrEmpty(s)</code> returns <code>true</code> for <code>""</code></li>
+      <li>Functions that return a "null string" in .NET typically return <code>""</code></li>
+    </ul>
+    <pre><code>std::string name = "";  // "null" string in .NET equivalent
+if (System::String::IsNullOrEmpty(name)) {
+    // handles both "null" and "" cases
+}</code></pre>
+
+    <h2>The charcs / char16_t Alias</h2>
+    <p>C# <code>char</code> is a 16-bit Unicode value (UTF-16 code unit).
+    The sharp-runtime alias for this is <code>charcs</code> = <code>char16_t</code>,
+    defined in <code>SharpRuntimeHelper.hpp</code>:</p>
+    <pre><code>using charcs = char16_t;</code></pre>
+    <p>When porting C# code that uses individual <code>char</code> values, use <code>charcs</code>.
+    When porting code that works with strings as a whole, use <code>std::string</code>.</p>
+    <p>Note that <code>std::string</code> contains <code>char</code> (8-bit), not <code>charcs</code>.
+    If you need a UTF-16 string, use <code>std::u16string</code> — though most sharp-runtime APIs
+    use <code>std::string</code>.</p>
+
+    <h2>Encoding</h2>
+    <p>sharp-runtime does not enforce a specific encoding in <code>std::string</code>.
+    By convention, strings are expected to contain UTF-8. The <code>System::Text::Encoding</code>
+    hierarchy provides explicit encode/decode operations:</p>
+    <ul>
+      <li><code>UTF8Encoding::GetBytes(string)</code> — UTF-8 string → bytes</li>
+      <li><code>UTF8Encoding::GetString(bytes)</code> — bytes → UTF-8 string</li>
+      <li><code>ASCIIEncoding</code>, <code>Latin1Encoding</code>, <code>UnicodeEncoding</code> (UTF-16)</li>
+    </ul>
+    <p class="file-path">modules/text/include/System/Text/Encoding.hpp</p>
+
+    <h2>StringBuilder</h2>
+    <p><code>System::Text::StringBuilder</code> wraps a <code>std::string</code> and provides
+    append/insert/remove/replace operations. It mirrors the .NET <code>StringBuilder</code> API
+    for mutable string accumulation:</p>
+    <pre><code>System::Text::StringBuilder sb;
+sb.Append("Hello");
+sb.Append(", ");
+sb.Append("world");
+std::string result = sb.ToString(); // "Hello, world"</code></pre>
+    <p class="file-path">modules/text/include/System/Text/StringBuilder.hpp</p>
+
+    <h2>String Interning and Identity</h2>
+    <p>.NET has string interning (reference equality for same-content strings). sharp-runtime
+    has no such mechanism — two <code>std::string</code> objects with the same content are equal
+    via <code>==</code> but are distinct objects in memory. This is the expected C++ behavior.</p>
+
+    <div class="nav-links">
+      <a class="prev" href="property-macros.html">← Property Macros</a>
+      <a class="next" href="array-internals.html">Array Internals →</a>
+    </div>
+  </main>
+</div>
+<script src="../assets/script.js"></script>
+</body>
+</html>

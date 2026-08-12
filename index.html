@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sharp-runtime Documentation</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">sharp-runtime <span>docs</span></a>
+  <div class="header-search">
+    <input type="text" placeholder="Search docs…" id="search-input" autocomplete="off">
+  </div>
+  <button class="theme-toggle" id="theme-toggle">☾ Dark</button>
+</header>
+<div class="page-body">
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li class="nav-section">Getting Started</li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="overview.html">Overview</a></li>
+        <li><a href="getting-started.html">Getting Started</a></li>
+        <li><a href="build.html">Build</a></li>
+        <li><a href="running-tests.html">Running Tests</a></li>
+        <li class="nav-section">Architecture</li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="project-structure.html">Project Structure</a></li>
+        <li><a href="runtime-overview.html">Runtime Overview</a></li>
+        <li class="nav-section">Core Runtime</li>
+        <li><a href="type-system.html">Type System</a></li>
+        <li><a href="memory-management.html">Memory Management</a></li>
+        <li><a href="exceptions.html">Exceptions</a></li>
+        <li><a href="strings.html">Strings</a></li>
+        <li><a href="arrays.html">Arrays</a></li>
+        <li><a href="delegates.html">Delegates &amp; Events</a></li>
+        <li><a href="reflection.html">Reflection</a></li>
+        <li><a href="io.html">I/O</a></li>
+        <li><a href="threading.html">Threading</a></li>
+        <li><a href="platform-layer.html">Platform Layer</a></li>
+        <li class="nav-section">Compatibility</li>
+        <li><a href="csharp-compatibility.html">C# Compatibility</a></li>
+        <li><a href="cna-integration.html">CNA Integration</a></li>
+        <li class="nav-section">Reference</li>
+        <li><a href="modules/index.html">Modules</a></li>
+        <li><a href="classes/index.html">Classes</a></li>
+        <li><a href="api/index.html">API Reference</a></li>
+        <li><a href="internals/index.html">Internals</a></li>
+        <li class="nav-section">Tutorials</li>
+        <li><a href="tutorials/index.html">All Tutorials</a></li>
+        <li class="nav-section">Developer Guide</li>
+        <li><a href="development/index.html">Overview</a></li>
+        <li><a href="development/coding-style.html">Coding Style</a></li>
+        <li><a href="development/debugging.html">Debugging</a></li>
+        <li><a href="development/porting-csharp-code.html">Porting C# Code</a></li>
+        <li><a href="development/adding-runtime-features.html">Adding Features</a></li>
+        <li><a href="development/known-limitations.html">Known Limitations</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="content">
+    <div id="search-results"></div>
+    <h1>sharp-runtime Documentation</h1>
+    <p class="page-subtitle">A C++23 implementation of a practical subset of the .NET <code>System.*</code> namespace, available as focused CMake components.</p>
+
+    <div class="callout note">
+      <div class="callout-title">ℹ About this project</div>
+      sharp-runtime is <strong>not</strong> a full .NET runtime or CLR implementation.
+      It is a pragmatic C++23 library that provides <code>System::*</code> API compatibility
+      so that ported C#/XNA game code compiles with minimal changes. Applications can select
+      only the components they need; existing all-in integration remains available. It powers
+      <strong>CNA</strong> (C++ port of XNA 4.0) and <strong>mobile-eggbert</strong>.
+    </div>
+
+    <h2>Quick Start</h2>
+    <pre><code># Clone the repository (with submodules)
+git clone --recurse-submodules https://github.com/openeggbert/sharp-runtime.git
+cd sharp-runtime
+
+# Configure, build, and run the complete test suite
+cmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All
+cmake --build build --target SharpRuntimeTests --parallel 4
+scripts/run_component_tests.sh build</code></pre>
+
+    <h2>Explore the Documentation</h2>
+    <div class="card-grid">
+      <a class="card" href="overview.html">
+        <h3>Project Overview</h3>
+        <p>What sharp-runtime is, its goals, status, and relationship to CNA.</p>
+      </a>
+      <a class="card" href="getting-started.html">
+        <h3>Getting Started</h3>
+        <p>How to build, test, and integrate the complete runtime or selected components.</p>
+      </a>
+      <a class="card" href="architecture.html">
+        <h3>Architecture</h3>
+        <p>Runtime layers, namespace design, key architectural decisions.</p>
+      </a>
+      <a class="card" href="csharp-compatibility.html">
+        <h3>C# Compatibility</h3>
+        <p>Mapping table from C# constructs to C++ sharp-runtime equivalents.</p>
+      </a>
+      <a class="card" href="type-system.html">
+        <h3>Type System</h3>
+        <p>Primitive types, Object base class, SharpRuntimeHelper.</p>
+      </a>
+      <a class="card" href="exceptions.html">
+        <h3>Exceptions</h3>
+        <p>Exception hierarchy, throwing patterns, C# to C++ mapping.</p>
+      </a>
+      <a class="card" href="strings.html">
+        <h3>Strings</h3>
+        <p>std::string usage, System::String helpers, StringBuilder.</p>
+      </a>
+      <a class="card" href="io.html">
+        <h3>I/O Subsystem</h3>
+        <p>Stream, File, Directory, Compression, IsolatedStorage.</p>
+      </a>
+      <a class="card" href="modules/index.html">
+        <h3>Components &amp; Modules</h3>
+        <p>Browse the component catalogue, public targets, and subsystem reference.</p>
+      </a>
+      <a class="card" href="development/porting-csharp-code.html">
+        <h3>Porting C# Code</h3>
+        <p>Practical guide for porting C# classes to C++ using sharp-runtime.</p>
+      </a>
+      <a class="card" href="tutorials/index.html">
+        <h3>Tutorials</h3>
+        <p>Step-by-step guides for common tasks.</p>
+      </a>
+      <a class="card" href="development/known-limitations.html">
+        <h3>Known Limitations</h3>
+        <p>What is not implemented, POSIX-only subsystems, known gaps.</p>
+      </a>
+    </div>
+
+    <h2>Status Summary</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Physical modules</td><td><strong>40</strong> independently selectable components</td></tr>
+      <tr><td>Public headers</td><td><strong>983</strong> headers across the module include roots</td></tr>
+      <tr><td>Test sources</td><td><strong>369</strong> module-owned GoogleTest source files</td></tr>
+      <tr><td>C++ standard</td><td>C++23</td></tr>
+      <tr><td>Build output</td><td>Selected component targets, with <code>SharpRuntime::All</code> for the complete runtime</td></tr>
+      <tr><td>Build system</td><td>CMake ≥ 3.20</td></tr>
+      <tr><td>Primary platform</td><td>Linux / macOS</td></tr>
+      <tr><td>Additional platforms</td><td>Windows (partial), Android (SDL3), Emscripten (partial)</td></tr>
+      <tr><td>License</td><td>MIT</td></tr>
+    </table>
+    </div>
+  </main>
+</div>
+<script src="assets/script.js"></script>
+</body>
+</html>
