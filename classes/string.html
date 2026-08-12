@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System::String Helpers | Sharp Runtime</title>
-  <meta name="description" content="UTF-8 string helpers, formatting and compatibility differences.">
+  <meta name="description" content="Deep System::String reference for construction model, search, comparison, split, formatting, trimming, conversion, hashing, culture, and .NET deviations.">
   <link rel="canonical" href="https://sharpruntime.com/classes/string.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
   <meta property="og:title" content="System::String Helpers | Sharp Runtime">
-  <meta property="og:description" content="UTF-8 string helpers, formatting and compatibility differences.">
+  <meta property="og:description" content="Deep System::String reference for construction model, search, comparison, split, formatting, trimming, conversion, hashing, culture, and .NET deviations.">
   <meta property="og:url" content="https://sharpruntime.com/classes/string.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
@@ -17,13 +17,13 @@
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="System::String Helpers | Sharp Runtime">
-  <meta name="twitter:description" content="UTF-8 string helpers, formatting and compatibility differences.">
+  <meta name="twitter:description" content="Deep System::String reference for construction model, search, comparison, split, formatting, trimming, conversion, hashing, culture, and .NET deviations.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "System::String Helpers", "description": "UTF-8 string helpers, formatting and compatibility differences.", "url": "https://sharpruntime.com/classes/string.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "System::String Helpers", "item": "https://sharpruntime.com/classes/string.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "System::String Helpers", "description": "Deep System::String reference for construction model, search, comparison, split, formatting, trimming, conversion, hashing, culture, and .NET deviations.", "url": "https://sharpruntime.com/classes/string.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "System::String Helpers", "item": "https://sharpruntime.com/classes/string.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,13 +33,133 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">System::String Helpers</span></nav><h1>System::String Helpers</h1><p class="lead">UTF-8 string helpers, formatting and compatibility differences.</p><div class="page-meta"><span>API</span><span>Source f827a6c5</span></div><p>The common string representation is native <code>std::string</code>/UTF-8. Helpers provide familiar operations; indices and Unicode behavior must be checked rather than assumed from .NET UTF-16 semantics.</p><div class="page-index"><a href="../strings.html">Strings concept<small>Representation and components.</small></a><a href="../tutorials/strings-and-builder.html">StringBuilder tutorial<small>Byte-index caveats.</small></a></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">System::String Helpers</span></nav><h1>System::String Helpers</h1><p class="lead">A practical behavioral reference for the static String algorithms over Sharp Runtime’s native UTF-8 std::string representation.</p><div class="page-meta"><span>Core.Base</span><span>Static helpers</span><span>Byte-indexed</span></div>
+<h2 id="what-system-string-is">What System::String is</h2>
+<p><code>System::String</code> is a non-instantiable class of static algorithms over <code>std::string</code>. The actual common string value is <code>SharpRuntime::String</code>, an alias for <code>std::string</code>. A string therefore owns a native byte buffer, copies and moves as a value, can be modified through standard C++ operations, and has no CLR object header.</p>
+<pre><code class="language-cpp">#include &lt;System/String.hpp&gt;
+
+using System::String;
+
+const std::string raw = "  alpha,beta,gamma  ";
+const std::string clean = String::Trim(raw);
+const auto parts = String::Split(clean, ',');
+const std::string label = String::Join(" | ", parts);</code></pre>
+<p>The example uses the static helpers without constructing a <code>System::String</code>. Select <code>Core.Base</code> and link <code>SharpRuntime::Core.Base</code>; no separate text component is needed for these foundational operations.</p>
+
+<h2 id="construction-and-native-values">Construction and native values</h2>
+<p>Construct, copy, move, reserve, and mutate the underlying value exactly as an <code>std::string</code>. <code>System::String::Empty</code> supplies an empty constant, while <code>Create(count, ch)</code> constructs repeated bytes. The helper has no constructor because it stores no string instance.</p>
+<div class="table-wrap"><table><thead><tr><th>Intent</th><th>Native / Sharp Runtime form</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Empty value</td><td><code>std::string value;</code> or <code>String::Empty</code></td><td>An owned zero-byte string, not null</td></tr>
+<tr><td>Literal</td><td><code>std::string value = "text";</code></td><td>Copies literal bytes</td></tr>
+<tr><td>Repeated byte</td><td><code>String::Create(8, '-')</code></td><td>Eight copies of one <code>char</code></td></tr>
+<tr><td>Preallocate</td><td><code>value.reserve(bytes);</code></td><td>Native capacity optimization</td></tr>
+<tr><td>Optional string</td><td><code>std::optional&lt;std::string&gt;</code> or API-specific pointer</td><td>Presence is explicit; empty is not substituted for null</td></tr>
+</tbody></table></div>
+<div class="callout callout--warning"><div class="callout-title">Empty is not a universal null replacement</div><p>A reference parameter such as <code>const std::string&amp;</code> cannot be null. That does not mean every C# null should silently become empty. Preserve absence with an optional or pointer when it has distinct meaning.</p></div>
+
+<h2 id="encoding-and-index-units">Encoding and index units</h2>
+<p>The runtime treats ordinary strings as UTF-8 byte storage. The helper delegates much of its work to <code>std::string</code>, so lengths, positions, counts, ranges, and returned indices are bytes. .NET <code>System.String</code> uses UTF-16 code units. Neither unit is the same as a Unicode scalar or a user-perceived grapheme.</p>
+<div class="table-wrap"><table><thead><tr><th>Text</th><th>UTF-8 bytes here</th><th>UTF-16 units in .NET</th><th>Graphemes</th></tr></thead><tbody>
+<tr><td><code>A</code></td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td><code>é</code> precomposed</td><td>2</td><td>1</td><td>1</td></tr>
+<tr><td>😀</td><td>4</td><td>2</td><td>1</td></tr>
+<tr><td><code>e</code> + combining acute</td><td>3</td><td>2</td><td>1</td></tr>
+</tbody></table></div>
+<p><code>Substring</code>, <code>IndexOf</code>, <code>LastIndexOf</code>, <code>Remove</code>, <code>Insert</code>, <code>ToCharArray</code>, padding widths, and range-taking overloads all operate on this native byte representation. A valid byte range can still cut through a multi-byte scalar. Use an encoding/scalar-aware layer when a port stores human-character offsets.</p>
+
+<h2 id="empty-and-whitespace-tests">Empty and whitespace tests</h2>
+<p><code>IsEmpty</code> and <code>IsNullOrEmpty</code> both test whether the supplied reference is empty; the parameter itself cannot be null. <code>IsNullOrWhiteSpace</code> scans bytes with the native character-classification function. It correctly recognizes the implemented byte/locale whitespace set but is not .NET Unicode whitespace classification.</p>
+<pre><code class="language-cpp">if (System::String::IsNullOrWhiteSpace(input)) {
+    throw System::ArgumentException("A non-blank name is required.");
+}</code></pre>
+
+<h2 id="comparison-modes">Comparison modes</h2>
+<p>The API exposes the six familiar <code>StringComparison</code> names. The current implementation reduces them to two paths: the three IgnoreCase values lowercase each byte before comparing; the other three use case-sensitive byte comparison. It does not implement distinct current-culture, invariant-culture, and ordinal collation engines.</p>
+<div class="table-wrap"><table><thead><tr><th>Requested mode</th><th>Current implementation</th><th>Important reduction</th></tr></thead><tbody>
+<tr><td><code>Ordinal</code>, <code>CurrentCulture</code>, <code>InvariantCulture</code></td><td>Case-sensitive byte comparison</td><td>Culture names do not select different collation</td></tr>
+<tr><td>The three <code>*IgnoreCase</code> values</td><td>Per-byte <code>std::tolower</code>, then byte comparison</td><td>Not Unicode case folding; result can depend on C locale</td></tr>
+<tr><td><code>CompareOrdinal</code></td><td>Byte-by-byte ordering</td><td>UTF-8 byte ordering differs from UTF-16 ordering for some text</td></tr>
+</tbody></table></div>
+<p><code>Compare</code> returns negative, zero, or positive. <code>Equals</code>, <code>StartsWith</code>, <code>EndsWith</code>, <code>Contains</code>, <code>IndexOf</code>, and <code>LastIndexOf</code> offer comparison-aware overloads. Use the case-sensitive path for protocol tokens only when that protocol defines byte comparison; do not label the current ignore-case path as Unicode invariant.</p>
+
+<h2 id="search-and-range-validation">Search and range validation</h2>
+<p>Search families cover strings, bytes, start positions, counts, comparison modes, and “any of” sets. A missing value returns <code>-1</code>. Range-taking overloads validate signed inputs and reject invalid positions with Sharp Runtime argument exceptions. The current post-audit implementation bounds backward searches instead of allowing a negative or oversized position to wrap into <code>size_t</code>.</p>
+<ul>
+  <li><code>IndexOf</code> searches forward and returns a byte offset.</li>
+  <li><code>LastIndexOf</code> searches backward and returns a byte offset.</li>
+  <li><code>IndexOfAny</code> and <code>LastIndexOfAny</code> compare individual <code>char</code> bytes.</li>
+  <li><code>Contains</code>, <code>StartsWith</code>, and <code>EndsWith</code> avoid exposing a numeric position.</li>
+</ul>
+<p>If a search result will later index another representation—UTF-16 text, code points, a rendered label, or a different normalization form—convert the unit explicitly.</p>
+
+<h2 id="substring-insertion-removal-and-replacement">Substring, insertion, removal, and replacement</h2>
+<p><code>Substring</code> returns a new owning <code>std::string</code>; it does not retain a view into the source. <code>Insert</code>, <code>Remove</code>, and both <code>Replace</code> families also return new strings, leaving their input unchanged. This helper-level immutability is convenient for ports even though callers can still mutate the underlying <code>std::string</code> directly.</p>
+<pre><code class="language-cpp">const std::string version = "v1.2.3";
+const std::string numbers = String::Substring(version, 1);
+const std::string major = String::Substring(numbers, 0, 1);
+const std::string masked = String::Replace(version, '.', '-');</code></pre>
+<p>The integer arguments are byte positions and lengths. Replacing a string walks non-overlapping matches and returns the original value when <code>oldValue</code> is empty. Character replacement compares single bytes.</p>
+
+<h2 id="split-and-join">Split and join</h2>
+<p><code>Split</code> supports a single byte delimiter, a set of delimiter bytes, or a string delimiter. Overloads accept <code>StringSplitOptions</code> for the implemented removal/trimming policy. <code>Join</code> supports string or byte separators and collections of strings, 32-bit integers, and doubles; an initializer-list string overload is also available.</p>
+<p>Delimiter semantics follow bytes unless a multi-byte delimiter is supplied as a whole string. A set of <code>char</code> delimiters is a set of bytes, not Unicode scalars. When parsing a textual protocol, first decide whether separators are ASCII protocol bytes or user-language characters.</p>
+<pre><code class="language-cpp">const auto fields = String::Split("alpha::beta::gamma", "::");
+const std::string csv = String::Join(',', fields);</code></pre>
+
+<h2 id="trim-padding-and-case-conversion">Trim, padding, and case conversion</h2>
+<p>The parameterless trim methods recognize the ASCII whitespace bytes space, tab, line feed, carriage return, form feed, and vertical tab. Custom trim sets are vectors of bytes. Padding returns a new byte string with spaces or a supplied byte until the requested byte width is reached.</p>
+<p><code>ToUpper</code> and <code>ToLower</code> apply the native C character conversion to each unsigned byte. The invariant-named helpers forward to the same basic behavior. This is suitable for ASCII-oriented identifiers and deliberately insufficient for general Unicode casing, expansions, Turkish-I behavior, or culture-aware display text.</p>
+
+<h2 id="concatenation">Concatenation</h2>
+<p><code>Concat</code> supplies two-, three-, four-, and vector-of-string overloads. The vector implementation precomputes byte size and reserves once. Ordinary <code>operator+</code>, <code>append</code>, and <code>StringBuilder</code> remain valid native choices; choose based on clarity and allocation behavior rather than on managed syntax alone.</p>
+
+<h2 id="composite-formatting">Composite formatting</h2>
+<p><code>Format</code> supports a finite set of overloads for strings, characters, booleans, 32/64-bit integers, floats, and doubles, with selected one-, two-, and three-argument combinations. The parser handles indexed placeholders and a bounded format-specifier grammar. Numeric formatting uses native/classic-locale machinery.</p>
+<pre><code class="language-cpp">const std::string status = String::Format(
+    "Processed {0} items in {1} ms", 42, 7);
+</code></pre>
+<p>Do not infer arbitrary CLR <code>IFormattable</code>, custom formatter providers, reflection over object arguments, or every .NET numeric/date specifier. If the exact overload or format is not present in the pinned header, prefer an explicit native formatter or add a tested runtime feature.</p>
+
+<h2 id="conversions">Conversions</h2>
+<p><code>ToString(int, width, fill)</code> formats a 32-bit integer with a native stream width and fill. Other numeric wrappers expose their own parse/format methods. Encoding conversions belong to <code>System::Text::Encoding</code>: <code>GetBytes</code> produces a byte vector and <code>GetString</code> decodes input according to the selected encoding.</p>
+<p>Do not treat a byte reinterpretation as a conversion. UTF-8, ASCII, Latin-1, UTF-16 little/big endian, UTF-32, and UTF-7 are distinct concrete surfaces. The current Encoding count APIs report UTF-8 storage-byte units, and shared factory instances have mutable fallback properties; those are documented limitations rather than CLR parity.</p>
+
+<h2 id="tochararray-and-charcs">ToCharArray and charcs</h2>
+<p><code>ToCharArray</code> returns <code>std::vector&lt;char&gt;</code> containing UTF-8 storage bytes. It does not return <code>std::vector&lt;charcs&gt;</code> of UTF-16 units. <code>SharpRuntime::charcs</code> exists for APIs that explicitly model a 16-bit code unit, but it does not change the string storage type.</p>
+<div class="callout callout--warning"><div class="callout-title">The familiar name hides a unit difference</div><p>For non-ASCII input, <code>ToCharArray</code> is not the direct equivalent of C# <code>string.ToCharArray()</code>. Use the encoding or Unicode helper that matches the unit your algorithm needs.</p></div>
+
+<h2 id="equality-and-hashing">Equality and hashing</h2>
+<p>Default helper equality compares bytes. Comparison-mode equality follows the two-path reduction described above. <code>GetHashCode</code> folds a native <code>std::hash&lt;std::string&gt;</code> result into a 32-bit signed value; the widening step avoids invalid shifts on 32-bit platforms.</p>
+<p>The hash is intended for an in-process native hash container under matching equality. It is not stable across standard-library implementations or processes, not suitable for persisted data or network protocols, and not promised to equal a .NET string hash.</p>
+
+<h2 id="interning-and-identity">Interning and identity</h2>
+<p><code>Intern</code> and <code>IsInterned</code> currently return their input value. There is no intern pool and no reference identity for ordinary strings. Comparing addresses or <code>c_str()</code> pointers is never a substitute for value equality.</p>
+
+<h2 id="important-differences-from-net">Important differences from .NET</h2>
+<div class="table-wrap"><table><thead><tr><th>.NET String</th><th>Sharp Runtime</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td>UTF-16 code-unit storage</td><td>UTF-8 bytes in <code>std::string</code></td><td>Indices, lengths, ordering, and arrays differ</td></tr>
+<tr><td>Immutable managed object</td><td>Mutable native value; helpers return copies</td><td>Native mutation and invalidation are visible</td></tr>
+<tr><td>Reference can be null</td><td><code>std::string</code> value cannot be null</td><td>Use optional/pointer when absence matters</td></tr>
+<tr><td>Rich culture/ordinal comparison engines</td><td>Byte comparison plus bytewise ignore-case reduction</td><td>Do not promise Unicode/culture parity</td></tr>
+<tr><td>Unicode normalization</td><td>Current extension returns input and reports true</td><td>Use a real Unicode library when normalization matters</td></tr>
+<tr><td>Runtime interning</td><td>No intern pool</td><td>Only value comparison is meaningful</td></tr>
+<tr><td>Stable contract within CLR version</td><td>Native <code>std::hash</code> folded to 32 bits</td><td>Never persist the hash</td></tr>
+</tbody></table></div>
+
+<h2 id="when-to-use-another-representation">When to use another representation</h2>
+<ul>
+  <li>Use <code>std::string_view</code> for a short synchronous byte-string borrow when the owner is clear.</li>
+  <li>Use byte spans for binary data; do not label arbitrary bytes as text.</li>
+  <li>Use <code>charcs</code> or an explicit UTF-16 container only at a boundary that requires UTF-16.</li>
+  <li>Use a Unicode library for normalization, grapheme segmentation, language-sensitive casing, or collation.</li>
+  <li>Use <code>StringBuilder</code> for repeated append/format operations where its byte-unit mutation model is acceptable.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="object.html"><span class="next-label">Previous</span>System::Object</a><a href="array.html"><span class="next-label">Next</span>System::Array Helpers</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#what-system-string-is">What System::String is</a><a class="toc-level-2" href="#construction-and-native-values">Construction and native values</a><a class="toc-level-2" href="#encoding-and-index-units">Encoding and index units</a><a class="toc-level-2" href="#empty-and-whitespace-tests">Empty and whitespace tests</a><a class="toc-level-2" href="#comparison-modes">Comparison modes</a><a class="toc-level-2" href="#search-and-range-validation">Search and range validation</a><a class="toc-level-2" href="#substring-insertion-removal-and-replacement">Substring, insertion, removal, and replacement</a><a class="toc-level-2" href="#split-and-join">Split and join</a><a class="toc-level-2" href="#trim-padding-and-case-conversion">Trim, padding, and case conversion</a><a class="toc-level-2" href="#concatenation">Concatenation</a><a class="toc-level-2" href="#composite-formatting">Composite formatting</a><a class="toc-level-2" href="#conversions">Conversions</a><a class="toc-level-2" href="#tochararray-and-charcs">ToCharArray and charcs</a><a class="toc-level-2" href="#equality-and-hashing">Equality and hashing</a><a class="toc-level-2" href="#interning-and-identity">Interning and identity</a><a class="toc-level-2" href="#important-differences-from-net">Important differences from .NET</a><a class="toc-level-2" href="#when-to-use-another-representation">When to use another representation</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

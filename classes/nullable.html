@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nullable Values | Sharp Runtime</title>
-  <meta name="description" content="Optional value compatibility patterns in Sharp Runtime.">
+  <title>System::Nullable&lt;T&gt; | Sharp Runtime</title>
+  <meta name="description" content="Source-verified Nullable&lt;T&gt; value semantics, access, equality, NaN behavior, hashing, conversion, ownership, exceptions, and C# differences.">
   <link rel="canonical" href="https://sharpruntime.com/classes/nullable.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
-  <meta property="og:title" content="Nullable Values | Sharp Runtime">
-  <meta property="og:description" content="Optional value compatibility patterns in Sharp Runtime.">
+  <meta property="og:title" content="System::Nullable&lt;T&gt; | Sharp Runtime">
+  <meta property="og:description" content="Source-verified Nullable&lt;T&gt; value semantics, access, equality, NaN behavior, hashing, conversion, ownership, exceptions, and C# differences.">
   <meta property="og:url" content="https://sharpruntime.com/classes/nullable.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Nullable Values | Sharp Runtime">
-  <meta name="twitter:description" content="Optional value compatibility patterns in Sharp Runtime.">
+  <meta name="twitter:title" content="System::Nullable&lt;T&gt; | Sharp Runtime">
+  <meta name="twitter:description" content="Source-verified Nullable&lt;T&gt; value semantics, access, equality, NaN behavior, hashing, conversion, ownership, exceptions, and C# differences.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Nullable Values", "description": "Optional value compatibility patterns in Sharp Runtime.", "url": "https://sharpruntime.com/classes/nullable.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "Nullable Values", "item": "https://sharpruntime.com/classes/nullable.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "System::Nullable<T>", "description": "Source-verified Nullable<T> value semantics, access, equality, NaN behavior, hashing, conversion, ownership, exceptions, and C# differences.", "url": "https://sharpruntime.com/classes/nullable.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "System::Nullable<T>", "item": "https://sharpruntime.com/classes/nullable.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,13 +33,100 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">Nullable Values</span></nav><h1>Nullable Values</h1><p class="lead">Optional value compatibility patterns in Sharp Runtime.</p><div class="page-meta"><span>API</span><span>Source f827a6c5</span></div><p>Nullable-shaped templates model the presence or absence of a native value. Construction, copying and the contained type’s lifetime follow ordinary C++ semantics.</p></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">System::Nullable&lt;T&gt;</span></nav><h1>System::Nullable<T></h1><p class="lead">Represent optional values with native construction and equality rules, without confusing absence with pointer ownership.</p><div class="page-meta"><span>Core.Base</span><span>std::optional-backed</span><span>Source-verified</span></div>
+<h2 id="role-and-storage">Role and storage</h2>
+<p><code>System::Nullable&lt;T&gt;</code> represents either no value or one value of <code>T</code>. It is an ordinary header-only C++ template backed by a private <code>std::optional&lt;T&gt;</code>; it is not a boxed object, does not derive from <code>System::Object</code>, and does not introduce CLR nullable metadata.</p>
+<p>The type lives in <code>System/Nullable.hpp</code> and belongs to <code>Core.Base</code>. A default-constructed instance is absent. Constructors from <code>const T&amp;</code> and <code>T&amp;&amp;</code> are intentionally implicit, mirroring the convenient C# conversion from <code>T</code> to <code>T?</code>.</p>
+<pre><code class="language-cpp">#include &lt;System/Nullable.hpp&gt;
+
+System::Nullable&lt;int&gt; missing;
+System::Nullable&lt;int&gt; answer = 42;
+
+if (answer.getHasValueProperty()) {
+    const int value = answer.getValueProperty();
+    (void)value;
+}</code></pre>
+
+<h2 id="public-surface">Public surface</h2>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Behavior</th><th>Important detail</th></tr></thead><tbody>
+<tr><td><code>getHasValueProperty()</code></td><td>Reports presence</td><td><code>noexcept</code>; equivalent to the backing optional's <code>has_value()</code></td></tr>
+<tr><td><code>getValueProperty()</code></td><td>Returns the contained value</td><td>Returns <code>const T&amp;</code>; throws when absent</td></tr>
+<tr><td><code>GetValueOrDefault()</code></td><td>Returns the value or <code>T{}</code></td><td>Returns by value</td></tr>
+<tr><td><code>GetValueOrDefault(defaultValue)</code></td><td>Returns the value or a supplied fallback</td><td>Returns by value; the fallback is passed as <code>const T&amp;</code></td></tr>
+<tr><td><code>Equals</code> / <code>GetHashCode</code></td><td>Default-equality and matching hash contract</td><td>Different from lifted <code>operator==</code> for floating NaN</td></tr>
+<tr><td><code>ToString</code></td><td>Empty text when absent; formatted contained value when present</td><td>Prefers <code>T::ToString()</code>, otherwise stream insertion</td></tr>
+<tr><td><code>explicit operator bool</code></td><td>Tests presence</td><td>A C++ convenience, not nullable-Boolean value conversion</td></tr>
+<tr><td><code>explicit operator T</code></td><td>Extracts the value</td><td>Uses the same throwing access as <code>Value</code></td></tr>
+<tr><td><code>operator==</code> / <code>operator!=</code></td><td>Compares two nullable values, or presence against <code>std::nullopt</code></td><td>Uses the backing optional's lifted underlying operator</td></tr>
+</tbody></table></div>
+
+<h2 id="value-access-and-exceptions">Value access and exceptions</h2>
+<p><code>getValueProperty()</code> throws <code>System::InvalidOperationException</code> with the message “Nullable object must have a value.” when absent. Explicit conversion to <code>T</code> delegates to that accessor and throws the same exception. The returned property reference remains valid only while the <code>Nullable</code> object exists and is not assigned a replacement value.</p>
+<p><code>GetValueOrDefault()</code> never throws merely because the nullable is absent. The parameterless overload value-initializes <code>T</code>; that means zero for arithmetic values, but it is not necessarily the correct domain fallback. Prefer the explicit-default overload when zero, an empty string, or a default-constructed object would hide missing input.</p>
+<pre><code class="language-cpp">System::Nullable&lt;int&gt; port;
+
+const int conventional = port.GetValueOrDefault();    // 0
+const int configured = port.GetValueOrDefault(8080);  // 8080
+
+if (!port) {
+    // Presence test only; no value was extracted.
+}</code></pre>
+
+<h2 id="equality-ordering-and-floating-point-behavior">Equality, ordering, and floating-point behavior</h2>
+<p><code>Equals</code> treats two absent values as equal, an absent and present value as unequal, and two present values through Sharp Runtime's default equality policy. For floating types that policy follows .NET's <code>Single.Equals</code>/<code>Double.Equals</code> shape: two NaNs compare equal and signed zero values compare equal.</p>
+<p><code>operator==</code> deliberately has a different floating behavior. It models lifted C# <code>==</code> by using the underlying equality operator through <code>std::optional</code>. Two present NaNs therefore compare false, just as two nullable NaNs do under lifted <code>==</code> in C#. This is not an inconsistency to “fix”; it represents two distinct public equality surfaces.</p>
+<div class="table-wrap"><table><thead><tr><th>Operands</th><th><code>Equals</code></th><th><code>operator==</code></th></tr></thead><tbody>
+<tr><td>absent, absent</td><td>true</td><td>true</td></tr>
+<tr><td>absent, present</td><td>false</td><td>false</td></tr>
+<tr><td>equal ordinary values</td><td>true</td><td>true</td></tr>
+<tr><td>NaN, NaN</td><td>true</td><td>false</td></tr>
+<tr><td>+0.0, -0.0</td><td>true</td><td>true</td></tr>
+</tbody></table></div>
+<p><code>NullableHelper::Compare</code> orders absence before presence and compares two present values with the runtime's default comparison policy; floating NaN consequently orders before every present numeric value. <code>NullableHelper::Equals</code> delegates to the <code>Equals</code> surface. The helper has a different name because C++ cannot define a non-template <code>Nullable</code> beside <code>Nullable&lt;T&gt;</code> in the same namespace.</p>
+
+<h2 id="hashing">Hashing</h2>
+<p>An absent nullable hashes to zero. A present value uses the runtime's default hash policy. For floating values, NaN payloads are canonicalized so values considered equal by <code>Equals</code> receive the same hash; positive and negative zero also share a hash. Zero is a valid hash for a present value, so a collision with the absent state does not imply equality.</p>
+<p><code>GetHashCode()</code> returns the project-wide 32-bit <code>intcs</code> hash shape. It is suitable only where the consuming comparer uses the matching equality contract. Do not persist it, treat it as identity, or assume it equals a .NET process's hash.</p>
+
+<h2 id="text-conversion">Text conversion</h2>
+<p><code>ToString()</code> returns an empty <code>std::string</code> for an absent value, matching the intended nullable display shape rather than claiming that absence and empty text are generally equivalent. For a present <code>T</code>, compile-time detection prefers a const <code>T::ToString()</code> convertible to <code>std::string</code>. Otherwise the implementation uses <code>operator&lt;&lt;</code> on a classic-locale <code>std::ostringstream</code>.</p>
+<p>There is no format-provider overload, nullable format string, or reflection-based conversion. A type with neither a suitable member nor stream insertion can still be stored, but calling <code>ToString()</code> for that instantiation will not compile.</p>
+
+<h2 id="ownership-and-template-requirements">Ownership and template requirements</h2>
+<p>The contained value is stored inline according to <code>std::optional</code>'s object model. Copying or moving a <code>Nullable&lt;T&gt;</code> copies or moves <code>T</code>; destroying it destroys a present <code>T</code>. It does not allocate merely to represent presence and does not extend the lifetime of an external object unless <code>T</code> itself is an owning smart pointer.</p>
+<p>The template does not restrict <code>T</code> to CLR-style value types. That flexibility does not make every member available for every C++ type. The value-or-default and explicit-value operations return by value and therefore require the corresponding construction. Equality, hashing, and text conversion require the relevant operators or customization. The current equality and hash members are declared <code>noexcept</code>; a user-defined equality or hash that throws is not a safe instantiation for those calls.</p>
+<div class="callout callout--warning"><div class="callout-title">Nullable is not an ownership policy</div><p>Use <code>Nullable&lt;T&gt;</code> for optional value semantics. Use <code>unique_ptr</code>, <code>shared_ptr</code>, <code>weak_ptr</code>, or a documented raw pointer when the problem is object ownership, shared lifetime, expiry, or borrowing. Wrapping a pointer in Nullable usually adds a second absence mechanism rather than clarity.</p></div>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td><code>T?</code> language syntax</td><td><code>System::Nullable&lt;T&gt;</code></td><td>Include the header and name the template explicitly</td></tr>
+<tr><td><code>.HasValue</code> / <code>.Value</code></td><td><code>getHasValueProperty()</code> / <code>getValueProperty()</code></td><td>Property syntax becomes accessor calls</td></tr>
+<tr><td>Nullable value returned by <code>Value</code></td><td>Const reference returned by the property accessor</td><td>Do not retain the reference beyond the nullable object's lifetime</td></tr>
+<tr><td>Compiler lifts many operators over <code>T?</code></td><td>Only the documented equality/presence operators are supplied here</td><td>Write explicit presence logic for arithmetic, relational, and custom operators</td></tr>
+<tr><td>Boxing and <code>Nullable.GetUnderlyingType</code></td><td>No boxing service or CLR metadata</td><td>Use templates and explicit registries/type traits</td></tr>
+<tr><td><code>null</code> literal</td><td>Default construction; comparisons with <code>std::nullopt</code></td><td>There is no general managed-null conversion</td></tr>
+</tbody></table></div>
+
+<h2 id="usage-pattern">Usage pattern</h2>
+<pre><code class="language-cpp">#include &lt;System/Nullable.hpp&gt;
+
+System::Nullable&lt;int&gt; parsePort(const std::string&amp; text)
+{
+    if (text.empty()) return {};
+    return std::stoi(text);
+}
+
+const auto port = parsePort("443");
+if (port.getHasValueProperty()) {
+    connectTo(port.getValueProperty());
+}</code></pre>
+<p>This example uses absence for empty input and extracts only after testing presence. <code>std::stoi</code> still has native exception behavior; <code>Nullable</code> does not translate parsing failures automatically.</p><nav class="next-links" aria-label="Previous and next pages"><a href="array.html"><span class="next-label">Previous</span>System::Array Helpers</a><a href="exception.html"><span class="next-label">Next</span>System::Exception</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#role-and-storage">Role and storage</a><a class="toc-level-2" href="#public-surface">Public surface</a><a class="toc-level-2" href="#value-access-and-exceptions">Value access and exceptions</a><a class="toc-level-2" href="#equality-ordering-and-floating-point-behavior">Equality, ordering, and floating-point behavior</a><a class="toc-level-2" href="#hashing">Hashing</a><a class="toc-level-2" href="#text-conversion">Text conversion</a><a class="toc-level-2" href="#ownership-and-template-requirements">Ownership and template requirements</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#usage-pattern">Usage pattern</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

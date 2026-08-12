@@ -1,0 +1,95 @@
+<h2 id="mental-model">The I/O model in one view</h2>
+<p>Sharp Runtime’s I/O surface is a native C++ implementation of a practical subset of <code>System.IO</code>. The familiar names are useful when porting, but the storage underneath is ordinary C++: streams are polymorphic objects, files are reached through <code>std::fstream</code> and <code>std::filesystem</code>, and ownership is explicit. There is no managed finalization pass to rescue an object whose lifetime was designed incorrectly.</p>
+<p>The core <code>IO</code> component owns byte streams, text and binary readers and writers, filesystem helpers, metadata objects, positional descriptor I/O, drive information, unmanaged-memory access, and the Linux file watcher. Compression, ZIP, hashing, storage-path selection, and isolated storage are separate physical components so consumers can select only the surface they need.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Need</th><th scope="col">CMake target</th><th scope="col">What it adds</th><th scope="col">Important dependency</th></tr></thead>
+<tbody>
+<tr><td>Streams, files, paths, readers, writers, watcher</td><td><code>SharpRuntime::IO</code></td><td>The core <code>System::IO</code> surface</td><td>Public: <code>Core.Base</code>, <code>Uri</code>; private: <code>TimeZone</code></td></tr>
+<tr><td>GZip and Deflate streams</td><td><code>SharpRuntime::IO.Compression</code></td><td>Compression streams and options</td><td>Private ZLIB; public <code>Buffers</code>, <code>Core.Base</code>, <code>IO</code></td></tr>
+<tr><td>ZIP archives</td><td><code>SharpRuntime::IO.Compression.Zip</code></td><td><code>ZipArchive</code>, entries, modes, levels</td><td>Private vendored miniz</td></tr>
+<tr><td>Non-cryptographic hashes</td><td><code>SharpRuntime::IO.Hashing</code></td><td>Adler, CRC, xxHash and the incremental base API</td><td>Public <code>Core.Base</code>, <code>IO</code></td></tr>
+<tr><td>Application-scoped storage</td><td><code>SharpRuntime::IO.IsolatedStorage</code></td><td>Store-relative file and directory operations</td><td>Private <code>Storage</code> path provider</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout"><div class="callout-title">Select the narrow target</div><p>Request the component that owns the public header you include. CMake enables its dependency closure. A consumer of <code>IO.Compression</code>, for example, does not need to list <code>IO</code> again.</p></div>
+
+<h2 id="surface-map">Surface map</h2>
+<p>The core component is broad enough that choosing a type by name alone is not always sufficient. This map separates ownership, buffering, representation, and platform concerns.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Family</th><th scope="col">Representative types</th><th scope="col">Use it for</th><th scope="col">Read before porting</th></tr></thead>
+<tbody>
+<tr><td>Byte streams</td><td><code>Stream</code>, <code>MemoryStream</code>, <code>FileStream</code>, <code>BufferedStream</code>, <code>UnmanagedMemoryStream</code></td><td>Sequential or seekable byte I/O behind one virtual interface</td><td>Capability defaults, close behavior, and ownership differ by concrete stream</td></tr>
+<tr><td>Binary records</td><td><code>BinaryReader</code>, <code>BinaryWriter</code></td><td>Little-endian primitives, 7-bit lengths, UTF-8 strings</td><td>They borrow a raw <code>Stream*</code>; the stream must outlive the wrapper</td></tr>
+<tr><td>Text</td><td><code>TextReader</code>, <code>TextWriter</code>, <code>StreamReader</code>, <code>StreamWriter</code>, <code>StringReader</code>, <code>StringWriter</code></td><td>Lines and native strings</td><td><code>StreamReader</code> is a byte-to-character reader, not a general encoding decoder</td></tr>
+<tr><td>Whole-file helpers</td><td><code>File</code></td><td>Read, write, append, copy, move, delete, and existence checks</td><td>Text helpers operate on native string bytes and do not offer encoding/BOM options</td></tr>
+<tr><td>Directories and paths</td><td><code>Directory</code>, <code>Path</code></td><td>Eager enumeration, creation, deletion, movement, normalization, and path parts</td><td>The implemented overload set is smaller than .NET’s and Windows root semantics are reduced</td></tr>
+<tr><td>Metadata objects</td><td><code>FileSystemInfo</code>, <code>FileInfo</code>, <code>DirectoryInfo</code>, <code>DriveInfo</code></td><td>Object-shaped metadata and operations</td><td>Symbolic-link APIs, several enumeration overloads, and full drive classification are absent</td></tr>
+<tr><td>Positional I/O</td><td><code>RandomAccess</code></td><td>Read or write at a file offset without changing a shared position</td><td>It borrows a native descriptor and throws on Emscripten</td></tr>
+<tr><td>Filesystem events</td><td><code>FileSystemWatcher</code></td><td>Single-directory create, delete, change, and rename events on Linux</td><td>No recursive watch and no Windows/macOS backend</td></tr>
+<tr><td>Raw native memory</td><td><code>UnmanagedMemoryStream</code>, <code>UnmanagedMemoryAccessor</code></td><td>Expose caller-owned memory through stream or primitive-access APIs</td><td>The caller owns the buffer and must keep it alive</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="stream-contract">Streams are capability contracts</h2>
+<p><code>Stream</code> supplies a common byte-oriented protocol, not a promise that every operation works. Derived types must implement <code>Read</code>, <code>Close</code>, and <code>Length</code>. The base implementation rejects writing and resizing, derives single-byte reads from <code>Read</code>, derives seeking from <code>Position</code> and <code>Length</code>, and makes <code>Flush</code> a no-op.</p>
+<p>Capability properties are virtual defaults rather than abstract members. The base claims readable, not writable, and not seekable. A custom stream that overrides <code>Write</code> but forgets <code>CanWrite</code> can write in practice while readers of its contract reject it. Conversely, an unreadable custom stream that inherits the default <code>CanRead=true</code> is accepted by reader constructors and fails later. Implementers must override every capability whose answer differs from the base, including changes caused by closing the stream.</p>
+<p>Read operations may return fewer bytes than requested and return zero at end-of-stream. A caller that needs a complete record must loop or use a reader method whose contract promises an exact count. Write behavior depends on the concrete stream. <code>RandomAccess::Write</code>, for example, retries native short writes until the requested range is complete; the abstract <code>Stream::Write</code> contract does not turn every subclass into an exact-write transport automatically.</p>
+
+<p>See <a href="docs/io/streams.html">Streams, readers, and writers</a> for the capability matrix, ownership rules, disposal behavior, binary format, and text-encoding boundaries.</p>
+
+<h2 id="filesystem-model">Filesystem operations are eager and native</h2>
+<p><code>File</code> and <code>Directory</code> are static convenience surfaces. <code>FileInfo</code> and <code>DirectoryInfo</code> retain an absolute path and expose instance-shaped operations. Both styles ultimately use the host filesystem. They do not virtualize naming, permissions, link resolution, sharing, case sensitivity, timestamp resolution, or atomicity into one universal .NET-like filesystem.</p>
+<p>Current directory enumeration returns vectors. There are no streaming <code>Enumerate*</code> forms, and the core directory helpers do not expose recursive <code>SearchOption</code> or <code>EnumerationOptions</code> overloads. Large or untrusted directory trees therefore need an application-specific traversal rather than assuming the complete .NET enumeration surface exists.</p>
+<p><code>FileSystemInfo</code> translates path-resolution failures into Sharp Runtime exceptions instead of allowing <code>std::filesystem::filesystem_error</code> to escape its constructor. On POSIX, creation time is approximated with inode metadata-change time where portable birth-time data is unavailable. That distinction matters for backup, synchronization, and audit software.</p>
+
+<p>See <a href="docs/io/filesystem.html">Files, directories, paths, and metadata</a> for the exact helper inventory, deletion and movement rules, positional I/O, timestamp caveats, and platform differences.</p>
+
+<h2 id="ownership">Ownership and lifetime</h2>
+<p>The I/O API uses several ownership styles. Confusing them is a more serious bug than choosing the wrong convenience method.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Object</th><th scope="col">Backing resource</th><th scope="col">Ownership rule</th><th scope="col">Invalidation risk</th></tr></thead>
+<tbody>
+<tr><td><code>FileStream</code></td><td>Its <code>std::fstream</code></td><td>Owns and closes it; destructor is the RAII boundary</td><td>Public operations that require the file throw after <code>Close</code></td></tr>
+<tr><td><code>MemoryStream</code></td><td>Internal <code>std::vector&lt;bytecs&gt;</code></td><td>Owns a copy of constructor bytes</td><td>A reference from <code>GetBuffer</code> can be invalidated by later growth</td></tr>
+<tr><td><code>BufferedStream</code></td><td>Raw <code>Stream*</code></td><td>Borrowed by default; optionally closes it when constructed as owner</td><td>The wrapped stream must outlive a non-owning wrapper</td></tr>
+<tr><td>Reader/writer wrappers</td><td>Raw <code>Stream*</code></td><td>Borrow it; <code>leaveOpen</code> controls whether close/destruction closes the stream</td><td>The pointer dangles if the stream dies first</td></tr>
+<tr><td><code>UnmanagedMemoryStream</code></td><td>Raw byte buffer</td><td>Never frees it</td><td>The buffer must outlive the stream and must not move</td></tr>
+<tr><td><code>RandomAccess</code></td><td>Native integer descriptor</td><td>Never opens, closes, duplicates, or extends its lifetime</td><td>Closing or reusing the descriptor concurrently is the caller’s bug</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout callout--warning"><div class="callout-title">Close and ownership are separate questions</div><p><code>leaveOpen=true</code> means the wrapper does not close the underlying stream. At the selected source revision, the text wrappers also remain usable after their own <code>Close</code>; that is a documented compatibility gap, not a license to rely on the behavior. Design code so wrappers are not reused after close.</p></div>
+
+<h2 id="text-and-binary">Text and binary representations</h2>
+<p><code>BinaryReader</code> and <code>BinaryWriter</code> define an explicit little-endian record format. Their string format is UTF-8 bytes preceded by a 7-bit encoded byte length. Character reads decode UTF-8 into <code>charcs</code> UTF-16 code units, retaining a low surrogate when a supplementary scalar crosses a caller-supplied boundary. This is a specific binary protocol, not host-endian serialization of arbitrary C++ objects.</p>
+<p>The text wrappers are narrower. <code>StreamReader</code> reads individual bytes as Latin-1/ASCII-like characters and does not detect a BOM or decode multibyte UTF-8. <code>StreamWriter</code> writes the bytes already present in the native <code>std::string</code>. If an application needs validated Unicode transcoding, it should use the <a href="components/text-data.html">Text component’s encoding APIs</a> before or after the I/O operation.</p>
+
+<h2 id="errors">Errors are part of the contract</h2>
+<p>The implementation increasingly translates native failures into <code>System</code>-shaped exceptions at public doors: invalid ranges use argument exceptions, a closed stream uses <code>ObjectDisposedException</code>, access mismatches use <code>NotSupportedException</code>, and filesystem failures use the relevant <code>IOException</code> family. This does not erase every host difference. Permissions, sharing, missing parents, symlinks, special files, full disks, and unavailable platform services can still produce platform-specific messages and timing.</p>
+<p>Existence checks intentionally answer <code>false</code> for empty paths and native lookup errors rather than throwing. Mutating operations are not silent: for example, <code>File::Delete</code> rejects a directory instead of letting <code>std::filesystem::remove</code> remove an empty one, and non-overwriting moves reject an existing destination.</p>
+
+<h2 id="platform-boundaries">Platform boundaries</h2>
+<ul>
+<li>Core file, directory, path, stream, and drive surfaces build on the standard library, but their visible behavior still follows the host filesystem.</li>
+<li><code>RandomAccess</code> uses Win32 overlapped file operations on Windows and <code>pread</code>/<code>pwrite</code>/<code>fsync</code> on POSIX. It throws <code>PlatformNotSupportedException</code> on Emscripten.</li>
+<li><code>FileSystemWatcher</code> has a real Linux/inotify backend only. Enabling it elsewhere throws.</li>
+<li>Path separators and text-writer line endings are selected at compile time. The <code>Path</code> model does not reproduce the complete Windows drive/UNC grammar.</li>
+<li>Android and Emscripten storage roots belong to the separate <code>Storage</code> component and require application integration; see <a href="platform-layer.html">Platforms and portability</a>.</li>
+</ul>
+
+<h2 id="related-components">Compression, hashing, and isolated storage</h2>
+<p>The physical component split is also a semantic boundary. <code>IO.Compression</code> provides GZip and raw Deflate stream adapters backed privately by ZLIB. <code>IO.Compression.Zip</code> owns ZIP archive behavior and its private miniz implementation. <code>IO.Hashing</code> contains non-cryptographic checksum and hash algorithms; it is not a substitute for the cryptographic component. <code>IO.IsolatedStorage</code> interprets names relative to an application storage root and now rejects ordinary lexical and resolved-symlink escapes, but it is not an operating-system security sandbox and retains documented check-then-use and direct-constructor boundaries.</p>
+
+<h2 id="continue">Continue into the subsystem</h2>
+<div class="page-index">
+<a href="docs/io/streams.html">Streams, readers, and writers<small>Capabilities, concrete streams, binary layout, text behavior, ownership, and close semantics.</small></a>
+<a href="docs/io/filesystem.html">Files, directories, and paths<small>Static helpers, metadata objects, positional access, timestamps, and filesystem semantics.</small></a>
+<a href="docs/io/filesystem-watcher.html">FileSystemWatcher<small>Linux event delivery, reconfiguration, callback threading, and current limitations.</small></a>
+<a href="components/io-storage.html">I/O and storage components<small>Physical targets, dependencies, and related modules.</small></a>
+<a href="tutorials/work-with-files.html">Work with files tutorial<small>A focused consumer walkthrough using the current public surface.</small></a>
+<a href="development/known-limitations.html">Known limitations<small>Project-wide compatibility, platform, and lifetime boundaries.</small></a>
+</div>

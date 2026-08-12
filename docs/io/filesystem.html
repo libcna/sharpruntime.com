@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" data-search-url="../../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Files, Directories, Paths, and Metadata | Sharp Runtime</title>
+  <meta name="description" content="Sharp Runtime filesystem semantics for File, Directory, Path, FileInfo, DirectoryInfo, FileStream, RandomAccess, and DriveInfo.">
+  <link rel="canonical" href="https://sharpruntime.com/docs/io/filesystem.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Files, Directories, Paths, and Metadata | Sharp Runtime">
+  <meta property="og:description" content="Sharp Runtime filesystem semantics for File, Directory, Path, FileInfo, DirectoryInfo, FileStream, RandomAccess, and DriveInfo.">
+  <meta property="og:url" content="https://sharpruntime.com/docs/io/filesystem.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Files, Directories, Paths, and Metadata | Sharp Runtime">
+  <meta name="twitter:description" content="Sharp Runtime filesystem semantics for File, Directory, Path, FileInfo, DirectoryInfo, FileStream, RandomAccess, and DriveInfo.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Files, Directories, Paths, and Metadata", "description": "Sharp Runtime filesystem semantics for File, Directory, Path, FileInfo, DirectoryInfo, FileStream, RandomAccess, and DriveInfo.", "url": "https://sharpruntime.com/docs/io/filesystem.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Files, Directories, Paths, and Metadata", "item": "https://sharpruntime.com/docs/io/filesystem.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../../index.html">Home</a><a class="nav-link" href="../../getting-started.html">Start</a><a class="nav-link" href="../../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../../components/index.html">Components</a><a class="nav-link" href="../../api/index.html">API</a><a class="nav-link" href="../../tutorials/index.html">Tutorials</a><a class="nav-link" href="../../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../../overview.html">What is Sharp Runtime?</a><a href="../../architecture.html">Architecture</a><a href="../../runtime-overview.html">Runtime model</a><a href="../../compatibility.html">Compatibility</a><a href="../../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../../getting-started.html">Getting Started</a><a href="../../build.html">Build & integration</a><a href="../../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../../guides/porting-csharp.html">Port C# to C++</a><a href="../../memory-management.html">Memory & ownership</a><a href="../../exceptions.html">Exceptions</a><a href="../../cna-integration.html">CNA integration</a><a href="../../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../../components/index.html">Complete catalogue</a><a href="../../components/core.html">Core & collections</a><a href="../../components/text-data.html">Text, JSON & XML</a><a href="../../components/io-storage.html">I/O & storage</a><a href="../../components/networking.html">Networking</a><a href="../../components/concurrency.html">Concurrency</a><a href="../../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../../type-system.html">Type system</a><a href="../../strings.html">Strings</a><a href="../../arrays.html">Arrays & memory</a><a href="../../delegates.html">Delegates & events</a><a href="../../reflection.html">Reflection</a><a href="../../io.html">I/O overview</a><a href="streams.html">Streams & readers</a><a href="filesystem.html" aria-current="page">Filesystem</a><a href="filesystem-watcher.html">FileSystemWatcher</a><a href="../../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../../development/index.html">Development guide</a><a href="../../project-structure.html">Project structure</a><a href="../../development/adding-runtime-features.html">Adding features</a><a href="../../development/debugging.html">Debugging</a><a href="../../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Files, Directories, Paths, and Metadata</span></nav><h1>Files, Directories, Paths, and Metadata</h1><p class="lead">Use native filesystem APIs precisely, with explicit path, metadata, error, portability, and lifetime boundaries.</p><div class="page-meta"><span>Filesystem</span><span>Paths</span><span>Metadata</span></div>
+<h2 id="three-entry-points">Three ways to work with the filesystem</h2>
+<p>Sharp Runtime exposes the same storage through three different shapes. Static helpers are concise for one operation, metadata objects retain a path for a sequence of related operations, and streams expose ordered bytes. Choosing among them is about lifetime and control rather than feature ranking.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Shape</th><th scope="col">Types</th><th scope="col">Best use</th><th scope="col">Tradeoff</th></tr></thead>
+<tbody>
+<tr><td>Static helpers</td><td><code>File</code>, <code>Directory</code>, <code>Path</code></td><td>One-shot reads, writes, moves, existence checks, and path manipulation</td><td>Whole-file/eager operations and a deliberately bounded overload set</td></tr>
+<tr><td>Metadata objects</td><td><code>FileSystemInfo</code>, <code>FileInfo</code>, <code>DirectoryInfo</code>, <code>DriveInfo</code></td><td>Retain a normalized path and combine metadata with operations</td><td>Not a live handle; the filesystem may change between calls</td></tr>
+<tr><td>Open I/O</td><td><code>FileStream</code>, <code>RandomAccess</code></td><td>Incremental bytes, access modes, seeking, resizing, or explicit offsets</td><td>Resource ownership and close behavior become part of correctness</td></tr>
+</tbody>
+</table></div>
+
+<p>All three use native facilities. Sharp Runtime does not provide a virtual filesystem abstraction that erases case sensitivity, permissions, sharing, symbolic links, timestamp resolution, or atomic-rename differences. Treat a portable source branch as evidence that the code compiles there, not as proof that every host filesystem answers identically.</p>
+
+<h2 id="file-helpers">File: whole-file and namespace operations</h2>
+<p><code>System::IO::File</code> is a static class for the common operations currently implemented:</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Operation group</th><th scope="col">Members</th><th scope="col">Current behavior</th></tr></thead>
+<tbody>
+<tr><td>Existence</td><td><code>Exists</code></td><td>True only for a regular file; empty paths and lookup errors return false</td></tr>
+<tr><td>Namespace mutation</td><td><code>Delete</code>, <code>Copy</code>, <code>Move</code></td><td>Copy can opt into overwrite; move is non-overwriting; delete rejects a directory</td></tr>
+<tr><td>Text</td><td><code>ReadAllText</code>, <code>WriteAllText</code>, <code>AppendAllText</code></td><td>Reads or writes native string bytes through standard streams</td></tr>
+<tr><td>Lines</td><td><code>ReadAllLines</code>, <code>WriteAllLines</code></td><td>Eager vector of strings; writes an LF after each supplied line</td></tr>
+<tr><td>Binary</td><td><code>ReadAllBytes</code>, <code>WriteAllBytes</code></td><td>Eager byte vectors in binary mode</td></tr>
+</tbody>
+</table></div>
+
+<p><code>File::Delete</code> intentionally does not inherit <code>std::filesystem::remove</code>’s ability to remove an empty directory. It first rejects a directory with <code>IOException</code>, matching the separation between file deletion and directory deletion. Deleting a missing file succeeds. <code>FileInfo::Delete</code> routes through the same implementation so the static and object-shaped doors cannot disagree.</p>
+<p>Non-overwriting <code>Move</code> rejects an existing destination before calling the native rename operation. This matters on POSIX, where an unchecked rename can replace an existing destination. <code>Copy</code> and <code>Move</code> require the source to be a regular file and translate their main native failures into the <code>IOException</code> family.</p>
+
+<div class="callout callout--warning"><div class="callout-title">Text helpers do not select an encoding</div><p>The text methods read and write the bytes carried by <code>std::string</code>. They do not detect a BOM, validate UTF-8, or accept an <code>Encoding</code> argument. <code>ReadAllLines</code> uses the native <code>std::getline</code> LF delimiter, while <code>WriteAllLines</code> writes LF explicitly. Applications that need a defined Unicode or line-ending policy should make that policy explicit with the Text component.</p></div>
+
+<h2 id="directory-helpers">Directory: eager, single-level enumeration</h2>
+<p><code>System::IO::Directory</code> implements existence, recursive directory creation, optional recursive deletion, movement, eager file/subdirectory enumeration, and process-current-directory access.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Member</th><th scope="col">Implemented scope</th><th scope="col">Not implied</th></tr></thead>
+<tbody>
+<tr><td><code>Exists</code></td><td>True only when the path resolves to a directory</td><td>It does not distinguish missing, inaccessible, and invalid with exceptions</td></tr>
+<tr><td><code>CreateDirectory</code></td><td>Creates intermediate directories</td><td>No symbolic-link creation API</td></tr>
+<tr><td><code>Delete(path, recursive)</code></td><td>Single directory or full tree</td><td>Recursive deletion is destructive and follows host filesystem behavior</td></tr>
+<tr><td><code>Move</code></td><td>Non-overwriting native rename</td><td>No cross-device copy-and-delete fallback</td></tr>
+<tr><td><code>GetFiles(path)</code></td><td>Immediate regular files, returned eagerly</td><td>No streaming enumeration or recursion</td></tr>
+<tr><td><code>GetFiles(path, pattern)</code></td><td><code>*</code>/<code>?</code> pattern over immediate file names</td><td>No <code>SearchOption</code> or <code>EnumerationOptions</code></td></tr>
+<tr><td><code>GetDirectories</code></td><td>Immediate subdirectories, returned eagerly</td><td>No pattern overload in this class</td></tr>
+<tr><td>Current directory</td><td><code>GetCurrentDirectory</code>, <code>SetCurrentDirectory</code></td><td>The current directory is process-global state, not thread-local context</td></tr>
+</tbody>
+</table></div>
+
+<p>The pattern translator treats <code>*.*</code> as <code>*</code>, preserving the legacy .NET/DOS expectation that extensionless names are included. Matching is case-insensitive in the current implementation, including on case-sensitive POSIX filesystems. That is a visible policy choice: it should not be used to infer the filesystem’s actual case rules.</p>
+<p>Enumeration uses <code>std::filesystem::directory_iterator</code>. Results are not sorted, snapshots are not atomic, and entries can disappear between enumeration and use. Because the surface is eager, memory consumption grows with the number of matching entries. Permission or concurrent-mutation failures are not normalized uniformly at every iterator step; callers should keep their error handling at the operation boundary.</p>
+
+<h2 id="path">Path: lexical operations, not filesystem authority</h2>
+<p><code>System::IO::Path</code> manipulates path strings. Most members do not access the filesystem, and a syntactically normalized result is not proof that a target exists or remains confined to a directory.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Area</th><th scope="col">Members</th><th scope="col">Semantics</th></tr></thead>
+<tbody>
+<tr><td>Composition</td><td><code>Combine</code> with two or three parts</td><td>A rooted later part replaces preceding parts</td></tr>
+<tr><td>Name parts</td><td><code>GetFileName</code>, <code>GetFileNameWithoutExtension</code>, <code>GetExtension</code>, <code>GetDirectoryName</code></td><td>Lexical string/path decomposition</td></tr>
+<tr><td>Normalization</td><td><code>GetFullPath</code></td><td>Resolves against the process current directory and collapses duplicate, dot, and dot-dot segments</td></tr>
+<tr><td>Temporary paths</td><td><code>GetTempPath</code>, <code>GetTempFileName</code></td><td>Uses the host temporary directory; the file-name method creates the file</td></tr>
+<tr><td>Extensions</td><td><code>ChangeExtension</code>, <code>HasExtension</code></td><td>Works on the final path segment</td></tr>
+<tr><td>Root test</td><td><code>IsPathRooted</code></td><td>Delegates absolute-path recognition to <code>std::filesystem::path</code></td></tr>
+</tbody>
+</table></div>
+
+<p><code>GetFullPath</code> rejects an empty string and embedded NUL, obtains the process working directory for relative input, and removes relative segments lexically. It does not resolve symbolic links. Code enforcing a security boundary needs both lexical checks and an appropriate native filesystem strategy; path normalization alone cannot defeat a link swap or another process changing the tree.</p>
+<p>The root-length helper is intentionally simplified. Drive-letter and UNC-prefix behavior is not modeled as a complete .NET Windows path grammar. Separator constants and <code>PathSeparator</code> are platform-specific, but a successful build on Windows does not make every managed path edge case equivalent.</p>
+
+<h2 id="metadata">FileSystemInfo, FileInfo, and DirectoryInfo</h2>
+<p><code>FileSystemInfo</code> retains the original spelling and a resolved absolute path. <code>ToString</code> returns the original spelling; <code>FullName</code> returns the absolute path. An empty constructor path throws <code>ArgumentException</code>, and resolution uses an error-code path so a <code>std::filesystem::filesystem_error</code> does not escape that constructor.</p>
+
+<h3 id="timestamps">Timestamp model</h3>
+<p>The base supplies local and UTC creation, last-access, and last-write getters plus local/UTC last-write setters. It does not supply creation-time setters. On POSIX, “creation time” uses <code>st_ctime</code> when portable birth-time data is unavailable; that is inode metadata-change time, not necessarily when the file was created. Timestamp precision, daylight conversion, and access-time updates remain filesystem and mount-policy dependent.</p>
+
+<h3 id="file-info">FileInfo</h3>
+<p><code>FileInfo</code> exposes name, directory name, existence, length, a simplified owner-write permission test, delete, copy, and move. <code>Length</code> throws when the path is a directory but returns zero when a missing file or another size lookup error prevents a result. The object is not an open handle and does not cache existence or size as a coherent transaction.</p>
+<p><code>CopyTo</code> and <code>MoveTo</code> validate their destination and require the source to exist. A successful move updates the object’s full and original paths. <code>CopyToInfo</code> is a native convenience that returns a new destination object. Full .NET properties such as attributes, Unix mode, link target, and symbolic-link creation/resolution are not implemented on this base/object family.</p>
+
+<h3 id="directory-info">DirectoryInfo</h3>
+<p><code>DirectoryInfo</code> exposes name, parent, existence, create, delete, move, immediate <code>FileInfo</code> enumeration, immediate <code>DirectoryInfo</code> enumeration, and <code>GetFileNames</code>. The last member is a Sharp Runtime convenience; .NET’s <code>DirectoryInfo.GetFiles</code> already returns metadata objects rather than strings.</p>
+<p>Missing are <code>CreateSubdirectory</code>, streaming <code>Enumerate*</code> methods, <code>GetFileSystemInfos</code>, <code>Root</code>, and pattern/recursive overloads on the instance. Recursive delete is explicit. The non-recursive override rejects a missing directory and reports non-empty/native failures rather than silently turning them into a no-op.</p>
+
+<h2 id="file-stream">FileStream modes, access, and large offsets</h2>
+<p><code>FileStream</code> supplies the open-handle surface for common file work. <code>FileMode::Open</code> and <code>Truncate</code> require an existing regular file; <code>CreateNew</code> rejects an existing target; create/truncate/append modes require write access; append cannot include read access. The stream tracks read/write capability and consults the native open state for every public operation that needs the file.</p>
+<p>The general <code>Stream</code> contract represents length, position, count, and offsets with 32-bit <code>intcs</code>. Code that needs a large-file offset beyond that representable range should use <code>RandomAccess</code>, whose lengths and file offsets are <code>longcs</code>, or a project-specific native abstraction. See <a href="streams.html">Streams, readers, and writers</a> for the complete lifecycle and capability matrix.</p>
+<p>Although types such as <code>FileShare</code>, <code>FileOptions</code>, and <code>FileStreamOptions</code> exist in the module, the active <code>FileStream</code> constructor set does not reproduce the complete managed sharing, asynchronous-option, handle, and buffer-size surface. Do not infer file-sharing enforcement merely from the presence of the enum headers.</p>
+
+<h2 id="random-access">RandomAccess: positional native descriptor I/O</h2>
+<p><code>RandomAccess</code> performs reads and writes at an explicit file offset without changing a shared logical stream position. On POSIX it uses <code>pread</code>, <code>pwrite</code>, <code>lseek</code>, <code>ftruncate</code>, and <code>fsync</code>. On Windows it converts a CRT integer descriptor to a Win32 handle and uses overlapped <code>ReadFile</code>/<code>WriteFile</code>, file-pointer/length operations, and <code>FlushFileBuffers</code>. Every operation throws <code>PlatformNotSupportedException</code> on Emscripten.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Member</th><th scope="col">Contract</th><th scope="col">Caller responsibility</th></tr></thead>
+<tbody>
+<tr><td><code>GetLength</code></td><td>Returns a 64-bit length; invalid or non-seekable descriptors throw</td><td>Pass a live descriptor suitable for a file-length query</td></tr>
+<tr><td><code>SetLength</code></td><td>Rejects negative length and reports native truncation failure</td><td>Descriptor must permit resize</td></tr>
+<tr><td><code>Read</code></td><td>Returns a possibly shorter count, zero at end</td><td>Keep the destination buffer and descriptor valid for the call</td></tr>
+<tr><td><code>Write</code></td><td>Retries short writes until all requested bytes are written; detects zero progress</td><td>Keep the source buffer stable</td></tr>
+<tr><td><code>FlushToDisk</code></td><td>Requests an OS-level durable flush</td><td>Understand that device/filesystem durability remains host-defined</td></tr>
+</tbody>
+</table></div>
+
+<p>The class borrows the integer descriptor. It never opens, closes, duplicates, locks, or extends its lifetime. Closing the descriptor, letting another thread reuse its number, or changing the underlying file concurrently is outside the class’s ownership boundary.</p>
+
+<h2 id="drive-info">DriveInfo is a lightweight view</h2>
+<p><code>DriveInfo</code> uses <code>std::filesystem::space</code> for available, free, and total bytes. It reports zero when the root is not ready or the query fails. On Windows, <code>GetDrives</code> enumerates the logical-drive bitmask. Elsewhere it returns the root directory <code>/</code>. Drive type currently always reports <code>Fixed</code>, drive format reports <code>Unknown</code>, and volume label returns the configured name. These values are useful as a small storage-capacity surface, not a full mount/volume inventory.</p>
+
+<h2 id="watching">Watching is a separate concurrency model</h2>
+<p><code>FileSystemWatcher</code> is not a polling wrapper around <code>Directory</code>. On Linux it owns inotify descriptors and a background dispatch thread. Handler lifetime, reconfiguration, event coalescing, kernel queue limits, and backend availability therefore require separate treatment. Read <a href="filesystem-watcher.html">FileSystemWatcher in depth</a> before using it in teardown-sensitive code.</p>
+
+<h2 id="filesystem-portability">Filesystem portability checklist</h2>
+<ul>
+<li>Do not assume enumeration order. Sort explicitly when order is part of your output or test.</li>
+<li>Do not assume case sensitivity from the platform label alone; mounts and the current pattern implementation can differ.</li>
+<li>Do not treat <code>Exists=false</code> as proof that a path is absent; it can also mean the lookup failed.</li>
+<li>Keep path normalization separate from symlink-aware confinement.</li>
+<li>Expect timestamp precision and creation-time meaning to vary.</li>
+<li>Use the operation’s exception, not a preflight existence check, as the final authority; the tree can change between calls.</li>
+<li>Keep destructive recursion explicit and narrowly scoped.</li>
+<li>Do not assume an open file can be renamed, deleted, or shared identically on Windows and POSIX.</li>
+</ul>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="../../io.html">I/O overview<small>The complete subsystem and component split.</small></a>
+<a href="streams.html">Streams, readers, and writers<small>FileStream lifecycle, buffering, and binary/text contracts.</small></a>
+<a href="filesystem-watcher.html">FileSystemWatcher<small>Linux event semantics and concurrency boundaries.</small></a>
+<a href="../../platform-layer.html">Platforms and portability<small>Evidence labels and per-subsystem runtime availability.</small></a>
+<a href="../../tutorials/work-with-files.html">Work with files tutorial<small>A focused application workflow.</small></a>
+</div><nav class="next-links" aria-label="Previous and next pages"><a href="streams.html"><span class="next-label">Previous</span>Streams, Readers, and Writers</a><a href="filesystem-watcher.html"><span class="next-label">Next</span>FileSystemWatcher</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#three-entry-points">Three ways to work with the filesystem</a><a class="toc-level-2" href="#file-helpers">File: whole-file and namespace operations</a><a class="toc-level-2" href="#directory-helpers">Directory: eager, single-level enumeration</a><a class="toc-level-2" href="#path">Path: lexical operations, not filesystem authority</a><a class="toc-level-2" href="#metadata">FileSystemInfo, FileInfo, and DirectoryInfo</a><a class="toc-level-3" href="#timestamps">Timestamp model</a><a class="toc-level-3" href="#file-info">FileInfo</a><a class="toc-level-3" href="#directory-info">DirectoryInfo</a><a class="toc-level-2" href="#file-stream">FileStream modes, access, and large offsets</a><a class="toc-level-2" href="#random-access">RandomAccess: positional native descriptor I/O</a><a class="toc-level-2" href="#drive-info">DriveInfo is a lightweight view</a><a class="toc-level-2" href="#watching">Watching is a separate concurrency model</a><a class="toc-level-2" href="#filesystem-portability">Filesystem portability checklist</a><a class="toc-level-2" href="#related-reading">Related reading</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../../getting-started.html">Getting Started</a></li><li><a href="../../components/index.html">Components</a></li><li><a href="../../api/index.html">API discovery</a></li><li><a href="../../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../../architecture.html">Architecture</a></li><li><a href="../../platform-layer.html">Platforms</a></li><li><a href="../../running-tests.html">Testing</a></li><li><a href="../../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../../assets/script.js"></script>
+</body>
+</html>

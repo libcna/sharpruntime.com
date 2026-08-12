@@ -14,12 +14,16 @@
     var title = page.title.toLowerCase();
     var tags = page.tags.join(' ').toLowerCase();
     var description = page.description.toLowerCase();
+    var headings = (page.headings || []).join(' ').toLowerCase();
+    var content = (page.content || '').toLowerCase();
     var total = 0;
     for (var i = 0; i < terms.length; i += 1) {
       if (title.indexOf(terms[i]) !== -1) total += 8;
       if (tags.indexOf(terms[i]) !== -1) total += 4;
       if (description.indexOf(terms[i]) !== -1) total += 2;
-      if (!title.includes(terms[i]) && !tags.includes(terms[i]) && !description.includes(terms[i])) return -1;
+      if (headings.indexOf(terms[i]) !== -1) total += 3;
+      if (content.indexOf(terms[i]) !== -1) total += 1;
+      if (!title.includes(terms[i]) && !tags.includes(terms[i]) && !description.includes(terms[i]) && !headings.includes(terms[i]) && !content.includes(terms[i])) return -1;
     }
     return total;
   }

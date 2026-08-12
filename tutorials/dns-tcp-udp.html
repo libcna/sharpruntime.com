@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use DNS, TCP, and UDP | Sharp Runtime</title>
+  <meta name="description" content="Resolve hosts and use Sharp Runtime TCP and UDP clients with explicit address families, socket ownership, errors, and platform evidence.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/dns-tcp-udp.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Use DNS, TCP, and UDP | Sharp Runtime">
+  <meta property="og:description" content="Resolve hosts and use Sharp Runtime TCP and UDP clients with explicit address families, socket ownership, errors, and platform evidence.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/dns-tcp-udp.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Use DNS, TCP, and UDP | Sharp Runtime">
+  <meta name="twitter:description" content="Resolve hosts and use Sharp Runtime TCP and UDP clients with explicit address families, socket ownership, errors, and platform evidence.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Use DNS, TCP, and UDP", "description": "Resolve hosts and use Sharp Runtime TCP and UDP clients with explicit address families, socket ownership, errors, and platform evidence.", "url": "https://sharpruntime.com/tutorials/dns-tcp-udp.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Use DNS, TCP, and UDP", "item": "https://sharpruntime.com/tutorials/dns-tcp-udp.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Use DNS, TCP, and UDP</span></nav><h1>Use DNS, TCP, and UDP</h1><p class="lead">Move from name resolution to an owned native transport without hiding IPv4, lifetime, or blocking behavior.</p><div class="page-meta"><span>Advanced</span><span>Net.Sockets</span><span>Environment-dependent</span></div>
+<h2 id="goal-and-components">Goal and components</h2>
+<p>Resolve a host deliberately, then choose TCP or UDP with a clear ownership and address-family policy. Name and address primitives belong to <code>Net</code>; socket clients belong to <code>Net.Sockets</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Net.Sockets)
+target_link_libraries(app PRIVATE SharpRuntime::Net.Sockets)</code></pre>
+<p>The socket component brings its declared <code>Net</code> dependency. Do not select the <code>All</code> aggregate merely to reach these headers.</p>
+
+<h2 id="resolve-without-hiding-the-family">Resolve without hiding the family</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Dns.hpp&gt;
+#include &lt;System/Net/Sockets/AddressFamily.hpp&gt;
+
+using System::Net::Dns;
+using System::Net::Sockets::AddressFamily;
+
+const auto addresses =
+    Dns::GetHostAddresses("localhost", AddressFamily::InterNetwork);
+
+for (const auto&amp; address : addresses) {
+    const std::string text = address.ToString();
+    (void)text;
+}</code></pre>
+<p><code>Dns</code> supports synchronous IPv4 and IPv6 resolution on POSIX and Windows. Passing <code>InterNetwork</code>, <code>InterNetworkV6</code>, or <code>Unspecified</code> changes the resolver hint. Results preserve resolver order while removing exact binary duplicates. Emscripten throws <code>PlatformNotSupportedException</code>.</p>
+
+<h2 id="open-a-tcp-client">Open a TCP client</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Sockets/TcpClient.hpp&gt;
+
+System::Net::Sockets::TcpClient client;
+client.Connect("127.0.0.1", 8080);
+auto stream = client.GetStream();
+
+// Use Stream operations while both client and stream remain in scope.
+client.Close();</code></pre>
+<p><code>TcpClient</code> owns a native descriptor and is neither copyable nor implicitly shareable. <code>GetStream()</code> returns the same cached <code>shared_ptr&lt;NetworkStream&gt;</code> on repeated calls. Port validation must treat the client, cached stream, shutdown policy, and outstanding operations as one lifetime design.</p>
+<div class="callout callout--warning"><div class="callout-title">The convenience clients are IPv4-only</div><p><code>TcpClient</code>, <code>TcpListener</code>, and <code>UdpClient</code> currently build <code>AF_INET</code>/<code>sockaddr_in</code> paths. An IPv6 endpoint is rejected rather than silently narrowed. The lower-level <code>Socket</code> surface has broader address-family support, so select it when IPv6 is a requirement and verify the exact operations you need.</p></div>
+
+<h2 id="send-and-receive-a-udp-datagram">Send and receive a UDP datagram</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Sockets/UdpClient.hpp&gt;
+
+using System::Net::IPEndPoint;
+using System::Net::Sockets::UdpClient;
+
+UdpClient sender;
+sender.Connect("127.0.0.1", 9000);
+const std::vector&lt;SharpRuntime::bytecs&gt; payload{0x53, 0x52};
+const auto sent = sender.Send(payload,
+    static_cast&lt;SharpRuntime::intcs&gt;(payload.size()));
+(void)sent;
+
+// A receiver normally binds its local port in the constructor.
+// Receive blocks and replaces remote with the sender endpoint.
+IPEndPoint remote{System::Net::IPAddress::Any, 0};
+// std::vector&lt;SharpRuntime::bytecs&gt; reply = receiver.Receive(remote);</code></pre>
+<p>The final line is intentionally commented because a complete runnable example needs a cooperating peer and a timeout policy. <code>UdpClient::Receive</code> blocks; cancellation is not part of this synchronous convenience API. Validate datagram length and preserve message boundaries instead of treating UDP as a stream.</p>
+
+<h2 id="map-failures-at-the-boundary">Map failures at the boundary</h2>
+<div class="table-wrap"><table><thead><tr><th>Operation</th><th>Representative failure</th><th>Application decision</th></tr></thead><tbody>
+<tr><td>Resolve name</td><td><code>SocketException(HostNotFound)</code></td><td>Retry another configured host, report configuration, or stop.</td></tr>
+<tr><td>Validate port</td><td><code>ArgumentOutOfRangeException</code></td><td>Reject input before network work.</td></tr>
+<tr><td>Connect TCP</td><td><code>SocketException</code></td><td>Classify refusal, routing, timeout, and cancellation policy outside the type.</td></tr>
+<tr><td>Use unsupported platform</td><td><code>PlatformNotSupportedException</code></td><td>Choose an alternate backend at configure time.</td></tr>
+</tbody></table></div>
+<p>Do not turn every socket error into an empty result. C# ports often rely on exception type, socket error code, and retry scope as observable behavior.</p>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Important difference</th></tr></thead><tbody>
+<tr><td><code>await Dns.GetHostAddressesAsync</code></td><td><code>Dns::GetHostAddresses</code></td><td>The current DNS surface is synchronous.</td></tr>
+<tr><td><code>using TcpClient</code></td><td>Automatic destructor or explicit <code>Close</code></td><td>Native lifetime is lexical; copies are deleted.</td></tr>
+<tr><td>IPv4/IPv6 convenience clients</td><td>Convenience clients currently IPv4-only</td><td>Use lower-level Socket for an audited IPv6 path.</td></tr>
+<tr><td>GC keeps referenced arrays alive</td><td>Caller-owned native buffers</td><td>Async lower-level operations need explicit shared lifetime.</td></tr>
+</tbody></table></div>
+
+<h2 id="verification-checklist">Verification checklist</h2>
+<ul>
+  <li>Compile the consumer against <code>SharpRuntime::Net.Sockets</code>, not accidental transitive targets.</li>
+  <li>Test numeric literals separately from resolver-backed names.</li>
+  <li>Exercise refusal, invalid port, early peer close, partial TCP reads/writes, and UDP truncation policy.</li>
+  <li>Run integration tests on the actual OS and network namespace used in deployment.</li>
+  <li>For internet protocols, add framing, deadlines, authentication, and transport security above these primitives.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="filesystem-watcher.html"><span class="next-label">Previous</span>Watch a Directory</a><a href="websockets.html"><span class="next-label">Next</span>Use WebSockets</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#goal-and-components">Goal and components</a><a class="toc-level-2" href="#resolve-without-hiding-the-family">Resolve without hiding the family</a><a class="toc-level-2" href="#open-a-tcp-client">Open a TCP client</a><a class="toc-level-2" href="#send-and-receive-a-udp-datagram">Send and receive a UDP datagram</a><a class="toc-level-2" href="#map-failures-at-the-boundary">Map failures at the boundary</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#verification-checklist">Verification checklist</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

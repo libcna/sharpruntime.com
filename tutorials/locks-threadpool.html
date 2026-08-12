@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use Locks and ThreadPool | Sharp Runtime</title>
+  <meta name="description" content="Apply RAII to Sharp Runtime Monitor locks and queue work with honest detached-thread, exception, capture, and Emscripten behavior.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/locks-threadpool.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Use Locks and ThreadPool | Sharp Runtime">
+  <meta property="og:description" content="Apply RAII to Sharp Runtime Monitor locks and queue work with honest detached-thread, exception, capture, and Emscripten behavior.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/locks-threadpool.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Use Locks and ThreadPool | Sharp Runtime">
+  <meta name="twitter:description" content="Apply RAII to Sharp Runtime Monitor locks and queue work with honest detached-thread, exception, capture, and Emscripten behavior.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Use Locks and ThreadPool", "description": "Apply RAII to Sharp Runtime Monitor locks and queue work with honest detached-thread, exception, capture, and Emscripten behavior.", "url": "https://sharpruntime.com/tutorials/locks-threadpool.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Use Locks and ThreadPool", "item": "https://sharpruntime.com/tutorials/locks-threadpool.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Use Locks and ThreadPool</span></nav><h1>Use Locks and ThreadPool</h1><p class="lead">Preserve monitor semantics without losing C++ cleanup and callback lifetime safety.</p><div class="page-meta"><span>Advanced</span><span>Threading</span><span>Source-checked</span></div>
+<h2 id="choose-the-right-layer">Choose the right layer</h2>
+<p><code>Threading</code> contains threads, monitor-style synchronization, locks, events, semaphores, cancellation primitives, and <code>ThreadPool</code>. Native C++ synchronization remains available too. Use a Sharp Runtime type when ported behavior matters; use an idiomatic standard primitive when no compatibility contract is required.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Threading)
+target_link_libraries(app PRIVATE SharpRuntime::Threading)</code></pre>
+
+<h2 id="wrap-monitor-in-raii">Wrap Monitor in RAII</h2>
+<p><code>Monitor::Enter</code>/<code>Exit</code> model C#’s reentrant <code>lock</code> monitor, but C++ exceptions make a hand-written exit at the bottom unsafe. A tiny guard restores lexical cleanup:</p>
+<pre><code class="language-cpp">#include &lt;System/Threading/Monitor.hpp&gt;
+
+class MonitorGuard {
+    const void* key_;
+public:
+    explicit MonitorGuard(const void* key) : key_(key) {
+        System::Threading::Monitor::Enter(key_);
+    }
+    ~MonitorGuard() {
+        System::Threading::Monitor::Exit(key_);
+    }
+    MonitorGuard(const MonitorGuard&amp;) = delete;
+    MonitorGuard&amp; operator=(const MonitorGuard&amp;) = delete;
+};
+
+struct Counter {
+    int value{};
+    void Increment() {
+        MonitorGuard guard(this);
+        ++value;
+    }
+};</code></pre>
+<p>The runtime registry keys monitors by pointer identity and keeps each registry entry for the life of the process. Do not lock on a temporary address, an address that may be reused for an unrelated object, or a pointer whose meaning changes while other threads retain it.</p>
+
+<h2 id="understand-reentrancy-wait-and-pulse">Understand reentrancy, wait, and pulse</h2>
+<p>The backing mutex is recursive. The same thread may enter repeatedly and must exit the same number of times. <code>Wait</code> requires ownership, releases the complete recursion depth, blocks, and restores that depth after reacquiring. <code>Pulse</code> and <code>PulseAll</code> also require ownership.</p>
+<pre><code class="language-cpp">// Always wait in a predicate loop: wake-up is permission to re-check,
+// not proof that the condition is now true.
+MonitorGuard guard(&amp;state);
+while (!state.ready) {
+    System::Threading::Monitor::Wait(&amp;state);
+}
+</code></pre>
+<p>The snippet is a behavioral pattern: an application guard that calls <code>Wait</code> must remain logically associated with the monitor while <code>Wait</code> temporarily releases and restores it. Never hold an unrelated native mutex while blocking on this monitor unless lock ordering is documented.</p>
+
+<h2 id="queue-work-with-honest-expectations">Queue work with honest expectations</h2>
+<pre><code class="language-cpp">#include &lt;System/Threading/ThreadPool.hpp&gt;
+#include &lt;atomic&gt;
+
+std::atomic&lt;bool&gt; finished{false};
+System::Threading::ThreadPool::QueueUserWorkItem([&amp;finished] {
+    // Perform bounded work and catch/report failures here.
+    finished.store(true, std::memory_order_release);
+});
+</code></pre>
+<p>At the selected source revision, <code>QueueUserWorkItem</code> creates and detaches a native thread for each item. It is not a bounded reusable worker pool, does not provide a completion handle, and does not retain captured references safely. The reported min/max settings are process-global configuration values; changing them does not turn the detached implementation into .NET’s adaptive scheduler.</p>
+<div class="callout callout--warning"><div class="callout-title">A reference capture is a lifetime contract</div><p>The example keeps <code>finished</code> alive until work completes. In real code, prefer captured values or <code>shared_ptr</code>-owned state and add an explicit completion signal. Never let a detached callback outlive stack variables, services, logging backends, or shutdown state it borrows.</p></div>
+
+<h2 id="handle-failure-inside-detached-work">Handle failure inside detached work</h2>
+<p>An exception escaping a raw detached thread invokes <code>std::terminate</code>. Put the error boundary inside the callback, publish the result through owned shared state, and make shutdown wait for that state. If completion and exception propagation matter, <code>Task</code> is normally a better abstraction than fire-and-forget <code>ThreadPool</code> work.</p>
+
+<h2 id="emscripten-needs-pthreads">Emscripten needs pthreads</h2>
+<p>On an Emscripten build without pthreads, queueing work throws <code>PlatformNotSupportedException</code>. Source availability is not runtime evidence: browser isolation headers, worker configuration, and deployment server headers also influence whether a pthread-enabled artifact works.</p>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Important difference</th></tr></thead><tbody>
+<tr><td><code>lock (obj)</code></td><td><code>Monitor::Enter/Exit</code> plus RAII guard</td><td>No compiler-generated <code>finally</code>; pointer identity backs the registry.</td></tr>
+<tr><td>Managed thread pool</td><td>Detached thread per queued item</td><td>No bounded shared pool or queue-pressure contract.</td></tr>
+<tr><td>GC roots callback captures</td><td>C++ capture rules</td><td>Borrowed references can dangle.</td></tr>
+<tr><td>Unhandled task exceptions remain task state</td><td>Detached callback exceptions terminate</td><td>Catch inside the callback or use Task.</td></tr>
+</tbody></table></div>
+
+<h2 id="verification-checklist">Verification checklist</h2>
+<ul>
+  <li>Use RAII for every acquired monitor, mutex, semaphore permit, and thread join.</li>
+  <li>Write predicate-loop tests for wait/pulse and timeout paths.</li>
+  <li>Prove captured state outlives detached work and shutdown observes completion.</li>
+  <li>Exercise callback exceptions without allowing them to cross a native thread entry point.</li>
+  <li>Use ThreadSanitizer where supported; passing a functional test does not prove absence of a data race.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="websockets.html"><span class="next-label">Previous</span>Use WebSockets</a><a href="channels.html"><span class="next-label">Next</span>Build a Channel Pipeline</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#choose-the-right-layer">Choose the right layer</a><a class="toc-level-2" href="#wrap-monitor-in-raii">Wrap Monitor in RAII</a><a class="toc-level-2" href="#understand-reentrancy-wait-and-pulse">Understand reentrancy, wait, and pulse</a><a class="toc-level-2" href="#queue-work-with-honest-expectations">Queue work with honest expectations</a><a class="toc-level-2" href="#handle-failure-inside-detached-work">Handle failure inside detached work</a><a class="toc-level-2" href="#emscripten-needs-pthreads">Emscripten needs pthreads</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#verification-checklist">Verification checklist</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

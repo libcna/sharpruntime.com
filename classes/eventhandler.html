@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EventHandler | Sharp Runtime</title>
-  <meta name="description" content="Typed event callback behavior and native capture lifetime.">
+  <title>System::EventHandler&lt;TEventArgs&gt; | Sharp Runtime</title>
+  <meta name="description" content="Source-verified EventHandler subscriptions, removal tokens, snapshot dispatch, replay hooks, exceptions, thread safety, lifetime, and .NET differences.">
   <link rel="canonical" href="https://sharpruntime.com/classes/eventhandler.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
-  <meta property="og:title" content="EventHandler | Sharp Runtime">
-  <meta property="og:description" content="Typed event callback behavior and native capture lifetime.">
+  <meta property="og:title" content="System::EventHandler&lt;TEventArgs&gt; | Sharp Runtime">
+  <meta property="og:description" content="Source-verified EventHandler subscriptions, removal tokens, snapshot dispatch, replay hooks, exceptions, thread safety, lifetime, and .NET differences.">
   <meta property="og:url" content="https://sharpruntime.com/classes/eventhandler.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="EventHandler | Sharp Runtime">
-  <meta name="twitter:description" content="Typed event callback behavior and native capture lifetime.">
+  <meta name="twitter:title" content="System::EventHandler&lt;TEventArgs&gt; | Sharp Runtime">
+  <meta name="twitter:description" content="Source-verified EventHandler subscriptions, removal tokens, snapshot dispatch, replay hooks, exceptions, thread safety, lifetime, and .NET differences.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "EventHandler", "description": "Typed event callback behavior and native capture lifetime.", "url": "https://sharpruntime.com/classes/eventhandler.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "EventHandler", "item": "https://sharpruntime.com/classes/eventhandler.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "System::EventHandler<TEventArgs>", "description": "Source-verified EventHandler subscriptions, removal tokens, snapshot dispatch, replay hooks, exceptions, thread safety, lifetime, and .NET differences.", "url": "https://sharpruntime.com/classes/eventhandler.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "API"}, {"@type": "ListItem", "position": 3, "name": "System::EventHandler<TEventArgs>", "item": "https://sharpruntime.com/classes/eventhandler.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,13 +33,105 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">EventHandler</span></nav><h1>EventHandler</h1><p class="lead">Typed event callback behavior and native capture lifetime.</p><div class="page-meta"><span>API</span><span>Source f827a6c5</span></div><p>EventHandler-shaped APIs provide familiar typed event patterns. Publisher/subscriber ownership and capture lifetime are not managed by a garbage collector.</p><div class="page-index"><a href="../delegates.html">Delegate guide<small>Composition and limits.</small></a><a href="../tutorials/use-events.html">Events tutorial<small>Safe callback lifetime.</small></a></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>API</span><span>/</span><span aria-current="page">System::EventHandler&lt;TEventArgs&gt;</span></nav><h1>System::EventHandler<TEventArgs></h1><p class="lead">Understand the native type that deliberately combines a callback signature with event subscription and dispatch storage.</p><div class="page-meta"><span>Core.Base</span><span>Tokens + snapshot dispatch</span><span>Source-verified</span></div>
+<h2 id="role-and-deliberate-design-difference">Role and deliberate design difference</h2>
+<p><code>System::EventHandler&lt;TEventArgs&gt;</code> is a header-only event collection in <code>Core.Base</code>. Its name is familiar, but its role is intentionally broader than .NET's type. In .NET, <code>EventHandler&lt;TEventArgs&gt;</code> describes one delegate signature and the C# <code>event</code> language feature manages a multicast subscription list. Sharp Runtime combines both jobs: one object owns copied callables, issues removal tokens, and invokes subscribers.</p>
+<p>The callback signature is:</p>
+<pre><code class="language-cpp">using HandlerType =
+    std::function&lt;void(System::Object* sender,
+                       const TEventArgs&amp; args)&gt;;</code></pre>
+<p>The sender is always <code>Object*</code> and may be null. Event arguments are borrowed as a const reference for the duration of each call. Instantiate <code>EventHandler&lt;System::EventArgs&gt;</code> for the traditional non-generic event shape. The newer two-type-parameter .NET delegate with a typed sender is not modeled.</p>
+
+<h2 id="public-operations">Public operations</h2>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Behavior</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>Add(handler)</code></td><td>Subscribes a copied/moved <code>std::function</code> and returns a token</td><td>Use the token for precise removal</td></tr>
+<tr><td><code>operator+=(handler)</code></td><td>Delegates to Add and discards the token</td><td>Convenient when the subscription lasts as long as the event owner</td></tr>
+<tr><td><code>Remove(token)</code></td><td>Removes the matching subscription</td><td>Unknown or already-removed tokens are a no-op</td></tr>
+<tr><td><code>Clear()</code></td><td>Removes all stored handlers</td><td>Does not clear the replay hook</td></tr>
+<tr><td><code>Empty()</code> / <code>Size()</code></td><td>Inspect the current stored list</td><td>No synchronization is performed</td></tr>
+<tr><td><code>Raise(sender, args)</code></td><td>Invokes a snapshot in subscription order</td><td>Mutations during dispatch affect the next raise</td></tr>
+<tr><td><code>Invoke(sender, args)</code></td><td>Alias for Raise</td><td>Identical behavior</td></tr>
+<tr><td><code>SetReplayHook(hook)</code></td><td>Installs subscription-time replay behavior</td><td>Special compatibility facility, not normal .NET event semantics</td></tr>
+</tbody></table></div>
+
+<h2 id="subscribe-raise-and-remove">Subscribe, raise, and remove</h2>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;System/EventHandler.hpp&gt;
+
+struct ProgressArgs {
+    int completed;
+};
+
+System::EventHandler&lt;ProgressArgs&gt; progress;
+const auto token = progress.Add(
+    [](System::Object*, const ProgressArgs&amp; args) {
+        std::cout &lt;&lt; args.completed &lt;&lt; '\n';
+    });
+
+progress.Raise(nullptr, ProgressArgs{3});
+progress.Remove(token);
+progress.Raise(nullptr, ProgressArgs{4}); // no subscriber remains</code></pre>
+<p>Multiple subscriptions are independent. Adding the same callable twice stores two entries and invokes it twice. Each non-empty <code>Add</code> receives a unique numeric <code>Token</code>; removing one token does not remove another subscription that happens to wrap the same callable. There is no <code>operator-=</code> because arbitrary <code>std::function</code> values do not provide a reliable general equality operation.</p>
+
+<h2 id="empty-handlers">Empty handlers</h2>
+<p>An empty <code>HandlerType</code> is treated like adding a null delegate in C#: it is not stored, does not invoke the replay hook, and does not change <code>Size()</code> or <code>Empty()</code>. <code>Raise</code> and <code>Invoke</code> therefore do not encounter a deliberately empty subscriber through the public API.</p>
+<p><code>Add</code> still consumes and returns a unique token for the ignored handler. Calling <code>Remove</code> with that token is safe and has no effect. Consuming the token prevents a later real subscription from reusing it and being accidentally removed through the ignored subscription's token.</p>
+
+<h2 id="dispatch-order-snapshots-and-reentrancy">Dispatch order, snapshots, and reentrancy</h2>
+<p><code>Raise</code> copies the current vector of token/callable pairs, then invokes that snapshot in subscription order. A handler may add, remove, or clear subscriptions on the same event without invalidating the loop. A handler that removes itself still runs once in the current raise; a not-yet-invoked handler removed by an earlier callback also remains in the current snapshot. Those changes are visible on the next raise.</p>
+<p>A nested call to <code>Raise</code> takes its own snapshot of the then-current list. This makes reentrancy memory-safe at the collection level, but it does not make application state reentrancy-safe. Handlers must still protect invariants if they trigger nested events, mutate shared objects, or cause the owner to begin shutdown.</p>
+<div class="callout callout--warning"><div class="callout-title">Snapshot means copied callables</div><p>Each raise copies the stored <code>std::function</code> objects. Captured shared owners remain shared; captured references and raw pointers remain non-owning. Copying a callable does not repair a dangling capture.</p></div>
+
+<h2 id="replay-hooks">Replay hooks</h2>
+<p><code>SetReplayHook</code> installs one <code>std::function&lt;void(const HandlerType&amp;)&gt;</code> that runs synchronously whenever a non-empty handler is added. It receives the new handler before that handler is stored. The intended use is a specific compatibility event whose documented contract replays already-existing state to a new subscriber—for example, an owner can call the handler once for each pending item.</p>
+<p>The hook's own calls are not subscriptions and do not change the event size. Replacing it with an empty function clears it. Plain events should leave it unset. It is not a general event-history queue, and <code>Clear()</code> removes handlers without removing this hook.</p>
+<pre><code class="language-cpp">progress.SetReplayHook(
+    [](const System::EventHandler&lt;ProgressArgs&gt;::HandlerType&amp; handler) {
+        handler(nullptr, ProgressArgs{2}); // current state replay
+    });
+
+const auto replayed = progress.Add(onProgress);
+// onProgress ran synchronously before Add returned, then was stored.</code></pre>
+<p>A replay hook can call user code during subscription, so <code>Add</code> is not necessarily a passive mutation. Avoid holding locks across subscription if the hook or callback could call back into the owner.</p>
+
+<h2 id="exception-behavior">Exception behavior</h2>
+<p>The event collection does not catch callback exceptions. If a handler invoked by <code>Raise</code> throws, that exception escapes immediately and later handlers in the snapshot are not called. The stored subscription list remains intact unless callbacks changed it before the exception. Code that must isolate subscriber failures should catch at an explicit application boundary and define logging or aggregation policy there.</p>
+<p>A replay-hook exception escapes from <code>Add</code>. Because the hook runs before insertion, the new handler is not stored when that call fails. Copying the snapshot can also propagate native allocation or callable-copy failures before any subscriber runs.</p>
+
+<h2 id="thread-safety">Thread safety</h2>
+<p><code>EventHandler</code> contains a vector, a token counter, and a replay callable with no mutex or atomic coordination. Concurrent <code>Add</code>, <code>Remove</code>, <code>Clear</code>, <code>SetReplayHook</code>, <code>Size</code>, or <code>Raise</code> on the same instance is not supported without external synchronization. The snapshot protects mutation performed synchronously by a handler on the same thread; it is not a cross-thread safety mechanism.</p>
+<p>If an event crosses threads, choose and document the owner of the lock or message queue. Do not hold an event lock while invoking arbitrary handlers unless reentrancy and deadlock behavior have been designed explicitly.</p>
+
+<h2 id="ownership-and-lifetime">Ownership and lifetime</h2>
+<p>The event owns its stored <code>std::function</code> values. What those functions own depends on their captures:</p>
+<ul>
+  <li>A value capture is copied into the callable.</li>
+  <li>A <code>shared_ptr</code> capture extends the target's lifetime and can participate in a reference cycle.</li>
+  <li>A reference, raw pointer, or captured <code>this</code> does not extend lifetime and can dangle.</li>
+  <li>A weak capture must be locked and checked on every invocation.</li>
+</ul>
+<p>Tokens are plain integers, not RAII subscription objects. The caller must remove a subscription at the appropriate teardown boundary. If the event owner dies first, its handler list dies with it; if it outlives a referenced subscriber, the callback must be removed or use an expiry-aware capture.</p>
+<p>The class has ordinary compiler-generated copy and move behavior. Copying an <code>EventHandler</code> duplicates its current handler list, replay hook, counter value, and callable captures into an independent event object. Tokens should be treated as meaningful only for the particular event instance that returned them. If event identity must not be duplicated, make the containing owner non-copyable.</p>
+
+<h2 id="differences-from-c-and-net">Differences from C# and .NET</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Consequence</th></tr></thead><tbody>
+<tr><td><code>EventHandler&lt;T&gt;</code> is one delegate type</td><td>The template owns a multicast subscription list</td><td>Declaring the value also declares event storage</td></tr>
+<tr><td><code>event</code> restricts external invocation and assignment</td><td>A public <code>EventHandler</code> value exposes <code>Raise</code>, <code>Clear</code>, and mutation</td><td>Encapsulation must be designed by the containing C++ class</td></tr>
+<tr><td><code>+=</code> and <code>-=</code> combine/remove delegates</td><td><code>+=</code> adds; removal uses an Add token</td><td>Keep the token when teardown is required</td></tr>
+<tr><td>Managed delegate captures keep managed targets reachable</td><td>Native capture ownership is explicit</td><td>Audit raw <code>this</code>, references, shared cycles, and weak expiry</td></tr>
+<tr><td>Multicast invocation uses a delegate snapshot</td><td><code>Raise</code> copies the stored handlers before invocation</td><td>Mid-raise mutations take effect next time</td></tr>
+<tr><td>Typed-sender newer overload may be available</td><td>Sender remains <code>System::Object*</code></td><td>No <code>EventHandler&lt;TSender,TArgs&gt;</code> shape</td></tr>
+<tr><td>No general subscription-time replay in EventHandler</td><td>Optional owner-installed replay hook</td><td>Use only for a specifically documented compatibility event</td></tr>
+</tbody></table></div>
+
+<h2 id="encapsulation-pattern">Encapsulation pattern</h2>
+<p>When only the owning type should raise an event, avoid exposing a freely mutable public field. A native owner can keep <code>EventHandler</code> private, expose a subscription method returning a token, expose a matching unsubscribe method, and call <code>Raise</code> internally. This is more verbose than the C# <code>event</code> keyword but preserves its important access boundary.</p><nav class="next-links" aria-label="Previous and next pages"><a href="exception.html"><span class="next-label">Previous</span>System::Exception</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#role-and-deliberate-design-difference">Role and deliberate design difference</a><a class="toc-level-2" href="#public-operations">Public operations</a><a class="toc-level-2" href="#subscribe-raise-and-remove">Subscribe, raise, and remove</a><a class="toc-level-2" href="#empty-handlers">Empty handlers</a><a class="toc-level-2" href="#dispatch-order-snapshots-and-reentrancy">Dispatch order, snapshots, and reentrancy</a><a class="toc-level-2" href="#replay-hooks">Replay hooks</a><a class="toc-level-2" href="#exception-behavior">Exception behavior</a><a class="toc-level-2" href="#thread-safety">Thread safety</a><a class="toc-level-2" href="#ownership-and-lifetime">Ownership and lifetime</a><a class="toc-level-2" href="#differences-from-c-and-net">Differences from C# and .NET</a><a class="toc-level-2" href="#encapsulation-pattern">Encapsulation pattern</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

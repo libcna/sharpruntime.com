@@ -1,0 +1,53 @@
+<h2>The three layers</h2>
+<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Role</th><th>Use it for</th></tr></thead><tbody>
+<tr><td><code>SharpRuntime::String</code> / <code>std::string</code></td><td>Owning UTF-8 byte value</td><td>Storage, native APIs, containers, value passing</td></tr>
+<tr><td><code>System::String</code></td><td>Static compatibility algorithms</td><td>Search, split/join, trim, format, compare, replace, substring</td></tr>
+<tr><td><code>System::Text</code></td><td>Builders, encodings, Unicode-shaped helpers</td><td>Incremental construction and explicit byte/text conversion</td></tr>
+</tbody></table></div>
+<p>This separation preserves native interoperability without pretending that a mutable UTF-8 <code>std::string</code> is a managed immutable UTF-16 object.</p>
+
+<h2>Core rules</h2>
+<ul>
+  <li>Lengths and positions in the common string helpers are UTF-8 storage bytes.</li>
+  <li>An ordinary string is owned and non-null; use an optional or pointer when absence matters.</li>
+  <li>Helper operations usually return new values, but native <code>std::string</code> mutation remains possible.</li>
+  <li>Comparison modes currently reduce to case-sensitive bytes or per-byte native lowercasing.</li>
+  <li>Hashes are native process/container values, not persistent or .NET-compatible identifiers.</li>
+  <li>Normalization, grapheme segmentation, and full culture collation require a dedicated Unicode implementation.</li>
+</ul>
+
+<h2>Common C# translations</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Difference to review</th></tr></thead><tbody>
+<tr><td><code>string s = "x";</code></td><td><code>std::string s = "x";</code></td><td>Native value, UTF-8 bytes</td></tr>
+<tr><td><code>s.Length</code></td><td><code>s.size()</code></td><td>Bytes, not UTF-16 units</td></tr>
+<tr><td><code>s.Substring(i, n)</code></td><td><code>System::String::Substring(s, i, n)</code></td><td>Byte range and owning copy</td></tr>
+<tr><td><code>string.IsNullOrEmpty(s)</code></td><td><code>System::String::IsNullOrEmpty(s)</code></td><td>Reference cannot be null</td></tr>
+<tr><td><code>string.Join</code></td><td><code>System::String::Join</code></td><td>Curated overload set</td></tr>
+<tr><td><code>StringBuilder</code></td><td><code>System::Text::StringBuilder</code></td><td>Positions and length are bytes</td></tr>
+<tr><td><code>Encoding.UTF8</code></td><td><code>System::Text::Encoding::UTF8()</code></td><td>Shared mutable factory instance</td></tr>
+</tbody></table></div>
+
+<h2>Choose the detailed document</h2>
+<div class="page-index">
+  <a href="classes/string.html">System::String reference<small>Construction model, method families, examples, comparison, formatting, and deviations.</small></a>
+  <a href="internals/string-internals.html">String internals<small>Storage, lifetime, encoding, builder, normalization, hashing, and interop.</small></a>
+  <a href="tutorials/strings-and-builder.html">Strings tutorial<small>A focused path through UTF-8 and StringBuilder.</small></a>
+  <a href="type-system.html">Type system<small>How string values relate to Object, nullable values, arrays, and native ownership.</small></a>
+</div>
+
+<h2>Component selection</h2>
+<p>The native value and <code>System::String</code> helper are owned by <code>Core.Base</code>. Builders and encoding families are owned by <code>Text</code>. JSON and regular expressions are separate physical components.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS
+    Text
+    Text.Json
+)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+
+target_link_libraries(app PRIVATE
+    SharpRuntime::Text
+    SharpRuntime::Text.Json
+)</code></pre>
+
+<h2>Unicode boundary</h2>
+<p>UTF-8 is a storage encoding, not a complete text-processing policy. Define whether an operation works in bytes, Unicode scalar values, normalized text, grapheme clusters, or display cells. Sharp Runtime is strong at native byte ownership and familiar helpers; it deliberately does not supply full ICU-class normalization, collation, casing, or grapheme data.</p>

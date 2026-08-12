@@ -1,0 +1,332 @@
+[
+  {
+    "path": "architecture.html",
+    "title": "Architecture",
+    "description": "Deep Sharp Runtime architecture: native execution, namespaces, physical components, CMake ownership, dependency closure, resources, platforms, exceptions, and tests.",
+    "category": "Overview",
+    "lead": "How a familiar System.* surface becomes a selective, boundary-validated set of native C++23 components.",
+    "labels": ["Architecture", "{{physical_components}} physical components", "{{production_edges}} direct production edges"],
+    "tags": ["architecture", "components", "cmake", "dependencies", "ownership", "platforms", "testing"],
+    "body": "content/pages/architecture.html"
+  },
+  {
+    "path": "runtime-overview.html",
+    "title": "Runtime Overview",
+    "description": "A technical tour of Sharp Runtime subsystem families, native representations, component boundaries, dependencies, and verification evidence.",
+    "category": "Overview",
+    "lead": "Understand the complete runtime from core native representations through collections, data, I/O, networking, concurrency, and platform services.",
+    "labels": ["Subsystem map", "Native C++23", "Source-backed"],
+    "tags": ["runtime", "overview", "subsystems", "components", "representations"],
+    "body": "content/pages/runtime-overview.html"
+  },
+  {
+    "path": "type-system.html",
+    "title": "Type System",
+    "description": "Sharp Runtime primitive aliases, native values, Object, Type, strings, arrays, spans, nullable, enums, boxing limits, casts, equality, and ownership.",
+    "category": "Concepts",
+    "lead": "Use familiar type landmarks without mistaking native C++ values, ownership, RTTI, and templates for a CLR type system.",
+    "labels": ["Core model", "Ownership", "Compatibility boundaries"],
+    "tags": ["types", "object", "type", "nullable", "arrays", "spans", "boxing", "reflection", "casts"],
+    "body": "content/pages/type-system.html"
+  },
+  {
+    "path": "strings.html",
+    "title": "Strings and Text",
+    "description": "Sharp Runtime string layers, UTF-8 byte semantics, System::String helpers, StringBuilder, encodings, comparisons, and Unicode boundaries.",
+    "category": "Concepts",
+    "lead": "Choose the right layer for native UTF-8 values, familiar String algorithms, incremental construction, and explicit encoding conversion.",
+    "labels": ["UTF-8 storage", "Core.Base + Text", "Porting guide"],
+    "tags": ["strings", "utf-8", "text", "stringbuilder", "encoding", "unicode"],
+    "body": "content/pages/strings.html"
+  },
+  {
+    "path": "classes/string.html",
+    "title": "System::String Helpers",
+    "description": "Deep System::String reference for construction model, search, comparison, split, formatting, trimming, conversion, hashing, culture, and .NET deviations.",
+    "category": "API",
+    "lead": "A practical behavioral reference for the static String algorithms over Sharp Runtime’s native UTF-8 std::string representation.",
+    "labels": ["Core.Base", "Static helpers", "Byte-indexed"],
+    "tags": ["string", "search", "comparison", "split", "join", "format", "hash", "culture"],
+    "body": "content/pages/classes-string.html"
+  },
+  {
+    "path": "classes/array.html",
+    "title": "System::Array Helpers",
+    "description": "Source-verified System::Array algorithms over std::vector: sorting, copying, searching, validation, ownership, invalidation, exceptions, and .NET differences.",
+    "category": "API",
+    "lead": "Use familiar array algorithms without mistaking a static native helper for the CLR array object model.",
+    "labels": ["Core.Base", "Static algorithms", "Source-verified"],
+    "tags": ["array", "vector", "sort", "copy", "search", "ownership", "porting"],
+    "body": "content/pages/classes-array.html"
+  },
+  {
+    "path": "classes/nullable.html",
+    "title": "System::Nullable<T>",
+    "description": "Source-verified Nullable<T> value semantics, access, equality, NaN behavior, hashing, conversion, ownership, exceptions, and C# differences.",
+    "category": "API",
+    "lead": "Represent optional values with native construction and equality rules, without confusing absence with pointer ownership.",
+    "labels": ["Core.Base", "std::optional-backed", "Source-verified"],
+    "tags": ["nullable", "optional", "value types", "equality", "hashing", "porting"],
+    "body": "content/pages/classes-nullable.html"
+  },
+  {
+    "path": "classes/eventhandler.html",
+    "title": "System::EventHandler<TEventArgs>",
+    "description": "Source-verified EventHandler subscriptions, removal tokens, snapshot dispatch, replay hooks, exceptions, thread safety, lifetime, and .NET differences.",
+    "category": "API",
+    "lead": "Understand the native type that deliberately combines a callback signature with event subscription and dispatch storage.",
+    "labels": ["Core.Base", "Tokens + snapshot dispatch", "Source-verified"],
+    "tags": ["events", "delegates", "callbacks", "reentrancy", "lifetime", "threading", "porting"],
+    "body": "content/pages/classes-eventhandler.html"
+  },
+  {
+    "path": "internals/string-internals.html",
+    "title": "String Internals",
+    "description": "Sharp Runtime string representation, UTF-8 units, ownership, lifetime, comparison, hashing, formatting, StringBuilder, encodings, and native interop.",
+    "category": "Internals",
+    "lead": "How native byte storage shapes the lifetime, mutation, Unicode, culture, formatting, and interop behavior behind familiar string APIs.",
+    "labels": ["Representation", "Lifetime", "Unicode boundaries"],
+    "tags": ["string internals", "std::string", "utf-8", "ownership", "hashing", "stringbuilder", "encoding"],
+    "body": "content/pages/internals-string.html"
+  },
+  {
+    "path": "arrays.html",
+    "title": "Arrays, Spans, and Memory",
+    "description": "Choose Sharp Runtime owned sequences, Array algorithms, Span, Memory, ArraySegment, and collection representations with explicit lifetime rules.",
+    "category": "Concepts",
+    "lead": "Separate ownership, algorithms, and borrowed contiguous views before translating C# array code.",
+    "labels": ["Core.Base", "Owned + borrowed", "Porting guide"],
+    "tags": ["arrays", "vector", "span", "memory", "arraysegment", "ownership", "invalidation"],
+    "body": "content/pages/arrays.html"
+  },
+  {
+    "path": "internals/array-internals.html",
+    "title": "Array Internals",
+    "description": "Deep Sharp Runtime array internals: vectors, System::Array, spans, memory, segments, bounds, overlap, ownership, invalidation, and multidimensional choices.",
+    "category": "Internals",
+    "lead": "Understand the storage, range validation, copying, invalidation, and lifetime contracts behind every Sharp Runtime array-shaped representation.",
+    "labels": ["Ownership", "Bounds", "Views and invalidation"],
+    "tags": ["array internals", "vector", "span", "memory", "arraysegment", "copy", "bounds", "multidimensional"],
+    "body": "content/pages/internals-array.html"
+  },
+  {
+    "path": "io.html",
+    "title": "I/O, Files, and Streams",
+    "description": "Architecture, ownership, component boundaries, error contracts, and platform behavior across Sharp Runtime’s System.IO implementation.",
+    "category": "Concepts",
+    "lead": "A code-first guide to streams, files, directories, readers, writers, watchers, compression, hashing, and storage.",
+    "labels": ["System.IO", "Native resources", "Platform-qualified"],
+    "tags": ["io", "streams", "files", "filesystem", "readers", "writers", "components", "ownership"],
+    "body": "content/pages/io.html"
+  },
+  {
+    "path": "threading.html",
+    "title": "Threading, Tasks, Channels, and Timers",
+    "description": "Deep source-backed guide to Sharp Runtime thread lifecycle, synchronization, cancellation, task scheduling, channel backpressure, timers, and native lifetime boundaries.",
+    "category": "Concepts",
+    "lead": "Understand how familiar System.Threading APIs map to native threads, eager tasks, blocking channels, and timer callbacks.",
+    "labels": ["Four components", "Native lifecycle", "Source-backed"],
+    "tags": ["threading", "tasks", "channels", "timers", "cancellation", "threadpool", "monitor", "synchronization", "concurrency", "ownership"],
+    "body": "content/pages/threading.html"
+  },
+  {
+    "path": "docs/io/streams.html",
+    "title": "Streams, Readers, and Writers",
+    "description": "Deep reference for Sharp Runtime Stream capabilities, concrete streams, binary formats, text encoding, ownership, and close behavior.",
+    "category": "Concepts",
+    "lead": "Understand byte transfer, capabilities, buffering, reader/writer protocols, and native lifetime before porting System.IO code.",
+    "labels": ["System.IO", "Streams", "Ownership"],
+    "tags": ["stream", "filestream", "memorystream", "bufferedstream", "binaryreader", "binarywriter", "streamreader", "streamwriter", "ownership"],
+    "body": "content/pages/io-streams.html"
+  },
+  {
+    "path": "docs/io/filesystem.html",
+    "title": "Files, Directories, Paths, and Metadata",
+    "description": "Sharp Runtime filesystem semantics for File, Directory, Path, FileInfo, DirectoryInfo, FileStream, RandomAccess, and DriveInfo.",
+    "category": "Concepts",
+    "lead": "Use native filesystem APIs precisely, with explicit path, metadata, error, portability, and lifetime boundaries.",
+    "labels": ["Filesystem", "Paths", "Metadata"],
+    "tags": ["filesystem", "file", "directory", "path", "fileinfo", "directoryinfo", "randomaccess", "driveinfo"],
+    "body": "content/pages/io-filesystem.html"
+  },
+  {
+    "path": "docs/io/filesystem-watcher.html",
+    "title": "FileSystemWatcher",
+    "description": "Linux inotify event semantics, live reconfiguration, callback threading, self-stop repair, and current Sharp Runtime watcher limits.",
+    "category": "Concepts",
+    "lead": "A precise guide to what the watcher delivers, how it rearms and stops, and where the Linux backend remains intentionally partial.",
+    "labels": ["Linux inotify", "Callbacks", "Remediated at source pin"],
+    "tags": ["filesystemwatcher", "inotify", "events", "callbacks", "linux", "threading", "notifyfilters"],
+    "body": "content/pages/io-filesystem-watcher.html"
+  },
+  {
+    "path": "platform-layer.html",
+    "title": "Platforms and Portability",
+    "description": "Evidence-driven platform and subsystem matrix for Linux, Windows, macOS, Emscripten, and Android at the pinned Sharp Runtime revision.",
+    "category": "Guides",
+    "lead": "Separate source paths, cross-builds, native runtime evidence, and full test gates before making deployment claims.",
+    "labels": ["Evidence matrix", "Current source pin", "No inferred support"],
+    "tags": ["platforms", "portability", "linux", "windows", "mingw", "msvc", "macos", "emscripten", "android", "ci"],
+    "body": "content/pages/platform-layer.html"
+  },
+  {
+    "path": "development/known-limitations.html",
+    "title": "Known Limitations",
+    "description": "Current non-goals, reduced semantics, platform limits, lifetime hazards, and verification conditions at the pinned Sharp Runtime source.",
+    "category": "Development",
+    "lead": "An implementation-backed boundary map for deciding what Sharp Runtime can safely replace in a native C++ port.",
+    "labels": ["Current pin", "Implementation-backed", "Calm technical scope"],
+    "tags": ["limitations", "compatibility", "non-goals", "platform", "lifetime", "unicode", "reflection", "networking", "io"],
+    "body": "content/pages/known-limitations.html"
+  },
+  {
+    "path": "development/porting-csharp-code.html",
+    "title": "Porting C# Code",
+    "description": "Flagship guide to porting C# classes, types, properties, arrays, collections, strings, events, tasks, I/O, networking, JSON, XML, and ownership to Sharp Runtime C++.",
+    "category": "Development",
+    "lead": "Translate observable behavior and managed lifetime assumptions into explicit, tested native C++23 design.",
+    "labels": ["Flagship guide", "C# → C++", "Practical transformations"],
+    "tags": ["porting", "csharp", "cpp", "ownership", "properties", "events", "tasks", "io", "json", "xml"],
+    "body": "content/pages/development-porting-csharp.html"
+  },
+  {
+    "path": "development/adding-runtime-features.html",
+    "title": "Adding Runtime Features",
+    "description": "Contributor workflow for selecting component ownership, implementing APIs, registering CMake, testing behavior and negative consumers, validating boundaries, and regenerating documentation.",
+    "category": "Development",
+    "lead": "Add the smallest correct compatibility slice while preserving native ownership, graph visibility, platform honesty, and reproducible evidence.",
+    "labels": ["Contributor workflow", "CMake ownership", "Tests + boundaries"],
+    "tags": ["contributing", "api", "components", "cmake", "tests", "negative fixtures", "catalogue", "documentation"],
+    "body": "content/pages/development-adding-features.html"
+  },
+  {
+    "path": "tutorials/index.html",
+    "title": "Tutorials",
+    "description": "Task-oriented Sharp Runtime tutorials for consumers, C# ports, I/O, networking, concurrency, and contributors, with explicit components and verification status.",
+    "category": "Tutorials",
+    "lead": "Build working native programs, port managed patterns deliberately, and contribute verified runtime behavior.",
+    "labels": ["{{tutorial_count}} tutorials", "C++23", "Source-checked"],
+    "tags": ["tutorials", "learning path", "consumer", "porting", "io", "networking", "threading", "contributing"],
+    "body": "content/pages/tutorials-index.html"
+  },
+  {
+    "path": "tutorials/nullable-values.html",
+    "title": "Use Nullable Values",
+    "description": "Represent present and absent values with Sharp Runtime Nullable, choose fallbacks, and distinguish optional values from pointer ownership.",
+    "category": "Tutorials",
+    "lead": "Preserve absence as data without allocating an object or inventing a sentinel.",
+    "labels": ["Beginner", "Core.Base", "Source-checked"],
+    "tags": ["nullable", "optional", "value", "ownership", "porting"],
+    "body": "content/pages/tutorial-nullable.html"
+  },
+  {
+    "path": "tutorials/arrays-spans.html",
+    "title": "Work with Arrays and Spans",
+    "description": "Own native sequences, create checked borrowed spans, copy overlapping ranges, and avoid view invalidation in Sharp Runtime.",
+    "category": "Tutorials",
+    "lead": "Separate owned vectors from borrowed contiguous views before translating array operations.",
+    "labels": ["Beginner", "Core.Base", "Built and run"],
+    "tags": ["arrays", "vector", "span", "memory", "copy", "invalidation"],
+    "body": "content/pages/tutorial-arrays-spans.html"
+  },
+  {
+    "path": "tutorials/memory-stream.html",
+    "title": "Round-trip Data with MemoryStream",
+    "description": "Write and read a binary record through Sharp Runtime MemoryStream with explicit position, encoding, and leave-open ownership.",
+    "category": "Tutorials",
+    "lead": "Build a small in-memory binary protocol while preserving stream and wrapper lifetimes.",
+    "labels": ["Intermediate", "IO", "Built and run"],
+    "tags": ["memorystream", "binaryreader", "binarywriter", "position", "leaveopen"],
+    "body": "content/pages/tutorial-memory-stream.html"
+  },
+  {
+    "path": "tutorials/readers-writers.html",
+    "title": "Use Readers and Writers",
+    "description": "Choose Sharp Runtime binary or text reader/writer stacks with precise byte order, encoding, buffering, close, and ownership contracts.",
+    "category": "Tutorials",
+    "lead": "Select a byte protocol or text policy deliberately instead of relying on familiar .NET type names.",
+    "labels": ["Intermediate", "IO", "Source-checked"],
+    "tags": ["readers", "writers", "binary", "text", "encoding", "streams"],
+    "body": "content/pages/tutorial-readers-writers.html"
+  },
+  {
+    "path": "tutorials/filesystem-watcher.html",
+    "title": "Watch a Directory",
+    "description": "Configure Sharp Runtime FileSystemWatcher on Linux, handle callback reconfiguration safely, reconcile events, and stop without self-join hazards.",
+    "category": "Tutorials",
+    "lead": "Treat inotify events as change hints and design callback, reconfiguration, and teardown boundaries explicitly.",
+    "labels": ["Advanced", "IO", "Linux/inotify"],
+    "tags": ["filesystemwatcher", "inotify", "callbacks", "reconfiguration", "linux"],
+    "body": "content/pages/tutorial-filesystem-watcher.html"
+  },
+  {
+    "path": "tutorials/dns-tcp-udp.html",
+    "title": "Use DNS, TCP, and UDP",
+    "description": "Resolve hosts and use Sharp Runtime TCP and UDP clients with explicit address families, socket ownership, errors, and platform evidence.",
+    "category": "Tutorials",
+    "lead": "Move from name resolution to an owned native transport without hiding IPv4, lifetime, or blocking behavior.",
+    "labels": ["Advanced", "Net.Sockets", "Environment-dependent"],
+    "tags": ["dns", "tcp", "udp", "sockets", "ipv4", "networking"],
+    "body": "content/pages/tutorial-dns-tcp-udp.html"
+  },
+  {
+    "path": "tutorials/websockets.html",
+    "title": "Use WebSockets",
+    "description": "Connect, send, receive, fragment, and close with Sharp Runtime ClientWebSocket while preserving async buffer and object lifetimes.",
+    "category": "Tutorials",
+    "lead": "Use the RFC 6455 client honestly: ws:// only, borrowed asynchronous buffers, and explicit task completion.",
+    "labels": ["Advanced", "Net.WebSockets", "Controlled peer required"],
+    "tags": ["websocket", "clientwebsocket", "async", "buffers", "lifetime", "ws"],
+    "body": "content/pages/tutorial-websockets.html"
+  },
+  {
+    "path": "tutorials/locks-threadpool.html",
+    "title": "Use Locks and ThreadPool",
+    "description": "Apply RAII to Sharp Runtime Monitor locks and queue work with honest detached-thread, exception, capture, and Emscripten behavior.",
+    "category": "Tutorials",
+    "lead": "Preserve monitor semantics without losing C++ cleanup and callback lifetime safety.",
+    "labels": ["Advanced", "Threading", "Source-checked"],
+    "tags": ["monitor", "locks", "raii", "threadpool", "threads", "lifetime"],
+    "body": "content/pages/tutorial-locks-threadpool.html"
+  },
+  {
+    "path": "tutorials/channels.html",
+    "title": "Build a Channel Pipeline",
+    "description": "Use bounded, unbounded, and priority Sharp Runtime channels with backpressure, completion, shared endpoint lifetime, and safe payload ownership.",
+    "category": "Tutorials",
+    "lead": "Connect producers and consumers with an explicit capacity, completion protocol, and native message lifetime.",
+    "labels": ["Advanced", "Threading.Channels", "Built and run"],
+    "tags": ["channels", "producer", "consumer", "backpressure", "completion", "threading"],
+    "body": "content/pages/tutorial-channels.html"
+  },
+  {
+    "path": "tutorials/timers.html",
+    "title": "Use Timers Safely",
+    "description": "Choose Sharp Runtime threading or event timers and manage dedicated threads, callbacks, rescheduling, exceptions, and teardown hazards.",
+    "category": "Tutorials",
+    "lead": "Schedule native callbacks without mistaking stop or dispose for an in-flight completion barrier.",
+    "labels": ["Advanced", "Threading + Timers", "Source-checked"],
+    "tags": ["timer", "threading", "elapsed", "callbacks", "dispose", "lifetime"],
+    "body": "content/pages/tutorial-timers.html"
+  },
+  {
+    "path": "tutorials/write-component-test.html",
+    "title": "Write a Component Test",
+    "description": "Add a Sharp Runtime GoogleTest to the owning component, cover behavioral boundaries, build it serially, and distinguish discovery from execution.",
+    "category": "Tutorials",
+    "lead": "Turn one public compatibility claim into focused, discoverable, source-owned evidence.",
+    "labels": ["Contributor", "GoogleTest", "Serial commands"],
+    "tags": ["tests", "googletest", "ctest", "component", "discovery", "contributing"],
+    "body": "content/pages/tutorial-write-component-test.html"
+  },
+  {
+    "path": "tutorials/negative-consumer-fixture.html",
+    "title": "Add a Negative Consumer Fixture",
+    "description": "Prove forbidden Sharp Runtime consumer code remains rejected using clean baselines, isolated negative sites, diagnostic fragments, and component-derived includes.",
+    "category": "Tutorials",
+    "lead": "Make a compile-time boundary failure specific, reproducible, and impossible to pass for an unrelated reason.",
+    "labels": ["Contributor", "Compile-time contract", "Serial checker"],
+    "tags": ["negative fixture", "consumer", "compiler", "module boundaries", "diagnostics", "contributing"],
+    "body": "content/pages/tutorial-negative-consumer-fixture.html"
+  }
+]

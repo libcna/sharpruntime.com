@@ -1,0 +1,166 @@
+{
+  "Core.Base": {
+    "purpose": "Owns the foundational System and SharpRuntime types: primitive aliases, Object and Type identity, exceptions, Array and Span helpers, delegates, nullable values, versioning, environment helpers, and other cross-cutting contracts.",
+    "platform": "Predominantly portable C++23, with explicitly guarded operating-system helpers. It is an opt-in native object model, not a CLR or universal base-object layer."
+  },
+  "Console": {
+    "purpose": "Provides familiar Console input, output, color, cursor, and key APIs over native terminal facilities.",
+    "platform": "Basic stream output is broadly portable. Color, cursor, and key behavior depends on the host terminal and should not be treated as a virtualized .NET console."
+  },
+  "Uri": {
+    "purpose": "Implements URI construction, decomposition, escaping, comparison, and related enums for ports that use System.Uri-shaped code.",
+    "platform": "The parser is native and portable; compatibility is a curated contract rather than a promise of every .NET URI normalization edge case."
+  },
+  "TimeZone": {
+    "purpose": "Implements TimeZoneInfo-shaped lookup, offsets, conversions, adjustment rules, and time-zone exceptions.",
+    "platform": "Windows and POSIX data paths differ, and Emscripten behavior is reduced. Transition, ambiguity, and serialization behavior must be evaluated against the documented subset."
+  },
+  "Buffers": {
+    "purpose": "Provides buffer-writing, binary primitive, operation-status, and text-buffer primitives used by serialization and high-throughput APIs.",
+    "platform": "Header-oriented and portable. Span and Memory views remain native non-owning views; their owners and storage addresses must outlive every operation."
+  },
+  "Collections.Core": {
+    "purpose": "Owns generic, immutable, frozen, concurrent, specialized, and non-generic collection contracts and implementations used throughout the runtime.",
+    "platform": "Portable native containers with explicit value and pointer ownership. Mutation, iterator invalidation, comparers, and exception behavior are not supplied by a managed runtime."
+  },
+  "Collections.Blocking": {
+    "purpose": "Adds BlockingCollection and producer-consumer coordination over the core collection and threading layers.",
+    "platform": "Uses native synchronization and blocking. Shutdown, cancellation, and object lifetime must be coordinated explicitly by the caller."
+  },
+  "Collections.Async": {
+    "purpose": "Defines asynchronous enumerable and enumerator contracts used by task-oriented ports.",
+    "platform": "This is a native interface surface; it does not add C# async-iterator syntax or a CLR scheduler."
+  },
+  "Collections.ObjectModel": {
+    "purpose": "Provides collection wrappers and observable/change-notification collections aligned with System.Collections.ObjectModel patterns.",
+    "platform": "Portable, but notifications execute as native callbacks. Subscription removal, reentrancy, captures, and thread safety remain explicit concerns."
+  },
+  "ComponentModel": {
+    "purpose": "Provides component-model events, attributes, conversion helpers, cancellation arguments, and data-annotation types used by higher layers.",
+    "platform": "Attributes are ordinary C++ types rather than CLR metadata. Dynamic discovery and reflection-based component activation are outside this layer."
+  },
+  "Diagnostics": {
+    "purpose": "Owns tracing, debugging, stopwatch, stack, process, and code-analysis-shaped surfaces.",
+    "platform": "Stopwatch and basic diagnostics are portable; process and stack facilities depend strongly on the operating system. Source presence is not equivalent to a current cross-platform runtime gate."
+  },
+  "Globalization": {
+    "purpose": "Provides cultures, calendars, regions, text elements, comparison options, and numeric/date formatting support.",
+    "platform": "This is a curated native data and locale layer, not ICU or the complete .NET globalization database. Unicode collation, casing, graphemes, and locale coverage are intentionally reduced."
+  },
+  "Numerics": {
+    "purpose": "Owns BigInteger, Decimal, vectors, matrices, quaternion, complex numbers, wide integers, and numeric helper types.",
+    "platform": "Several wide numeric surfaces depend on native __int128. Compiler capability is therefore part of the public portability boundary, especially for current MSVC configurations."
+  },
+  "Runtime": {
+    "purpose": "Provides compiler-services, interop, exception-services, serialization markers, runtime helpers, handles, and selected environment/runtime facilities.",
+    "platform": "Many declarations are compatibility-shaped native helpers, not CLR services. Boxing, metadata reflection, assembly loading, and general interop activation are deliberately absent or reduced."
+  },
+  "Text": {
+    "purpose": "Owns StringBuilder, encodings, formatting, Unicode helpers, web encoders, Base64, and other System.Text-shaped algorithms.",
+    "platform": "The common String representation is UTF-8 bytes in std::string. Several case, comparison, indexing, normalization, and grapheme operations are narrower than .NET UTF-16/globalization semantics."
+  },
+  "Text.Json": {
+    "purpose": "Provides JSON documents, nodes, readers, writers, serializers, options, converters, metadata, and JSON exceptions over a native JSON backend.",
+    "platform": "Portable header-heavy API backed by vendored nlohmann JSON. Matching type names do not imply complete System.Text.Json converter, metadata, or source-generation parity."
+  },
+  "Text.RegularExpressions": {
+    "purpose": "Provides Regex, Match, Group, Capture, and option-shaped APIs for familiar regular-expression workflows.",
+    "platform": "The native backend and Unicode model do not implement every .NET regex construct or culture-sensitive behavior. Treat patterns as a tested subset rather than source-compatible regex bytecode."
+  },
+  "Threading": {
+    "purpose": "Owns threads, monitors, events, locks, cancellation, thread pool, synchronization context, atomics, and related primitives.",
+    "platform": "Built on native C++ and operating-system facilities. Scheduling, teardown, callback lifetime, fairness, and Emscripten pthread configuration differ from the CLR."
+  },
+  "Threading.Tasks": {
+    "purpose": "Provides Task, TaskCompletionSource, continuations, schedulers, awaiter-shaped helpers, and aggregate task coordination.",
+    "platform": "These are native task objects and continuations, not C# async/await execution semantics. Ownership, observation, cancellation, and scheduler lifetime remain explicit."
+  },
+  "Threading.Channels": {
+    "purpose": "Provides bounded and unbounded channel readers, writers, options, and completion coordination.",
+    "platform": "Portable native synchronization. Backpressure and shutdown behavior should be designed together with task/cancellation ownership."
+  },
+  "Timers": {
+    "purpose": "Provides Timer and timer-event patterns for delayed and periodic native callbacks.",
+    "platform": "Callbacks run under native scheduling and can race disposal or captured owners. Timing precision and dispatch context are host-dependent."
+  },
+  "IO": {
+    "purpose": "Owns the Stream model, memory/file streams, binary and text readers/writers, paths, files, directories, metadata, random access, and FileSystemWatcher.",
+    "platform": "Windows and POSIX filesystem behavior differs; several types have narrower lifecycle or encoding contracts. FileSystemWatcher is Linux/inotify-only at the pinned source."
+  },
+  "IO.Compression": {
+    "purpose": "Provides compression streams and codecs over ZLIB for Deflate, GZip, and related compression modes.",
+    "platform": "Requires ZLIB and links it privately. Stream ownership, flush/finalization, and invalid input errors follow native resource rules."
+  },
+  "IO.Compression.Zip": {
+    "purpose": "Provides ZIP archive and entry operations as a distinct component over vendored miniz.",
+    "platform": "Vendored miniz is private to the component. Archive format support and update semantics are a curated subset and this physical component has no dedicated test executable at the pin."
+  },
+  "IO.Hashing": {
+    "purpose": "Provides CRC and non-cryptographic hash algorithms for checksums and content processing.",
+    "platform": "Portable algorithms. These checksums and non-cryptographic hashes must not be presented as authentication or password-storage primitives."
+  },
+  "Storage": {
+    "purpose": "Provides application storage-path discovery used by platform integrations and CNA-style consumers.",
+    "platform": "Android integration expects a parent-provided SDL3 target. This small physical component has no dedicated test executable at the pin."
+  },
+  "IO.IsolatedStorage": {
+    "purpose": "Provides store-relative file and directory operations with quota and lifecycle concepts familiar from isolated storage.",
+    "platform": "The current confinement resolver rejects traversal and absolute escapes, but this remains a native filesystem facility rather than a complete operating-system security sandbox; TOCTOU and symlink-sensitive operations require care."
+  },
+  "Net": {
+    "purpose": "Owns IP addresses, DNS, endpoints, credentials, cookies, web utilities, and shared networking contracts.",
+    "platform": "Windows and POSIX socket paths exist; Emscripten and host-network facilities are reduced. DNS and interface availability are environmental inputs."
+  },
+  "Net.Sockets": {
+    "purpose": "Provides Socket, TCP/UDP clients and listeners, options, event arguments, and protocol enums over native sockets.",
+    "platform": "Windows and POSIX implementations differ. Async wrappers retain native ownership and caller-buffer risks; IPv6 and raw-socket behavior depend on host facilities and permissions."
+  },
+  "Net.Http": {
+    "purpose": "Provides HttpClient, request/response messages, content types, handlers, and completion options over the socket layer.",
+    "platform": "The pinned transport is buffered plain HTTP/1.1. HTTPS/TLS and automatic redirect parity are not part of the current implementation."
+  },
+  "Net.Http.Headers": {
+    "purpose": "Provides strongly named HTTP request, response, content, and general header value types.",
+    "platform": "Portable parsing and formatting helpers. Header type breadth does not add transport features such as TLS, HTTP/2, or managed handler pipelines."
+  },
+  "Net.Http.Json": {
+    "purpose": "Connects HTTP content and client helpers with the Text.Json serializer surface.",
+    "platform": "Inherits both the native JSON subset and the plain-HTTP transport boundary; examples must not imply HTTPS support."
+  },
+  "Net.Mime": {
+    "purpose": "Provides media-type and content-disposition names and helper types used by mail and HTTP-shaped code.",
+    "platform": "Portable value and parsing surface; it is not a complete mail transfer or MIME message engine."
+  },
+  "Net.NetworkInformation": {
+    "purpose": "Provides Ping, network/interface information, statistics, address-change events, and related result types.",
+    "platform": "Ping permissions and raw ICMP behavior depend on the host. Interface enumeration is currently Linux-specific and accounts for one class of environment-sensitive gate evidence."
+  },
+  "Net.Security": {
+    "purpose": "Provides security-protocol, authentication, negotiation, and protection-level shaped declarations used by networking ports.",
+    "platform": "This component does not establish a supported TLS/certificate/SslStream transport. Security-shaped names must not be mistaken for an end-to-end secure channel."
+  },
+  "Net.WebSockets": {
+    "purpose": "Provides WebSocket client, framing, state, options, close status, and result types over native networking.",
+    "platform": "Supports ws:// transport at the pinned source. wss:// requires TLS that the current runtime does not provide, and async owner lifetime must remain explicit."
+  },
+  "Security": {
+    "purpose": "Owns principal, identity, permission, authentication, and security exception-shaped contracts used by other components.",
+    "platform": "A compatibility surface, not a CLR code-access-security system. Authentication and authorization guarantees depend on the concrete API and platform."
+  },
+  "Security.Cryptography": {
+    "purpose": "Provides hashes, HMAC, PBKDF2, cryptographic operations, and related algorithm/value types.",
+    "platform": "This is not a complete cryptographic platform: encryption suites, certificate validation, TLS, and SslStream are outside the current promise."
+  },
+  "Security.Cryptography.Random": {
+    "purpose": "Provides operating-system-backed cryptographic random number generation as a narrow separately selectable component.",
+    "platform": "Uses platform entropy facilities, including BCrypt on Windows. This physical component has no dedicated test executable at the pin."
+  },
+  "Xml": {
+    "purpose": "Provides XML readers, writers, documents, schema and XPath-shaped APIs over vendored tinyxml2 plus native wrappers.",
+    "platform": "tinyxml2 is a public dependency because public headers expose it. XPath, schema, DTD, and extensibility behavior are curated subsets, not full System.Xml parity."
+  },
+  "Xml.Linq": {
+    "purpose": "Provides XDocument, XElement, names, nodes, attributes, annotations, and LINQ-to-XML-shaped operations.",
+    "platform": "Portable native object graph built above Xml. Namespace and lexical validation have current remediation coverage, while event/change semantics and broader LINQ integration remain narrower than .NET."
+  }
+}

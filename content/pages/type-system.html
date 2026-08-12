@@ -1,0 +1,134 @@
+<h2>A native type system with compatibility landmarks</h2>
+<p>Sharp Runtime does not recreate the Common Type System. C++ remains the language and runtime: templates are instantiated at compile time, values have native layout, polymorphism is opt-in, RTTI is compiler-provided, destructors are deterministic, and there is no managed heap. The library supplies familiar aliases, wrappers, interfaces, exceptions, and helper algorithms where they make source ports clearer.</p>
+<p>The most important design question is therefore not “what is the C++ spelling of this C# type?” but “is this concept a value, an owner, a shared identity, or a borrow in this port?” The spelling follows that decision.</p>
+
+<h2>Primitive aliases</h2>
+<p><code>SharpRuntime/SharpRuntimeHelper.hpp</code> defines exact-width aliases used throughout the library and by ports. They are type aliases, not boxed runtime objects.</p>
+<div class="table-wrap"><table><thead><tr><th>C# name</th><th>Sharp Runtime alias</th><th>Native type and width</th></tr></thead><tbody>
+<tr><td><code>sbyte</code> / <code>SByte</code></td><td><code>sbytecs</code> / <code>SByte</code></td><td><code>int8_t</code>, 8-bit signed</td></tr>
+<tr><td><code>byte</code> / <code>Byte</code></td><td><code>bytecs</code> / <code>Byte</code></td><td><code>uint8_t</code>, 8-bit unsigned</td></tr>
+<tr><td><code>short</code> / <code>Int16</code></td><td><code>shortcs</code> / <code>Int16</code></td><td><code>int16_t</code>, 16-bit signed</td></tr>
+<tr><td><code>ushort</code> / <code>UInt16</code></td><td><code>ushortcs</code> / <code>UInt16</code></td><td><code>uint16_t</code>, 16-bit unsigned</td></tr>
+<tr><td><code>int</code> / <code>Int32</code></td><td><code>intcs</code> / <code>Int32</code></td><td><code>int32_t</code>, 32-bit signed</td></tr>
+<tr><td><code>uint</code> / <code>UInt32</code></td><td><code>uintcs</code> / <code>UInt32</code></td><td><code>uint32_t</code>, 32-bit unsigned</td></tr>
+<tr><td><code>long</code> / <code>Int64</code></td><td><code>longcs</code> / <code>Int64</code></td><td><code>int64_t</code>, 64-bit signed</td></tr>
+<tr><td><code>ulong</code> / <code>UInt64</code></td><td><code>ulongcs</code> / <code>UInt64</code></td><td><code>uint64_t</code>, 64-bit unsigned</td></tr>
+<tr><td><code>float</code> / <code>Single</code></td><td><code>Single</code></td><td><code>float</code></td></tr>
+<tr><td><code>char</code></td><td><code>charcs</code></td><td><code>char16_t</code>, a UTF-16 code unit type</td></tr>
+<tr><td><code>string</code></td><td><code>String</code></td><td><code>std::string</code>, used as UTF-8 byte storage</td></tr>
+<tr><td><code>IntPtr</code></td><td><code>IntPtr</code></td><td><code>std::uintptr_t</code>, unsigned pointer-sized integer</td></tr>
+</tbody></table></div>
+<p>The aliases reproduce useful widths and names. They do not import checked arithmetic, CLR numeric conversions, boxing identity, or metadata. Signed overflow still follows C++ rules unless a checked wrapper or algorithm explicitly intercepts it.</p>
+<div class="callout callout--warning"><div class="callout-title">Two different character units</div><p><code>charcs</code> is a 16-bit code unit, while the common <code>String</code> representation stores UTF-8 bytes. Do not index an <code>std::string</code> with a UTF-16 offset or assume one <code>char</code> is one user-visible character.</p></div>
+
+<h2>Value-like types</h2>
+<p>Primitive aliases, numeric wrappers, <code>DateTime</code>-shaped structures, <code>Guid</code>, <code>Version</code>, <code>Nullable&lt;T&gt;</code>, vectors and matrices, strings, and many option/result types are ordinary C++ values. Construction, assignment, copying, moving, destruction, alignment, and container placement follow their C++ definitions.</p>
+<p>A value member is usually the safest translation for a required C# value type. It cannot be null, it shares the enclosing object’s lifetime, and its destructor runs deterministically. But copying a native value may duplicate state where managed code copied only a reference. Review each port for identity rather than classifying by name alone.</p>
+
+<h2>Reference-like and polymorphic types</h2>
+<p>Some hierarchies participate in <code>System::Object</code>, some implement native abstract interfaces, and some APIs exchange pointers or smart pointers. C++ has no universal reference-type category. The port must choose an owner:</p>
+<div class="table-wrap"><table><thead><tr><th>Need</th><th>Typical C++ form</th><th>Consequence</th></tr></thead><tbody>
+<tr><td>Required subobject with same lifetime</td><td>Direct member</td><td>No null; enclosing owner controls destruction</td></tr>
+<tr><td>Exclusive dynamic object</td><td><code>std::unique_ptr&lt;T&gt;</code></td><td>Move-only ownership; borrows invalidate on destruction</td></tr>
+<tr><td>Genuinely shared identity</td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Reference count retains object; cycles need <code>weak_ptr</code></td></tr>
+<tr><td>Non-owning observer</td><td>Reference or raw pointer</td><td>Caller must prove owner outlives access</td></tr>
+<tr><td>Optional value</td><td><code>Nullable&lt;T&gt;</code> or <code>std::optional&lt;T&gt;</code></td><td>Presence is distinct from pointer identity</td></tr>
+</tbody></table></div>
+
+<h2>System::Object: an opt-in base</h2>
+<p><code>System::Object</code> is an abstract polymorphic base for participating Sharp Runtime hierarchies. Its virtual destructor allows destruction through an <code>Object*</code>. Default <code>Equals</code> uses pointer identity, static <code>ReferenceEquals</code> compares pointers, and default <code>GetHashCode</code> derives a non-negative value from the address. A derived value-equality class must override equality and hashing together.</p>
+<p><code>ToString</code> defaults to the project-specific <code>GetTypeName</code>. Concrete derived classes supply a stable type-name string, commonly through declaration/definition macros. <code>GetType</code> uses <code>typeid(*this)</code> to observe the dynamic C++ type.</p>
+<p>None of this makes <code>Object</code> a universal root. <code>std::string</code>, <code>std::vector</code>, primitives, templates, and unrelated native classes do not acquire an object header or become assignable to <code>Object*</code>. Code that accepts arbitrary managed <code>object</code> must be redesigned around a constrained variant, template, interface, or explicitly owned hierarchy.</p>
+
+<h2>System::Type and the reflection boundary</h2>
+<p><code>System::Type</code> wraps a pointer to <code>std::type_info</code>. <code>Type::From&lt;T&gt;()</code> represents a compile-time C++ type, while <code>Object::GetType()</code> wraps dynamic RTTI. Equality compares RTTI identity and hashing uses <code>type_info::hash_code</code>.</p>
+<p>This is type identity, not CLR reflection. Names come from <code>type_info::name()</code> and may be mangled. <code>Name</code> and <code>FullName</code> return the same string. The current <code>IsClass</code>, <code>IsValueType</code>, <code>IsAbstract</code>, <code>IsSealed</code>, and <code>IsInterface</code> properties are fixed compatibility stubs; they are not mutually dependable classifications. There is no member enumeration, custom-attribute discovery, generic metadata, dynamic construction table, or method invocation engine.</p>
+<pre><code class="language-cpp">const System::Type key = System::Type::From&lt;MyService&gt;();
+
+// Appropriate: an RTTI-backed key or identity comparison.
+services.emplace(key, service);
+
+// Inappropriate: branching on getIsValueTypeProperty() as CLR truth.</code></pre>
+
+<h2>Strings</h2>
+<p><code>SharpRuntime::String</code> is an alias for <code>std::string</code>. It owns its byte buffer, copies and moves as a native value, can be mutated, and cannot represent managed null by itself. <code>System::String</code> is a deleted-constructor static helper class over that representation; it is not a wrapper instance.</p>
+<p>Most indices and lengths are UTF-8 byte units. Substring returns a copy, not a shared backing view. Comparisons are byte-oriented, and the six <code>StringComparison</code> names collapse largely to case-sensitive versus per-byte case-insensitive behavior; they do not provide complete current/invariant/ordinal culture engines. Hashes use native <code>std::hash&lt;std::string&gt;</code> and are not stable serialized identifiers or .NET-compatible hash codes.</p>
+
+<h2>Arrays and owned sequences</h2>
+<p>The common one-dimensional owned sequence is <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> is a static algorithm class operating primarily on vectors and some raw buffers. It offers sorting, copying, clearing, searching, reversing, resizing, and related helpers; it is not a base object for every array.</p>
+<p>A vector owns elements and may reallocate when size or capacity changes. Reallocation invalidates pointers, references, iterators, spans, memory views, and segments into its old storage. Copying a vector copies elements according to <code>T</code>; copying a vector of <code>shared_ptr</code> shares pointees, while copying values duplicates them. Raw-buffer overloads cannot validate capacity because pointers carry no length; callers must supply valid storage.</p>
+<p>There is no general CLR rectangular multidimensional array model in the current core. Use nested vectors for jagged structure, a checked flattened index for rectangular data, or a domain-specific matrix type where appropriate. Document layout and bounds rather than assuming C# array rank behavior.</p>
+
+<h2>Span, ReadOnlySpan, Memory, and ArraySegment</h2>
+<p><code>Span&lt;T&gt;</code> and <code>ReadOnlySpan&lt;T&gt;</code> are pointer-plus-length views over contiguous native elements. They bounds-check indexing and slicing, and their copy operations are overlap-safe. Equality describes view identity—pointer and length—not sequence content. They never own or extend the source lifetime.</p>
+<p><code>Memory&lt;T&gt;</code> and <code>ReadOnlyMemory&lt;T&gt;</code> are also non-owning in this implementation: they retain a pointer to a vector plus offset and length. This is a major difference from managed <code>Memory&lt;T&gt;</code>, which can retain its backing owner. The current <code>Pin</code> exposes a pointer in a <code>MemoryHandle</code>; it does not prevent a native vector from reallocating and does not retain that vector.</p>
+<p><code>ArraySegment&lt;T&gt;</code> is a borrowed vector range. A default segment is empty/null-shaped and several property or operation accesses reject it, while iteration over its null begin/end behaves as an empty range. Do not retain any of these views across vector mutation unless the operation is proven not to relocate storage.</p>
+
+<h2>Nullable values</h2>
+<p><code>System::Nullable&lt;T&gt;</code> wraps <code>std::optional&lt;T&gt;</code>. A default instance has no value; construction from <code>T</code> stores a value. <code>HasValue</code> reports presence, <code>Value</code> returns the contained value or throws <code>InvalidOperationException</code> when absent, and <code>GetValueOrDefault</code> returns either the value or an established default.</p>
+<div class="table-wrap"><table><thead><tr><th>C#</th><th>Sharp Runtime / C++</th><th>Porting note</th></tr></thead><tbody>
+<tr><td><code>int? score = null;</code></td><td><code>System::Nullable&lt;int&gt; score;</code></td><td>No heap allocation or object boxing</td></tr>
+<tr><td><code>score.HasValue</code></td><td><code>score.getHasValueProperty()</code></td><td>Property naming follows current generated accessor conventions</td></tr>
+<tr><td><code>score.Value</code></td><td><code>score.getValueProperty()</code></td><td>Throws when absent</td></tr>
+<tr><td><code>score ?? 0</code></td><td><code>score.GetValueOrDefault()</code></td><td>Or branch explicitly when fallback is not <code>T{}</code></td></tr>
+</tbody></table></div>
+<p>The contained type controls copy, move, destruction, and resource semantics. A nullable <code>unique_ptr</code> usually adds little; the pointer is already nullable. A nullable value is different from a borrowed pointer that can dangle.</p>
+
+<h2>Enums</h2>
+<p>C++ <code>enum class</code> remains the primary representation for closed named integral choices. Sharp Runtime supplies enum-shaped helpers and numerous familiar enum declarations, but there is no CLR metadata table that automatically maps every value to attributes or names. Numeric conversion, parsing, validation, and flags behavior exist only where the concrete enum/helper implements them.</p>
+<p>Use explicit casts at interop boundaries and validate unknown integral values when the upstream protocol can evolve. Do not assume that a value lying within the underlying integer range is a declared enum member.</p>
+
+<h2>Boxing and unboxing</h2>
+<p>There is no general boxing operation that turns any C++ value into a managed <code>Object</code>. The current <code>RuntimeHelpers::Box</code> path throws <code>PlatformNotSupportedException</code>. Consequently, APIs that rely on arbitrary <code>object</code> payloads need an explicit native representation such as:</p>
+<ul>
+  <li>a constrained <code>std::variant</code> for a closed set of values;</li>
+  <li>a polymorphic base plus smart pointers for a deliberate hierarchy;</li>
+  <li>a type-erased callable or <code>std::any</code> when its reduced guarantees are acceptable;</li>
+  <li>a template when the type is known at compile time.</li>
+</ul>
+<p>Each alternative has different lifetime, conversion, and failure behavior. Hiding the choice behind a fake boxing label makes a port harder to reason about.</p>
+
+<h2>Casts and type tests</h2>
+<p>Use C++ casts according to the representation. <code>dynamic_cast</code> is appropriate for a polymorphic hierarchy with RTTI; <code>static_cast</code> is appropriate only when the relationship is established; numeric casts may narrow and should be validated or replaced by checked helpers; pointer casts do not establish ownership.</p>
+<div class="table-wrap"><table><thead><tr><th>C# intent</th><th>Native technique</th><th>Boundary</th></tr></thead><tbody>
+<tr><td><code>x is IFoo</code></td><td><code>dynamic_cast&lt;IFoo*&gt;(x) != nullptr</code></td><td>Requires a participating polymorphic hierarchy</td></tr>
+<tr><td><code>x as IFoo</code></td><td><code>dynamic_cast&lt;IFoo*&gt;(x)</code></td><td>Borrowed pointer; owner remains elsewhere</td></tr>
+<tr><td>Numeric conversion</td><td>Checked helper or validated <code>static_cast</code></td><td>C++ narrowing and overflow rules differ</td></tr>
+<tr><td>Generic conversion</td><td>Constrained template/converter</td><td>No universal CLR conversion service</td></tr>
+</tbody></table></div>
+
+<h2>Equality and hashing</h2>
+<p>Equality is type-specific. Native values usually use their operators. <code>Object</code> defaults to identity. Collection comparers may impose .NET-oriented policies—for example, current array sorting treats floating-point NaN ordering deliberately rather than passing a non-strict comparator to <code>std::sort</code>. String helper equality is byte/case-policy based.</p>
+<p>The invariant is familiar but still manual: if a type supplies value equality, equal values must produce equal hashes under the comparer used by a dictionary or set. Address-derived object hashes are only suitable for identity equality. Standard-library hash results and RTTI hashes should not be persisted or compared with .NET outputs.</p>
+
+<h2>Conversions and formatting</h2>
+<p>Wrapper types expose parsing and conversion surfaces where implemented. They may translate established overflow, format, and argument errors into Sharp Runtime exceptions. That does not create CLR-wide <code>IConvertible</code> semantics. Culture inputs, floating special values, integer widths, and native compiler capabilities remain part of each contract.</p>
+<p>Composite string formatting supports a bounded grammar and a bounded set of argument behavior, using native/classic-locale machinery. It is not a general reflection-based formatter. Encoding conversions belong to <code>System::Text</code>; they should not be replaced with byte reinterpretation when source and destination encodings differ.</p>
+
+<h2>Interfaces</h2>
+<p>Interfaces are expressed as C++ abstract base classes or templates. They provide compile-time names and virtual contracts, not CLR interface maps. Use virtual destructors when deleting through an interface pointer. Decide whether an API borrows an interface, uniquely owns it, or shares it; the interface declaration itself does not answer that question.</p>
+<p>Default interface methods, variance, runtime interface enumeration, and arbitrary managed casts do not appear automatically. Some familiar generic variance can be represented through templates, but each C++ instantiation remains a distinct type.</p>
+
+<h2>Exceptions are types, not a CLR</h2>
+<p>The runtime defines a broad hierarchy of familiar exception names. They are thrown as native C++ objects, caught by reference, and unwind destructors. Causal exceptions may be retained through the implemented pointer fields; native system errors are translated at component boundaries. Exact message text, stack traces, filters, serialization, and managed dispatch behavior are not universal.</p>
+<pre><code class="language-cpp">try {
+    const auto value = nullable.getValueProperty();
+    use(value);
+} catch (const System::InvalidOperationException&amp; error) {
+    log(error.what());
+}</code></pre>
+
+<h2>Ownership consequences at a glance</h2>
+<div class="table-wrap"><table><thead><tr><th>Type family</th><th>Usually owns?</th><th>Invalidation or lifetime concern</th></tr></thead><tbody>
+<tr><td>Primitive/wrapper/value</td><td>Owns its value</td><td>Copy/move and native overflow</td></tr>
+<tr><td><code>std::string</code>/<code>std::vector</code></td><td>Own their buffers/elements</td><td>Mutation can invalidate references and views</td></tr>
+<tr><td><code>Span</code>/<code>Memory</code>/<code>ArraySegment</code></td><td>No</td><td>Owner destruction or relocation</td></tr>
+<tr><td><code>Object*</code>/interface pointer</td><td>Not by itself</td><td>Must identify a longer-lived owner</td></tr>
+<tr><td><code>unique_ptr</code></td><td>Yes, exclusively</td><td>Moves transfer ownership</td></tr>
+<tr><td><code>shared_ptr</code></td><td>Yes, jointly</td><td>Cycles and delayed cleanup</td></tr>
+<tr><td>Delegate/event callback</td><td>Owns captures according to callable</td><td>Publisher may outlive captured objects</td></tr>
+</tbody></table></div>
+
+<h2>What has no native CLR equivalent</h2>
+<p>Compiler templates, deterministic destructors, references, move-only ownership, allocator behavior, iterator invalidation, object layout, undefined behavior, and ABI compatibility have no direct CLR equivalents. Conversely, garbage-collector reachability, universal boxing, runtime generic metadata, managed array covariance, reflection invocation, and assembly loading have no direct Sharp Runtime equivalents.</p>
+<p>A high-quality port acknowledges both directions. Use Sharp Runtime where a familiar API and tested behavior reduce translation risk; use idiomatic C++ where emulating a managed-only mechanism would hide lifetime or type constraints.</p>

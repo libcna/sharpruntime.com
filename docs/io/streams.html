@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" data-search-url="../../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Streams, Readers, and Writers | Sharp Runtime</title>
+  <meta name="description" content="Deep reference for Sharp Runtime Stream capabilities, concrete streams, binary formats, text encoding, ownership, and close behavior.">
+  <link rel="canonical" href="https://sharpruntime.com/docs/io/streams.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Streams, Readers, and Writers | Sharp Runtime">
+  <meta property="og:description" content="Deep reference for Sharp Runtime Stream capabilities, concrete streams, binary formats, text encoding, ownership, and close behavior.">
+  <meta property="og:url" content="https://sharpruntime.com/docs/io/streams.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Streams, Readers, and Writers | Sharp Runtime">
+  <meta name="twitter:description" content="Deep reference for Sharp Runtime Stream capabilities, concrete streams, binary formats, text encoding, ownership, and close behavior.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Streams, Readers, and Writers", "description": "Deep reference for Sharp Runtime Stream capabilities, concrete streams, binary formats, text encoding, ownership, and close behavior.", "url": "https://sharpruntime.com/docs/io/streams.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Streams, Readers, and Writers", "item": "https://sharpruntime.com/docs/io/streams.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../../index.html">Home</a><a class="nav-link" href="../../getting-started.html">Start</a><a class="nav-link" href="../../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../../components/index.html">Components</a><a class="nav-link" href="../../api/index.html">API</a><a class="nav-link" href="../../tutorials/index.html">Tutorials</a><a class="nav-link" href="../../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../../overview.html">What is Sharp Runtime?</a><a href="../../architecture.html">Architecture</a><a href="../../runtime-overview.html">Runtime model</a><a href="../../compatibility.html">Compatibility</a><a href="../../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../../getting-started.html">Getting Started</a><a href="../../build.html">Build & integration</a><a href="../../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../../guides/porting-csharp.html">Port C# to C++</a><a href="../../memory-management.html">Memory & ownership</a><a href="../../exceptions.html">Exceptions</a><a href="../../cna-integration.html">CNA integration</a><a href="../../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../../components/index.html">Complete catalogue</a><a href="../../components/core.html">Core & collections</a><a href="../../components/text-data.html">Text, JSON & XML</a><a href="../../components/io-storage.html">I/O & storage</a><a href="../../components/networking.html">Networking</a><a href="../../components/concurrency.html">Concurrency</a><a href="../../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../../type-system.html">Type system</a><a href="../../strings.html">Strings</a><a href="../../arrays.html">Arrays & memory</a><a href="../../delegates.html">Delegates & events</a><a href="../../reflection.html">Reflection</a><a href="../../io.html">I/O overview</a><a href="streams.html" aria-current="page">Streams & readers</a><a href="filesystem.html">Filesystem</a><a href="filesystem-watcher.html">FileSystemWatcher</a><a href="../../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../../development/index.html">Development guide</a><a href="../../project-structure.html">Project structure</a><a href="../../development/adding-runtime-features.html">Adding features</a><a href="../../development/debugging.html">Debugging</a><a href="../../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Streams, Readers, and Writers</span></nav><h1>Streams, Readers, and Writers</h1><p class="lead">Understand byte transfer, capabilities, buffering, reader/writer protocols, and native lifetime before porting System.IO code.</p><div class="page-meta"><span>System.IO</span><span>Streams</span><span>Ownership</span></div>
+<h2 id="contract-first">Start with the stream contract, not the class name</h2>
+<p><code>System::IO::Stream</code> is the common protocol for a sequence of bytes. It makes polymorphic readers, writers, compression adapters, network streams, and in-memory buffers possible, but it deliberately implements a smaller contract than the managed <code>System.IO.Stream</code>. There are no asynchronous members on the base class, lengths and positions use the project’s 32-bit <code>intcs</code>, and several capability members have defaults instead of being abstract.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Member</th><th scope="col">Base behavior</th><th scope="col">Subclass obligation</th></tr></thead>
+<tbody>
+<tr><td><code>Read(buffer, offset, count)</code></td><td>Pure virtual</td><td>Return zero at end-of-stream; validate the range and report partial reads honestly</td></tr>
+<tr><td><code>Close()</code></td><td>Pure virtual</td><td>End access to owned resources; repeated close should be safe where the concrete type promises it</td></tr>
+<tr><td><code>Length</code></td><td>Pure virtual</td><td>Return byte length or reject the operation for an unsupported/closed stream</td></tr>
+<tr><td><code>Write</code></td><td>Throws <code>NotSupportedException</code></td><td>Override together with <code>CanWrite</code></td></tr>
+<tr><td><code>WriteByte</code></td><td>Delegates to <code>Write</code></td><td>Override only for a more direct implementation</td></tr>
+<tr><td><code>CanRead</code></td><td><code>true</code></td><td>Override for unreadable streams and when liveness changes the answer</td></tr>
+<tr><td><code>CanWrite</code></td><td><code>false</code></td><td>Override for every writable stream</td></tr>
+<tr><td><code>CanSeek</code></td><td><code>false</code></td><td>Override for every seekable stream</td></tr>
+<tr><td><code>Position</code></td><td>Throws <code>NotSupportedException</code></td><td>Override getter and setter for seekable streams</td></tr>
+<tr><td><code>Seek</code></td><td>Computes a new position from Begin, Current, or End</td><td>May inherit it when <code>Position</code> and <code>Length</code> are correct</td></tr>
+<tr><td><code>SetLength</code></td><td>Throws <code>NotSupportedException</code></td><td>Override only when resizing is meaningful</td></tr>
+<tr><td><code>ReadByte</code></td><td>Reads one byte through <code>Read</code></td><td>Return <code>-1</code> only at clean end-of-stream</td></tr>
+<tr><td><code>Flush</code></td><td>No-op</td><td>Override for buffering or an external device</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout callout--warning"><div class="callout-title">The capability defaults are asymmetric</div><p>A writable subclass that overrides <code>Write</code> but inherits <code>CanWrite=false</code> is rejected by <code>BinaryWriter</code>. An unreadable subclass that inherits <code>CanRead=true</code> is accepted by reader constructors and fails later. Custom streams must state all three capabilities explicitly.</p></div>
+
+<h2 id="partial-transfer">Partial transfers and raw buffers</h2>
+<p><code>Read</code> means “up to <code>count</code> bytes,” not “exactly <code>count</code> bytes.” File, network, compression, and buffered implementations can return a shorter count without reaching the logical end of the complete data structure the application is reading. <code>BinaryReader</code> uses exact reads for fixed-width primitives, while <code>ReadBytes(count)</code> deliberately returns a shorter vector at end-of-stream.</p>
+<p>The raw-pointer overloads cannot know the allocation size behind <code>buffer</code>. They validate null pointers, negative offsets, and negative counts where their contracts say so, but the caller must still provide storage for <code>offset + count</code> elements. Passing a pointer to a smaller array is ordinary C++ memory corruption, not a managed bounds exception.</p>
+<p>Seeking before byte zero throws <code>IOException</code>. Directly assigning a negative position throws <code>ArgumentOutOfRangeException</code>. That distinction follows the implemented contract: an invalid relative seek and an invalid property value are different doors.</p>
+
+<h2 id="concrete-streams">Concrete stream matrix</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Type</th><th scope="col">Storage</th><th scope="col">Read/write/seek</th><th scope="col">Ownership and close behavior</th></tr></thead>
+<tbody>
+<tr><td><code>MemoryStream</code></td><td>Owned <code>std::vector&lt;bytecs&gt;</code></td><td>Readable and seekable while open; writable when constructed writable</td><td>Copies constructor bytes. <code>ToArray</code> and <code>GetBuffer</code> remain available after close</td></tr>
+<tr><td><code>FileStream</code></td><td>Owned <code>std::fstream</code></td><td>Capabilities follow requested access and open state</td><td>Destructor closes the file. Operations requiring the file throw after <code>Close</code></td></tr>
+<tr><td><code>BufferedStream</code></td><td>One shared read/write buffer over a <code>Stream*</code></td><td>Delegates capabilities while open; accounts for unread or unwritten buffered bytes</td><td>Borrowed by default; <code>ownsStream=true</code> makes close/destruction close the inner stream</td></tr>
+<tr><td><code>UnmanagedMemoryStream</code></td><td>Caller-owned raw byte range</td><td>Fixed-capacity read/write/seek according to <code>FileAccess</code></td><td>Never frees the buffer. Close invalidates stream operations and pointer access</td></tr>
+<tr><td>Compression streams</td><td>ZLIB state plus another <code>Stream*</code></td><td>Direction depends on compression mode</td><td>Belong to <code>IO.Compression</code>; inspect <code>leaveOpen</code> at the adapter boundary</td></tr>
+<tr><td><code>NetworkStream</code></td><td>Socket</td><td>Sequential network I/O; not a seekable file</td><td>Belongs to <code>Net.Sockets</code>; socket ownership is selected at construction</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="memory-stream">MemoryStream</h3>
+<p>The empty constructor creates a writable stream. The pointer-and-size constructor copies its source, so subsequent changes to the caller’s buffer do not affect the stream. A null pointer is accepted only for a zero-size range, which is Sharp Runtime’s native spelling of an empty source.</p>
+<p>Writes grow the vector as needed, seeking changes the shared read/write position, and <code>SetLength</code> truncates or zero-extends the buffer. <code>ToArray</code> returns an independent copy. <code>GetBuffer</code> returns a const reference to the live vector; later growth can reallocate it, so references, iterators, spans, or element pointers derived from that vector must not be retained across writes.</p>
+<p>After <code>Close</code>, reads, writes, seeks, length, and position throw <code>ObjectDisposedException</code>. <code>CanRead</code> and <code>CanSeek</code> become false. <code>CanWrite</code> deliberately continues to report the construction-time writable flag, matching the asymmetry of .NET’s <code>MemoryStream</code>. Capability checks therefore do not replace the lifecycle contract.</p>
+
+<h3 id="file-stream">FileStream</h3>
+<p><code>FileStream</code> validates <code>FileMode</code> and <code>FileAccess</code> combinations before opening. Append cannot include read access; truncate, create, create-new, and append require write access. The path-only constructor opens an existing file, and the mode-only overload defaults to write for append and read/write for other modes.</p>
+<p>The selected source revision enforces the closed state consistently. <code>Read</code>, <code>Write</code>, <code>WriteByte</code>, <code>Flush</code>, <code>Length</code>, <code>Position</code>, position assignment, and <code>SetLength</code> all pass through one open-state check. <code>CanRead</code>, <code>CanWrite</code>, and <code>CanSeek</code> become false after close. <code>Length</code> flushes pending writes and queries the file rather than returning a construction-time cache, so extending a stream is visible without closing and reopening it.</p>
+<p>Access mismatches are reported rather than silently delegated to a failing <code>std::fstream</code>. Reading an append-only stream or writing a read-only stream throws <code>NotSupportedException</code>. Missing parents and missing files are distinguished where the constructor has evidence to do so, while other native open failures become <code>IOException</code>.</p>
+
+<h3 id="buffered-stream">BufferedStream</h3>
+<p><code>BufferedStream</code> maintains one internal buffer, used for either reads or writes at a time. It batches small operations, flushes writes before querying length or switching to reads, and reconciles unread buffered data before a seek. The default buffer size is 4,096 bytes; callers can choose another positive size.</p>
+<p>Buffering changes performance and the moment bytes reach the inner stream, not the logical ordering. <code>Flush</code> sends pending writes or reconciles buffered reads. <code>Close</code> flushes before ending the wrapper and closes the inner stream only when the wrapper was constructed as its owner. Async I/O and .NET’s transient “shadow buffer” optimization are not implemented.</p>
+
+<h3 id="unmanaged-memory">UnmanagedMemoryStream and accessor</h3>
+<p><code>UnmanagedMemoryStream</code> wraps a raw, fixed-capacity range. It never allocates, moves, or frees that range. Length is the initialized data length; capacity is the maximum writable extent. A write beyond capacity throws. <code>getPositionPointerProperty()</code> exposes the current raw address only while the stream is open.</p>
+<p><code>UnmanagedMemoryAccessor</code> provides fixed-width primitive reads and writes at explicit byte positions. It does not implement generic blittable-structure marshalling, generic arrays, or decimal marshalling because the CLR layout machinery those operations depend on has no direct native equivalent here.</p>
+
+<h2 id="ownership-matrix">Wrapper ownership and lifetime</h2>
+<p>Readers and writers store raw <code>Stream*</code> values. They do not extend the stream’s lifetime. The wrapper must be destroyed or closed before a stack-owned stream leaves scope, and an asynchronously used stream must remain stable for the complete operation.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Wrapper</th><th scope="col">Default</th><th scope="col"><code>leaveOpen=true</code></th><th scope="col">Wrapper state after <code>Close</code></th></tr></thead>
+<tbody>
+<tr><td><code>BinaryReader</code></td><td>Closes the stream</td><td>Leaves the stream open</td><td>Disposed; later reader operations reject use</td></tr>
+<tr><td><code>BinaryWriter</code></td><td>Closes the stream</td><td>Leaves the stream open</td><td>Disposed; later writer operations reject use</td></tr>
+<tr><td><code>StreamReader</code></td><td>Closes an external stream; path constructor owns its <code>FileStream</code></td><td>Leaves the stream open</td><td>Compatibility gap: the wrapper has no closed-state flag</td></tr>
+<tr><td><code>StreamWriter</code></td><td>Closes an external stream; path constructor owns its <code>FileStream</code></td><td>Leaves the stream open</td><td>Compatibility gap: the wrapper has no closed-state flag</td></tr>
+<tr><td><code>StringReader</code></td><td>Owns a string copy</td><td>Not applicable</td><td>Inherits a no-op <code>Close</code> and remains readable</td></tr>
+<tr><td><code>StringWriter</code></td><td>Owns an <code>ostringstream</code></td><td>Not applicable</td><td>Inherits a no-op <code>Close</code> and remains writable</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout callout--warning"><div class="callout-title">Do not depend on post-close text-wrapper use</div><p><code>StreamReader</code>, <code>StreamWriter</code>, <code>StringReader</code>, and <code>StringWriter</code> currently remain usable in cases where .NET would treat them as disposed. The gap is documented because adding state changes public object layout. Portable code should consider the wrapper dead after <code>Close</code> even though this revision does not enforce that rule.</p></div>
+
+<h2 id="binary-reader-writer">BinaryReader and BinaryWriter</h2>
+<p>The binary wrappers define a stable Sharp Runtime protocol for the supported primitive set. Integers and IEEE floating-point values are encoded little-endian. Booleans use one byte. Strings are UTF-8 byte sequences prefixed with a 7-bit encoded byte length. The wrappers are not generic serializers: they do not write C++ object layouts, padding, vtables, pointers, or arbitrary structures.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Area</th><th scope="col">Current behavior</th><th scope="col">Difference to keep visible</th></tr></thead>
+<tbody>
+<tr><td>Primitive order</td><td>Little-endian fixed-width integers and floats</td><td>Independent of host endianness; not raw object memory</td></tr>
+<tr><td>Strings</td><td>7-bit byte count followed by UTF-8</td><td>No constructor-selectable encoding</td></tr>
+<tr><td>Characters</td><td>UTF-8 decoded to <code>charcs</code> UTF-16 code units</td><td>A supplementary scalar spans a surrogate pair and may cross read calls</td></tr>
+<tr><td><code>PeekChar</code></td><td>Decodes then restores position</td><td>Requires a seekable stream</td></tr>
+<tr><td>Exact primitives</td><td>Premature end throws <code>EndOfStreamException</code></td><td><code>ReadBytes</code> instead returns a shorter vector at clean EOF</td></tr>
+<tr><td>Decimal</td><td>Reads the .NET 16-byte field order</td><td>The member is compiled out under MSVC because <code>Decimal</code> needs native <code>unsigned __int128</code></td></tr>
+</tbody>
+</table></div>
+
+<p>For seekable streams, <code>ReadString</code> validates that a declared length can fit in the remaining bytes before allocating the string buffer. <code>ReadBytes</code> similarly clamps its initial allocation to the remaining seekable length. Non-seekable streams cannot provide that early bound and are read incrementally.</p>
+
+<h2 id="text-readers-writers">Text readers and writers</h2>
+<p><code>TextReader</code> and <code>TextWriter</code> are small porting-oriented bases. <code>TextWriter</code> supplies overloads for strings, C strings, characters, integers, floating-point values, booleans, and lines. The C-string overload exists to prevent a string literal from binding to the boolean overload through pointer-to-bool conversion. A null C string writes nothing; <code>WriteLine(nullptr)</code> still writes the platform line terminator.</p>
+<p><code>StringReader</code> stores a native string and returns its bytes as unsigned character values. It recognizes LF, CRLF, and lone CR as line terminators. <code>StringWriter</code> accumulates bytes in <code>std::ostringstream</code>. Neither type is a Unicode scalar iterator.</p>
+
+<h3 id="stream-reader-encoding">StreamReader’s encoding boundary</h3>
+<p>The current <code>StreamReader</code> reads one byte at a time and exposes that byte as a character value. It does not decode multibyte UTF-8, detect byte-order marks, select an encoding, or normalize newlines. This makes ASCII data straightforward and preserves single-byte Latin-1-style values, but a UTF-8 character outside ASCII appears as multiple reads. Use the Text component’s explicit encoding APIs when text can contain general Unicode.</p>
+<p><code>StreamWriter</code> writes the bytes in its input <code>std::string</code> and uses CRLF on Windows or LF elsewhere for <code>WriteLine</code>. Calling it “UTF-8” means the application supplies UTF-8 bytes by convention; the writer does not validate or transcode them.</p>
+
+<h2 id="synchronous-boundary">Synchronous by design</h2>
+<p>The core <code>Stream</code>, <code>FileStream</code>, <code>MemoryStream</code>, text wrapper, and binary wrapper surfaces are synchronous. There are no base <code>ReadAsync</code>, <code>WriteAsync</code>, or cancellation overloads to mirror the full managed API. Networking components expose task-returning operations separately, often by running blocking work on native threads. Do not infer a unified async stream scheduler from the presence of <code>Task</code> elsewhere in the project.</p>
+
+<h2 id="choosing-a-stream">Choosing a representation</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Situation</th><th scope="col">Preferred surface</th><th scope="col">Reason</th></tr></thead>
+<tbody>
+<tr><td>Build or parse a bounded byte payload</td><td><code>MemoryStream</code></td><td>Owns storage, seeks, grows, and can return a copy</td></tr>
+<tr><td>Read/write a file sequentially or by position</td><td><code>FileStream</code></td><td>RAII file ownership and familiar access/mode validation</td></tr>
+<tr><td>Many small calls over a slow inner stream</td><td><code>BufferedStream</code></td><td>Batches operations while preserving the inner interface</td></tr>
+<tr><td>Existing caller-owned native buffer</td><td><code>UnmanagedMemoryStream</code></td><td>No copy, provided the lifetime is controlled</td></tr>
+<tr><td>Fixed binary record format</td><td><code>BinaryReader</code>/<code>BinaryWriter</code></td><td>Explicit little-endian primitives and length-prefixed UTF-8</td></tr>
+<tr><td>ASCII-oriented lines</td><td><code>StreamReader</code>/<code>StreamWriter</code></td><td>Simple byte text with a familiar line API</td></tr>
+<tr><td>Unicode text with known encoding</td><td>Text encoding API plus byte stream</td><td>Keeps decoding and I/O as separate, explicit operations</td></tr>
+<tr><td>Offsets beyond the 32-bit Stream model</td><td><code>RandomAccess</code></td><td>Uses <code>longcs</code> file offsets and lengths</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="../../io.html">I/O overview<small>Component boundaries and the subsystem map.</small></a>
+<a href="filesystem.html">Files, directories, and paths<small>Filesystem operations and metadata semantics.</small></a>
+<a href="../../memory-management.html">Memory and ownership<small>RAII, shared ownership, and borrowed native resources.</small></a>
+<a href="../../components/io-storage.html">I/O component family<small>Compression, ZIP, hashing, and isolated storage targets.</small></a>
+<a href="../../development/known-limitations.html">Known limitations<small>Current text, lifetime, platform, and compatibility boundaries.</small></a>
+</div><nav class="next-links" aria-label="Previous and next pages"><a href="../../threading.html"><span class="next-label">Previous</span>Threading, Tasks, Channels, and Timers</a><a href="filesystem.html"><span class="next-label">Next</span>Files, Directories, Paths, and Metadata</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#contract-first">Start with the stream contract, not the class name</a><a class="toc-level-2" href="#partial-transfer">Partial transfers and raw buffers</a><a class="toc-level-2" href="#concrete-streams">Concrete stream matrix</a><a class="toc-level-3" href="#memory-stream">MemoryStream</a><a class="toc-level-3" href="#file-stream">FileStream</a><a class="toc-level-3" href="#buffered-stream">BufferedStream</a><a class="toc-level-3" href="#unmanaged-memory">UnmanagedMemoryStream and accessor</a><a class="toc-level-2" href="#ownership-matrix">Wrapper ownership and lifetime</a><a class="toc-level-2" href="#binary-reader-writer">BinaryReader and BinaryWriter</a><a class="toc-level-2" href="#text-readers-writers">Text readers and writers</a><a class="toc-level-3" href="#stream-reader-encoding">StreamReader’s encoding boundary</a><a class="toc-level-2" href="#synchronous-boundary">Synchronous by design</a><a class="toc-level-2" href="#choosing-a-stream">Choosing a representation</a><a class="toc-level-2" href="#related-reading">Related reading</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../../getting-started.html">Getting Started</a></li><li><a href="../../components/index.html">Components</a></li><li><a href="../../api/index.html">API discovery</a></li><li><a href="../../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../../architecture.html">Architecture</a></li><li><a href="../../platform-layer.html">Platforms</a></li><li><a href="../../running-tests.html">Testing</a></li><li><a href="../../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../../assets/script.js"></script>
+</body>
+</html>

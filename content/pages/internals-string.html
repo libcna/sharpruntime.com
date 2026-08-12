@@ -1,0 +1,104 @@
+<h2>Representation in one sentence</h2>
+<p>A Sharp Runtime string is normally an owning <code>std::string</code> containing UTF-8 bytes; <code>System::String</code> supplies static compatibility algorithms over it, and <code>System::Text</code> supplies builders and encoding conversions.</p>
+
+<h2>Why the runtime uses std::string</h2>
+<p><code>std::string</code> integrates directly with native libraries, streams, containers, operating-system adapters, and the C++ toolchain. It provides deterministic storage ownership, small-string optimization where the standard library chooses it, move semantics, contiguous bytes, and familiar performance characteristics. The runtime avoids allocating a wrapper object for every textual value.</p>
+<p>The tradeoff is semantic visibility. A .NET string is an immutable UTF-16 managed reference. An <code>std::string</code> is a mutable native UTF-8 byte value. Sharp Runtime helper methods can reproduce useful API shapes, but they cannot erase that difference without replacing the representation and breaking native interoperability.</p>
+
+<h2>Object layout, ownership, and movement</h2>
+<p>The <code>std::string</code> object owns its current buffer. Copy construction copies the value; move construction transfers the native state according to the standard library. Destruction releases the buffer. A direct member shares its lifetime with the enclosing object; a returned string is a new owning value.</p>
+<p>Pointers, references, iterators, and <code>string_view</code> into a string can be invalidated by mutation or destruction. Capacity growth can move the buffer. A <code>c_str()</code> pointer is for a bounded native call, not a durable handle. Store the string owner, not its transient data pointer, when a callback or asynchronous operation must retain text.</p>
+
+<h2>Value semantics versus reference semantics</h2>
+<p>Assigning one string to another copies a value. It does not create two references to one immutable CLR object. That usually makes local code simpler, but it changes identity-oriented patterns:</p>
+<ul>
+  <li>There is no meaningful string reference equality.</li>
+  <li>Copying a large string may allocate unless a move or optimization applies.</li>
+  <li>Mutating one copy does not change another.</li>
+  <li>Passing <code>const std::string&amp;</code> borrows one owner; passing by value creates or receives an independent value.</li>
+  <li>A returned substring owns its bytes and does not keep the source alive.</li>
+</ul>
+
+<h2>Null, empty, and optional</h2>
+<p>A string value is always present, although it may contain zero bytes. <code>System::String::IsNullOrEmpty</code> accepts a reference and therefore only tests emptiness. This is a source-port convenience, not a hidden nullable representation.</p>
+<p>Choose <code>std::optional&lt;std::string&gt;</code> when absent and empty are different values. Choose a pointer only when the API actually shares or borrows an object. At a C boundary, a null <code>char*</code> may still be meaningful, but convert it according to the boundary contract instead of adopting a global null-to-empty rule.</p>
+
+<h2>UTF-8 storage model</h2>
+<p>The runtime’s documented convention is UTF-8 for ordinary text. ASCII remains a one-byte subset, while other scalars use multiple bytes. The representation does not automatically validate every string mutation: native code can construct malformed UTF-8, split a sequence, or append arbitrary bytes.</p>
+<div class="table-wrap"><table><thead><tr><th>Operation family</th><th>Current unit</th><th>Risk</th></tr></thead><tbody>
+<tr><td><code>size</code>, String indices, substring, search</td><td>Bytes</td><td>Offset can land inside a scalar</td></tr>
+<tr><td><code>ToCharArray</code></td><td><code>char</code> bytes</td><td>Not .NET UTF-16 characters</td></tr>
+<tr><td><code>StringBuilder</code> length/index/remove/insert</td><td>Bytes</td><td>Mutation can create malformed UTF-8</td></tr>
+<tr><td>Encoding <code>GetCharCount</code></td><td>UTF-8 output bytes</td><td>Name suggests .NET character units but implementation differs</td></tr>
+<tr><td><code>charcs</code></td><td>16-bit code unit</td><td>Not the storage element of ordinary String</td></tr>
+</tbody></table></div>
+
+<h2>System::String helper architecture</h2>
+<p>The class deletes construction and destruction and exposes only static methods. The compiled implementation lives in <code>Core.Base</code>. Template-free helper bodies are linked from the core archive; the values passed in and returned remain <code>std::string</code>.</p>
+<p>The helper covers classification, prefix/suffix and containment, comparisons, forward/backward search, split, substring, insertion/removal/replacement, trim, padding, case conversion, concatenation, join, byte-array conversion, creation, formatting, hashing, and no-op interning. This is a curated behavioral surface, not a proxy that forwards unknown methods to a CLR.</p>
+
+<h2>Comparison internals</h2>
+<p>Case-sensitive comparison uses the native byte representation. <code>CompareOrdinal</code> is explicitly byte-by-byte. For a comparison mode, a small classifier tests whether the enum is one of the three ignore-case values. If so, both inputs are transformed one byte at a time with <code>std::tolower</code>; otherwise the case-sensitive path runs.</p>
+<p>Consequently, <code>CurrentCulture</code>, <code>InvariantCulture</code>, and <code>Ordinal</code> do not select distinct engines. The three ignore-case names also share one engine. UTF-8 multi-byte sequences are not Unicode case-folded. Native C locale can affect classification for individual bytes. Protocol code should prefer explicit ASCII/byte rules; user-language text needs a stronger globalization layer.</p>
+
+<h2>Hashing internals</h2>
+<p><code>String::GetHashCode</code> invokes <code>std::hash&lt;std::string&gt;</code>, widens the result to a fixed 64-bit value, XOR-folds its upper and lower halves, and returns a 32-bit signed value. Widening before the shift avoids an invalid full-width shift on wasm32 and other 32-bit targets.</p>
+<p>The standard does not promise the same hash across library implementations, processes, or build configurations. Hashing must use the same equality policy as its container. A bytewise hash is incompatible with a custom Unicode-insensitive comparer unless the comparer supplies a matching hash.</p>
+
+<h2>Substring and view behavior</h2>
+<p><code>Substring</code validates signed byte ranges and invokes <code>std::string::substr</code>. The result is an owning copy. It does not share source storage, so source mutation or destruction cannot invalidate the returned substring. The cost is an allocation/copy for non-empty values under normal implementations.</p>
+<p>When a hot native path only needs a short-lived view, <code>std::string_view</code> can avoid copying, but it introduces a borrow. Do not return a view to a local string, retain one across owner mutation, or confuse its byte positions with Unicode characters.</p>
+
+<h2>Mutation and helper immutability</h2>
+<p>The String helper returns new values for trim, case, replacement, substring, insertion, removal, padding, and formatting. This resembles .NET call sites and prevents the helper from mutating its input reference. The underlying value remains mutable through <code>std::string</code>, and callers may intentionally use native in-place operations.</p>
+<p>Document which layer an API promises. “String is immutable” is false for the representation; “this helper does not mutate its input” is precise. A callback that receives <code>const std::string&amp;</code> still borrows storage whose owner may mutate it later.</p>
+
+<h2>StringBuilder internals</h2>
+<p><code>System::Text::StringBuilder</code> owns an internal <code>std::string</code> buffer. It supports append operations for strings, C strings, bytes, booleans, integers and floating values; lines; insertion; removal; replacement; formatted append; joins; copying; length and capacity; indexing; and conversion back to a string.</p>
+<p>All positions and lengths are storage bytes. For the UTF-8 text <code>éA</code>, length is three. Removing one byte at offset one removes only the second byte of <code>é</code> and leaves malformed UTF-8. This is a deliberate current contract documented in the header, not a Unicode character editor.</p>
+<p>Builder references and data assumptions follow native mutation rules. Reallocation can move its buffer. <code>ToString</code> returns an owning copy, which remains valid after the builder changes or is destroyed.</p>
+
+<h2>Encoding architecture</h2>
+<p><code>System::Text::Encoding</code> is an abstract base with factories for UTF-8, ASCII, UTF-16 little endian, UTF-16 big endian, UTF-32, UTF-7, and Latin-1. <code>GetBytes</code> encodes a native string; <code>GetString</code> decodes a byte range. Raw-pointer overloads validate null and signed index/count but cannot validate the caller’s actual buffer capacity because the pointer carries no size.</p>
+<p>The output of every decode is the runtime’s UTF-8 <code>std::string</code>. Current <code>GetCharCount</code> therefore reports the number of UTF-8 output bytes, not the UTF-16 count implied by .NET naming. Encoding factories return shared mutable instances: changing a fallback on one affects other callers and can race concurrent conversion. Treat fallback mutation as process-shared configuration until this limitation changes.</p>
+
+<h2>Normalization and graphemes</h2>
+<p><code>StringNormalizationExtensions::IsNormalized</code> currently always returns true and <code>Normalize</code> returns its input unchanged for every requested normalization form. This is correct for ASCII and insufficient for decomposed or compatibility Unicode sequences. The implementation contains no ICU-style normalization tables.</p>
+<p>Similarly, code-point iteration does not solve user-perceived character segmentation. Combining marks, emoji sequences, flags, and variation selectors require grapheme rules. Use an appropriate Unicode library when normalization, collation, casing, display width, or grapheme slicing is a correctness requirement.</p>
+
+<h2>Formatting internals</h2>
+<p>The core formatter parses indexed replacement fields into a small internal argument variant for supported primitive/string types. Integer and floating formatters interpret a bounded specifier set through native stream and numeric formatting. Overloads construct one to three argument arrays and feed the shared parser.</p>
+<p>This design is explicit and linkable without CLR reflection, but it cannot discover an arbitrary object’s format provider or enumerate managed interfaces. Adding a new supported argument kind requires a concrete overload, renderer, tests for valid/invalid specifiers, and documentation of culture behavior.</p>
+
+<h2>Native interop boundaries</h2>
+<ul>
+  <li><strong>C APIs:</strong> <code>c_str()</code> supplies a null-terminated view for the duration of a bounded call. Embedded NUL bytes still terminate many C APIs early.</li>
+  <li><strong>POSIX paths:</strong> bytes are passed according to the host filesystem convention; valid UTF-8 is an application policy, not a kernel guarantee.</li>
+  <li><strong>Windows wide APIs:</strong> convert between UTF-8 and UTF-16 explicitly. Do not cast byte storage to <code>wchar_t*</code>.</li>
+  <li><strong>Binary protocols:</strong> keep byte vectors/spans distinct from text so invalid encoding is not silently normalized.</li>
+  <li><strong>Async calls:</strong> retain an owning string or copy the bytes if the native operation outlives the call.</li>
+</ul>
+
+<h2>Interning and identity</h2>
+<p>The current <code>Intern</code> and <code>IsInterned</code> helpers return the string value without maintaining a pool. There is no canonical storage address, identity comparison, or lifetime extension. If a native application needs symbol interning, it must own and synchronize an explicit pool with well-defined invalidation.</p>
+
+<h2>Porting decision matrix</h2>
+<div class="table-wrap"><table><thead><tr><th>Ported need</th><th>Choose</th><th>Why</th></tr></thead><tbody>
+<tr><td>Owned UTF-8 application text</td><td><code>std::string</code> / <code>SharpRuntime::String</code></td><td>Native ownership and broad runtime integration</td></tr>
+<tr><td>Familiar split/search/format helper</td><td><code>System::String</code></td><td>Tested source-port API shape</td></tr>
+<tr><td>Repeated byte-oriented assembly</td><td><code>StringBuilder</code> or native reserve/append</td><td>Avoid repeated temporary concatenation</td></tr>
+<tr><td>Short synchronous borrow</td><td><code>std::string_view</code></td><td>No allocation; owner must outlive view</td></tr>
+<tr><td>Explicit encoding boundary</td><td><code>System::Text::Encoding</code></td><td>Converts instead of reinterpreting bytes</td></tr>
+<tr><td>Unicode normalization/collation/graphemes</td><td>Dedicated Unicode library</td><td>Current runtime intentionally lacks full tables</td></tr>
+<tr><td>Optional textual value</td><td><code>std::optional&lt;std::string&gt;</code></td><td>Preserves absent versus empty</td></tr>
+</tbody></table></div>
+
+<h2>Invariants worth testing in a port</h2>
+<ul>
+  <li>Every stored offset has an explicit unit: byte, UTF-16 unit, scalar, or grapheme.</li>
+  <li>Malformed UTF-8 and embedded NUL behavior are tested at external boundaries.</li>
+  <li>Case-insensitive lookup uses a comparer and hash with the same reduction.</li>
+  <li>No view or C pointer survives mutation or destruction of its owner.</li>
+  <li>Normalization-sensitive identifiers use a real normalization policy.</li>
+  <li>Format strings and supported argument types are covered by exact tests rather than inferred from .NET.</li>
+</ul>

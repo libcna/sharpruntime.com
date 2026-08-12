@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build a Channel Pipeline | Sharp Runtime</title>
+  <meta name="description" content="Use bounded, unbounded, and priority Sharp Runtime channels with backpressure, completion, shared endpoint lifetime, and safe payload ownership.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/channels.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Build a Channel Pipeline | Sharp Runtime">
+  <meta property="og:description" content="Use bounded, unbounded, and priority Sharp Runtime channels with backpressure, completion, shared endpoint lifetime, and safe payload ownership.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/channels.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Build a Channel Pipeline | Sharp Runtime">
+  <meta name="twitter:description" content="Use bounded, unbounded, and priority Sharp Runtime channels with backpressure, completion, shared endpoint lifetime, and safe payload ownership.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Build a Channel Pipeline", "description": "Use bounded, unbounded, and priority Sharp Runtime channels with backpressure, completion, shared endpoint lifetime, and safe payload ownership.", "url": "https://sharpruntime.com/tutorials/channels.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Build a Channel Pipeline", "item": "https://sharpruntime.com/tutorials/channels.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Build a Channel Pipeline</span></nav><h1>Build a Channel Pipeline</h1><p class="lead">Connect producers and consumers with an explicit capacity, completion protocol, and native message lifetime.</p><div class="page-meta"><span>Advanced</span><span>Threading.Channels</span><span>Built and run</span></div>
+<h2 id="goal-and-component">Goal and component</h2>
+<p>Move values between producers and consumers without sharing a mutable container directly. <code>Threading.Channels</code> supplies bounded, unbounded, and priority-ordered channels backed by mutexes and condition variables.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Threading.Channels)
+target_link_libraries(app PRIVATE SharpRuntime::Threading.Channels)</code></pre>
+
+<h2 id="create-a-channel-and-keep-both-ends">Create a channel and keep both ends</h2>
+<pre><code class="language-cpp">#include &lt;System/Threading/Channels/Channel.hpp&gt;
+
+using System::Threading::Channels::Channel;
+
+auto channel = Channel&lt;int&gt;::CreateBounded(2);
+const bool first = channel.Writer-&gt;TryWrite(10);
+const bool second = channel.Writer-&gt;TryWrite(20);
+
+int value{};
+const bool read = channel.Reader-&gt;TryRead(value);
+(void)first;
+(void)second;
+(void)read;</code></pre>
+<p><code>Channel&lt;T&gt;</code> exposes shared reader and writer endpoints. The factory constructs shared backing state; copies of the endpoint <code>shared_ptr</code>s keep that state alive. The implementation is thread-safe but not lock-free.</p>
+
+<h2 id="choose-bounded-or-unbounded-capacity">Choose bounded or unbounded capacity</h2>
+<div class="table-wrap"><table><thead><tr><th>Factory</th><th>Use when</th><th>Risk to control</th></tr></thead><tbody>
+<tr><td><code>CreateBounded(capacity)</code></td><td>A producer must observe consumer pressure.</td><td>Blocking/waiting can deadlock if the consumer shares a required lock.</td></tr>
+<tr><td><code>CreateUnbounded()</code></td><td>The workload is externally bounded and writes should proceed immediately.</td><td>A stalled consumer can turn queue growth into memory exhaustion.</td></tr>
+<tr><td><code>CreateUnboundedPrioritized(options)</code></td><td>Ascending priority rather than FIFO is part of the protocol.</td><td>Low-priority work can starve; comparer correctness becomes shared-state correctness.</td></tr>
+</tbody></table></div>
+<p>The bounded default is <code>BoundedChannelFullMode::Wait</code>. The other full modes drop the incoming, newest, or oldest item according to the selected enum. A drop policy is an application-level data-loss decision, not a tuning flag.</p>
+
+<h2 id="wait-without-busy-spinning">Wait without busy-spinning</h2>
+<pre><code class="language-cpp">while (channel.Reader-&gt;WaitToReadAsync().Wait()) {
+    int item{};
+    while (channel.Reader-&gt;TryRead(item)) {
+        // Process item. Do not hold an unrelated lock while doing slow work.
+    }
+}</code></pre>
+<p>This is the current replacement for .NET’s <code>await foreach (ReadAllAsync())</code>, which is not reproduced. A waiting task uses background work; retain all state captured by processing code and decide where blocking is acceptable.</p>
+
+<h2 id="complete-the-producer-side">Complete the producer side</h2>
+<pre><code class="language-cpp">channel.Writer-&gt;Complete();
+
+// Existing buffered items can still be drained. Once closed and drained,
+// WaitToReadAsync returns false and ReadAsync throws ChannelClosedException.
+</code></pre>
+<p><code>TryComplete</code> reports a duplicate close as <code>false</code>; <code>Complete</code> throws <code>ChannelClosedException</code> for it. Completion may carry an <code>exception_ptr</code>. <code>ReadAsync</code>/<code>WriteAsync</code> wrap a producer failure as the closed-channel cause, whereas the wait/completion surfaces expose the completion error directly. Test the surface your application actually observes.</p>
+
+<h2 id="async-endpoint-lifetime">Async endpoint lifetime</h2>
+<p>The default <code>ReadAsync</code> and <code>WriteAsync</code> implementations call <code>shared_from_this</code> and retain their endpoint for the background task. Factory-created endpoints satisfy that contract. A custom subclass must also live in a <code>shared_ptr</code> before calling these methods or <code>shared_from_this</code> fails.</p>
+<div class="callout callout--warning"><div class="callout-title">Channel ownership does not retain payload dependencies</div><p>The queue owns each stored <code>T</code> according to normal C++ copy/move rules. A raw pointer, span, or reference wrapper inside <code>T</code> can still dangle while waiting in the channel. Prefer values or explicit smart ownership for cross-thread messages.</p></div>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Difference</th></tr></thead><tbody>
+<tr><td><code>Channel.CreateBounded&lt;T&gt;</code></td><td><code>Channel&lt;T&gt;::CreateBounded</code></td><td>Factory result holds public shared Reader/Writer endpoints.</td></tr>
+<tr><td><code>await reader.ReadAsync()</code></td><td><code>reader-&gt;ReadAsync().Wait()</code></td><td>No language-level await; blocking and scheduling are explicit.</td></tr>
+<tr><td><code>ReadAllAsync</code></td><td>Wait/try-read loop</td><td>No async-enumerable integration.</td></tr>
+<tr><td>GC-managed message graph</td><td>Native value/smart-pointer rules</td><td>Borrowed payload members need separate lifetime proof.</td></tr>
+</tbody></table></div>
+
+<h2 id="test-the-protocol-not-just-the-container">Test the protocol, not just the container</h2>
+<ul>
+  <li>Test zero/one/saturated capacity and every selected full mode.</li>
+  <li>Test completion both before and after buffered items are drained.</li>
+  <li>Test producer failure, duplicate completion, and writes after close.</li>
+  <li>Prove shutdown cannot leave a producer waiting for a consumer that has exited.</li>
+  <li>Use a bounded message count and fixed worker count in stress tests to keep memory use predictable.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="locks-threadpool.html"><span class="next-label">Previous</span>Use Locks and ThreadPool</a><a href="timers.html"><span class="next-label">Next</span>Use Timers Safely</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#goal-and-component">Goal and component</a><a class="toc-level-2" href="#create-a-channel-and-keep-both-ends">Create a channel and keep both ends</a><a class="toc-level-2" href="#choose-bounded-or-unbounded-capacity">Choose bounded or unbounded capacity</a><a class="toc-level-2" href="#wait-without-busy-spinning">Wait without busy-spinning</a><a class="toc-level-2" href="#complete-the-producer-side">Complete the producer side</a><a class="toc-level-2" href="#async-endpoint-lifetime">Async endpoint lifetime</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#test-the-protocol-not-just-the-container">Test the protocol, not just the container</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

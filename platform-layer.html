@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Platforms and Portability | Sharp Runtime</title>
-  <meta name="description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <meta name="description" content="Evidence-driven platform and subsystem matrix for Linux, Windows, macOS, Emscripten, and Android at the pinned Sharp Runtime revision.">
   <link rel="canonical" href="https://sharpruntime.com/platform-layer.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
   <meta property="og:title" content="Platforms and Portability | Sharp Runtime">
-  <meta property="og:description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <meta property="og:description" content="Evidence-driven platform and subsystem matrix for Linux, Windows, macOS, Emscripten, and Android at the pinned Sharp Runtime revision.">
   <meta property="og:url" content="https://sharpruntime.com/platform-layer.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
@@ -17,13 +17,13 @@
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Platforms and Portability | Sharp Runtime">
-  <meta name="twitter:description" content="Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.">
+  <meta name="twitter:description" content="Evidence-driven platform and subsystem matrix for Linux, Windows, macOS, Emscripten, and Android at the pinned Sharp Runtime revision.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Platforms and Portability", "description": "Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.", "url": "https://sharpruntime.com/platform-layer.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "Platforms and Portability", "item": "https://sharpruntime.com/platform-layer.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Platforms and Portability", "description": "Evidence-driven platform and subsystem matrix for Linux, Windows, macOS, Emscripten, and Android at the pinned Sharp Runtime revision.", "url": "https://sharpruntime.com/platform-layer.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides"}, {"@type": "ListItem", "position": 3, "name": "Platforms and Portability", "item": "https://sharpruntime.com/platform-layer.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,16 +33,140 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html" aria-current="page">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">Platforms and Portability</span></nav><h1>Platforms and portability</h1><p class="lead">Platform status is reported as validation depth—not a binary supported/unsupported badge.</p><div class="page-meta"><span>Pinned 2026-08-12</span><span>CI inspected</span><span>Conservative labels</span></div>
-<h2 id="matrix">Evidence matrix</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Platform/toolchain</th><th scope="col">Evidence</th><th scope="col">Important limits</th></tr></thead><tbody><tr><td>Linux / GCC</td><td><span class="badge badge--verified">Primary native validation</span></td><td>Only full native build/runtime-test baseline. The last controlled gate has the qualified failures documented on the Testing page.</td></tr><tr><td>Linux / Clang</td><td><span class="badge badge--partial">Source-supported</span></td><td>Compiler branches exist; no pinned Clang CI job in the current workflow.</td></tr><tr><td>Windows / MinGW-w64</td><td><span class="badge badge--build">Cross-compile verified</span></td><td>Library-only All and Text.Json cross-builds; tests were not compiled or run.</td></tr><tr><td>Windows / i686 MinGW</td><td><span class="badge badge--build">Compile/link boundary</span></td><td>Dedicated target excludes native-128 surfaces and disables tests.</td></tr><tr><td>Windows / MSVC</td><td><span class="badge badge--limited">Compiler-limited</span></td><td>CMake warning policy and platform links exist; lack of native <code>__int128</code> limits numeric surface completeness; no current CI/runtime result.</td></tr><tr><td>macOS / Apple Clang</td><td><span class="badge badge--partial">Downstream build evidence</span></td><td>Xcode 15.4 downstream builds drove fixes; no standalone full gate or current hosted job.</td></tr><tr><td>Emscripten</td><td><span class="badge badge--partial">Cross-compile verified</span></td><td>Library-only All and Text.Json cross-builds; no browser tests. DNS and several native facilities are unavailable.</td></tr><tr><td>Android</td><td><span class="badge badge--partial">Storage integration path</span></td><td>Storage paths can use a parent-provided SDL3 target; no whole-project Android build or device-suite result was produced.</td></tr></tbody></table></div>
-<h2 id="meanings">Evidence labels</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Label</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>Primary native validation</td><td>The repository’s only full native build/runtime-test baseline; read its exact outcome</td></tr><tr><td>Cross-compile verified</td><td>Library compilation completed for a recorded toolchain; runtime tests did not run</td></tr><tr><td>Downstream build evidence</td><td>A consumer build drove fixes, without a standalone runtime gate</td></tr><tr><td>Source-supported</td><td>Implementation branches exist; this audit did not prove a complete gate</td></tr><tr><td>Platform-limited</td><td>Some APIs intentionally throw, reduce behavior or depend on unavailable host facilities</td></tr><tr><td>Compiler-limited</td><td>A compiler capability prevents part of the intended surface</td></tr></tbody></table></div>
-<h2 id="api-caveats">Cross-platform caveats</h2><ul><li>Console cursor/color behavior uses ANSI sequences and is not a uniform terminal abstraction.</li><li>Ping and interface enumeration depend on host permissions and files; distinguish environment failures from library defects.</li><li>Emscripten DNS methods explicitly throw <code>PlatformNotSupportedException</code>.</li><li>Android storage’s SDL dependency must be provided by the parent build.</li><li>Operating-system version helpers largely report compile-time platform identity; version comparison is reduced.</li></ul><div class="callout callout--warning"><div class="callout-title">No overclaim</div><p>A source path or a successful cross-compile is not described as full runtime support. Add platform CI before strengthening these labels.</p></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html" aria-current="page">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O overview</a><a href="docs/io/streams.html">Streams & readers</a><a href="docs/io/filesystem.html">Filesystem</a><a href="docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Guides</span><span>/</span><span aria-current="page">Platforms and Portability</span></nav><h1>Platforms and Portability</h1><p class="lead">Separate source paths, cross-builds, native runtime evidence, and full test gates before making deployment claims.</p><div class="page-meta"><span>Evidence matrix</span><span>Current source pin</span><span>No inferred support</span></div>
+<h2 id="how-to-read-status">How to read platform status</h2>
+<p>Sharp Runtime’s platform status is evidence-based and multi-stage. A preprocessor branch proves only that a source path exists. A successful configuration proves only that CMake can construct the requested graph. A cross-build proves compilation and linking for that toolchain. Runtime behavior, the component test matrix, and a complete gate are stronger and separate claims.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Evidence label</th><th scope="col">What it establishes</th><th scope="col">What it does not establish</th></tr></thead>
+<tbody>
+<tr><td>Source path</td><td>Guarded implementation or explicit unsupported branch exists</td><td>Configure, compile, link, or correct runtime behavior</td></tr>
+<tr><td>Configure evidence</td><td>CMake generated the selected target graph</td><td>That every translation unit compiles</td></tr>
+<tr><td>Library cross-build</td><td>Selected library targets compiled and linked for another toolchain</td><td>GoogleTest discovery, host runtime behavior, or application integration</td></tr>
+<tr><td>Downstream build</td><td>A real consumer exercised a useful subset and drove fixes</td><td>A standalone complete build or test gate</td></tr>
+<tr><td>Native component tests</td><td>Named binaries executed on the target host</td><td>Untested components or environments</td></tr>
+<tr><td>Complete native gate</td><td>The complete registered suite executed with a recorded outcome</td><td>Identical behavior on another host, compiler, kernel, or filesystem</td></tr>
+</tbody>
+</table></div>
+
+<div class="callout"><div class="callout-title">“Supported” is not a single bit</div><p>For deployment decisions, read both the platform row and the subsystem matrix. A Windows implementation of sockets does not imply that <code>Process</code> or <code>FileSystemWatcher</code> has a Windows backend; an Emscripten library build does not imply browser runtime tests.</p></div>
+
+<h2 id="platform-matrix">Current evidence matrix</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Platform/toolchain</th><th scope="col">Strongest current evidence</th><th scope="col">What was covered</th><th scope="col">Qualification</th></tr></thead>
+<tbody>
+<tr><td>Linux / GCC</td><td><span class="badge badge--verified">Primary native baseline</span></td><td>Ubuntu CI, selective components, full local gate, documentation checks</td><td>The recorded complete gate at this pin ran 17,131 cases: 17,123 passed, two skipped, six failed; the failures are retained below</td></tr>
+<tr><td>Linux / Clang</td><td><span class="badge badge--partial">Source/toolchain path</span></td><td>Clang-aware warning configuration and portable source branches</td><td>No tracked Clang CI job or complete selected-pin gate</td></tr>
+<tr><td>Windows / MinGW-w64 GCC 14-win32</td><td><span class="badge badge--build">Historical cross-build</span></td><td>Earlier library-only <code>All</code> and selective <code>Text.Json</code> graphs with CMake 3.31.6</td><td>Not rebuilt at this selected pin; GoogleTest was not compiled or run, so this is not native Windows runtime validation</td></tr>
+<tr><td>Windows / MSVC</td><td><span class="badge badge--limited">Implementation and build branches</span></td><td>Win32 paths, platform libraries, and <code>/W4 /WX</code> policy exist</td><td>No current hosted build/runtime gate; native-128-dependent types hard-fail under the MSVC frontend</td></tr>
+<tr><td>macOS / Apple Clang</td><td><span class="badge badge--partial">Downstream build evidence</span></td><td>Xcode 15.4 consumer builds drove a recorded portability-fix series</td><td>No current macOS CI job or standalone complete test result</td></tr>
+<tr><td>Emscripten 5.0.7</td><td><span class="badge badge--build">Historical cross-build</span></td><td>Earlier library-only <code>All</code> and <code>Text.Json</code> graphs with CMake 3.31.6</td><td>Not rebuilt at this selected pin; no browser/Node runtime suite, and many native operations deliberately throw</td></tr>
+<tr><td>Android</td><td><span class="badge badge--partial">Integration path</span></td><td>Android storage-path branch and parent-provided SDL3 target wiring</td><td>No whole-project Android build or device/emulator test result at this pin</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="tracked-ci">What the tracked CI actually runs</h2>
+<p>The selected repository workflow runs on Ubuntu only. It contains nine selective component jobs—<code>Core.Base</code>, <code>Text.Json</code>, <code>Net.Http.Headers</code>, <code>Net.WebSockets</code>, <code>IO.Compression</code>, <code>IO.Compression.Zip</code>, <code>IO.IsolatedStorage</code>, <code>Security.Cryptography.Random</code>, and <code>Xml.Linq</code>—plus one complete local-integrity job and one Ubuntu 24.04 Doxygen warning-baseline job.</p>
+<p>The complete integrity script covers more than behavior tests: component-boundary validation, validator tests, generated-catalogue drift, ODR seams, negative consumer fixtures, configuration, a warning-as-error build, and the component-aware test sequence. It remains one Linux/GCC baseline, not a substitute for a compiler/OS matrix.</p>
+
+<h2 id="subsystem-matrix">Runtime availability by subsystem</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Subsystem</th><th scope="col">Implemented runtime path</th><th scope="col">Explicit reduced/unsupported path</th></tr></thead>
+<tbody>
+<tr><td><code>System::Net::Sockets</code></td><td>Windows and POSIX socket operations</td><td>Operations throw on Emscripten</td></tr>
+<tr><td><code>System::IO::RandomAccess</code></td><td>Win32 file APIs and POSIX positional I/O</td><td>All operations throw on Emscripten</td></tr>
+<tr><td><code>System::IO::FileSystemWatcher</code></td><td>Linux inotify, one directory</td><td>Enabling throws on Windows, macOS, Emscripten, and other targets</td></tr>
+<tr><td><code>NetworkInterface</code></td><td>Linux <code>getifaddrs</code>, packet metadata, and sysfs speed</td><td>Enumeration and queries throw elsewhere</td></tr>
+<tr><td><code>Ping</code></td><td>Native network path on the Linux baseline</td><td>Host permissions/configuration can expose the documented raw-ICMP fallback gap</td></tr>
+<tr><td><code>System::Diagnostics::Process</code></td><td>POSIX process, pipe, signal, and wait APIs</td><td>Operations throw on Windows and Emscripten</td></tr>
+<tr><td><code>PosixSignalRegistration</code></td><td>POSIX signal implementation</td><td>Registration throws on Windows and Emscripten</td></tr>
+<tr><td><code>AppDomain::BaseDirectory</code></td><td>Win32 executable path, Apple <code>_NSGetExecutablePath</code>, and the Linux executable path</td><td>Emscripten uses the virtual-filesystem-relative <code>./</code> fallback</td></tr>
+<tr><td><code>TimeZoneInfo</code></td><td>Windows APIs and POSIX zoneinfo/current-zone paths</td><td>Emscripten uses UTC for local and rejects system-zone lookup</td></tr>
+<tr><td><code>ThreadPool</code> and threading timers</td><td>Native threads where available</td><td>Single-threaded Emscripten builds throw for work that requires pthreads</td></tr>
+<tr><td><code>StoragePaths</code></td><td>Current-directory root by default; Android SDL root; Emscripten <code>/save</code> root</td><td>Persistence/mount setup belongs to the embedding application</td></tr>
+<tr><td><code>Console</code></td><td>Win32 and POSIX TTY queries plus standard streams</td><td>Emscripten reports streams redirected and uses fallback dimensions</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="linux">Linux / GCC baseline</h2>
+<p>Linux with GCC is the only platform with a recorded complete native gate at the selected revision. The project also depends on Linux-specific facilities for its strongest watcher and network-interface behavior: inotify/eventfd, <code>getifaddrs</code>, Linux packet metadata, sysfs network speed, <code>/proc</code> paths, and the conventional <code>/usr/share/zoneinfo</code> database.</p>
+<p>The complete gate is intentionally not summarized as green. Five recorded Ping cases were triggered by the host’s <code>ping_group_range</code> configuration and expose a real missing raw-ICMP receive fallback when the unprivileged datagram path cannot be used. One socket/interface case depended on IPv6 host state that was absent. These are environment-sensitive results with real library implications, not permission to discard failures.</p>
+
+<h2 id="windows">Windows</h2>
+<p>Windows source paths are substantial rather than cosmetic. The networking component attaches <code>ws2_32</code> privately; secure random attaches <code>bcrypt</code>; sockets, DNS, random access, executable-path discovery, runtime information, drive enumeration, console geometry, and time-zone lookup have Win32 branches. Consumers should link the Sharp Runtime component target and let its transitive platform libraries follow, rather than manually reproducing those links.</p>
+<p>That implementation breadth is not a current native validation claim. MinGW evidence is an earlier library-only cross-compilation and was not repeated at the selected pin. No selected-pin Windows tests ran, and no tracked Windows job exists. In particular, <code>Process</code>, <code>FileSystemWatcher</code>, and <code>NetworkInterface</code> still lack Windows backends.</p>
+
+<h3 id="msvc-boundary">MSVC is a compiler boundary, not a Windows boundary</h3>
+<p><code>System::Decimal</code>, <code>System::Int128</code>, and <code>System::UInt128</code> require the GCC/Clang <code>__int128</code> extension and deliberately produce a compile-time error under the MSVC frontend. <code>BinaryReader::ReadDecimal</code> is guarded out under MSVC so that one method does not make the whole reader unavailable. This limitation applies to the compiler, not to the Windows operating system: a Clang/GCC Windows target with native 128-bit extension support is a different case.</p>
+
+<h2 id="macos">macOS / Apple Clang</h2>
+<p>macOS benefits from POSIX code and has explicit Apple paths for executable discovery and runtime platform identity. A real Xcode 15.4 downstream consumer drove a sequence of portability fixes, which is stronger evidence than an untouched preprocessor branch. It is still narrower than a standalone <code>All</code> build plus complete test suite. The repository has no hosted macOS job, and <code>FileSystemWatcher</code> has no Apple backend.</p>
+
+<h2 id="emscripten">Emscripten and WebAssembly</h2>
+<p>The recorded Emscripten evidence covers library cross-builds of the complete graph and <code>Text.Json</code>, without GoogleTest or browser execution. Unsupported runtime operations are designed to compile and fail explicitly rather than disappearing at link time.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Area</th><th scope="col">Emscripten behavior</th></tr></thead>
+<tbody>
+<tr><td>TCP sockets, <code>HttpClient</code>, WebSockets over native sockets</td><td>Unavailable in the single-threaded native-socket model; operations throw</td></tr>
+<tr><td>DNS</td><td>Public lookup methods throw <code>PlatformNotSupportedException</code></td></tr>
+<tr><td>Random access</td><td>Throws for descriptor operations</td></tr>
+<tr><td>Process and POSIX signals</td><td>Throw</td></tr>
+<tr><td>Thread pool/timers without <code>__EMSCRIPTEN_PTHREADS__</code></td><td>Work requiring native threads throws</td></tr>
+<tr><td>Local time zone</td><td>Falls back to UTC; named system-zone lookup throws</td></tr>
+<tr><td>Application base directory</td><td>Returns <code>./</code> in the virtual filesystem</td></tr>
+<tr><td>Storage</td><td>Uses <code>/save/.cna_isolated_storage</code>; the application must mount/persist that path, typically with IDBFS</td></tr>
+<tr><td>Console</td><td>Reports input/output/error redirected and returns 80×24 fallback dimensions</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="android">Android</h2>
+<p>The Android-specific evidence centers on storage integration. When <code>Storage</code> is selected, the parent build must provide either <code>SDL3::SDL3</code> or <code>SDL3::SDL3-static</code>. <code>StoragePaths</code> uses <code>SDL_GetPrefPath</code>, falls back to <code>SDL_GetAndroidInternalStoragePath</code>, and finally has a <code>/data/local/tmp</code> fallback if neither SDL query succeeds.</p>
+<p>This code path does not prove a complete NDK configuration, every physical component, JNI/application lifecycle behavior, or device persistence. Android should be described as an integration path until a reproducible whole-project build and device/emulator suite are recorded.</p>
+
+<h2 id="native-semantics">Cross-platform semantic differences</h2>
+<p>Even APIs implemented on multiple platforms expose native realities:</p>
+<ul>
+<li><strong>Paths:</strong> separators differ, the Sharp Runtime path grammar is smaller than full Windows drive/UNC semantics, and case sensitivity follows both implementation policy and filesystem/mount behavior.</li>
+<li><strong>Files:</strong> deletion and rename of open files, sharing, permission errors, link behavior, and timestamp precision differ between Windows and POSIX.</li>
+<li><strong>Creation time:</strong> POSIX <code>FileSystemInfo</code> may approximate creation with inode metadata-change time.</li>
+<li><strong>Line endings:</strong> <code>TextWriter</code> selects CRLF on Windows and LF elsewhere; some whole-file helpers write LF directly.</li>
+<li><strong>Console:</strong> terminal geometry and redirection are queried natively, with fallbacks. ANSI-oriented behavior is not a uniform GUI console abstraction.</li>
+<li><strong>Network availability:</strong> interface presence, IPv6 state, ping permissions, firewalls, DNS, and container policies are host state, not merely OS names.</li>
+<li><strong>Time zones:</strong> Windows IDs/APIs and POSIX IANA zoneinfo are bridged only for the curated mapping and reduced <code>TimeZoneInfo</code> model.</li>
+</ul>
+
+<h2 id="build-requirements">Toolchain and build requirements</h2>
+<p>The root project requires CMake 3.20 and C++23 with language extensions disabled. The common target requests <code>cxx_std_23</code>. Production and test targets use warnings as errors: <code>/W4 /WX</code> for MSVC and <code>-Wall -Wextra -Werror</code> elsewhere, with one GCC-specific format-truncation suppression that is intentionally not sent to Clang.</p>
+<p>External dependencies remain attached to narrow owners: ZLIB to <code>IO.Compression</code>, vendored miniz to ZIP, tinyxml2 publicly to XML because public headers expose it, <code>ws2_32</code> to networking on Windows, BCrypt to secure random on Windows, and parent-provided SDL3 to Storage on Android.</p>
+
+<h2 id="portability-checklist">Portability checklist for consumers</h2>
+<ol>
+<li>Select the narrow component set and configure it with every intended toolchain.</li>
+<li>Separate “compiled” from “executed” in your own release evidence.</li>
+<li>Exercise platform-limited APIs on their real host; a Linux mock does not validate a Win32 path.</li>
+<li>Expect <code>PlatformNotSupportedException</code> at documented runtime doors and decide whether to gate, fall back, or disable the feature.</li>
+<li>Test real filesystem naming, permissions, timestamps, and open-file behavior on each target.</li>
+<li>Test networking under the deployment environment’s DNS, IPv6, firewall, sandbox, and ping permissions.</li>
+<li>For Emscripten, decide pthreads and virtual-filesystem persistence at the whole-application level.</li>
+<li>For Android, provide SDL3 before adding Sharp Runtime and verify the chosen storage root on a device.</li>
+<li>Do not strengthen a public platform label until the repository or product records the corresponding build/runtime evidence.</li>
+</ol>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="running-tests.html">Testing and verification<small>The selected source’s complete gate and validation layers.</small></a>
+<a href="development/known-limitations.html">Known limitations<small>Platform-independent and subsystem-specific boundaries.</small></a>
+<a href="docs/io/filesystem-watcher.html">FileSystemWatcher<small>The Linux-only backend and current concurrency contract.</small></a>
+<a href="components/networking.html">Networking components<small>Socket, HTTP, WebSocket, and network-information boundaries.</small></a>
+<a href="components/io-storage.html">I/O and storage components<small>Filesystem, compression, hashing, and platform storage ownership.</small></a>
+</div><nav class="next-links" aria-label="Previous and next pages"><a href="compatibility.html"><span class="next-label">Previous</span>Compatibility Philosophy</a><a href="memory-management.html"><span class="next-label">Next</span>Memory and Ownership</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#how-to-read-status">How to read platform status</a><a class="toc-level-2" href="#platform-matrix">Current evidence matrix</a><a class="toc-level-2" href="#tracked-ci">What the tracked CI actually runs</a><a class="toc-level-2" href="#subsystem-matrix">Runtime availability by subsystem</a><a class="toc-level-2" href="#linux">Linux / GCC baseline</a><a class="toc-level-2" href="#windows">Windows</a><a class="toc-level-3" href="#msvc-boundary">MSVC is a compiler boundary, not a Windows boundary</a><a class="toc-level-2" href="#macos">macOS / Apple Clang</a><a class="toc-level-2" href="#emscripten">Emscripten and WebAssembly</a><a class="toc-level-2" href="#android">Android</a><a class="toc-level-2" href="#native-semantics">Cross-platform semantic differences</a><a class="toc-level-2" href="#build-requirements">Toolchain and build requirements</a><a class="toc-level-2" href="#portability-checklist">Portability checklist for consumers</a><a class="toc-level-2" href="#related-reading">Related reading</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

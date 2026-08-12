@@ -1,0 +1,56 @@
+<h2>Goal and component</h2>
+<p>Own a sequence, take a checked subrange, mutate through the view, and copy overlapping elements safely. All types in this tutorial belong to <code>Core.Base</code>.</p>
+
+<h2>Own with vector, borrow with Span</h2>
+<pre><code class="language-cpp">#include &lt;System/Array.hpp&gt;
+#include &lt;System/Span.hpp&gt;
+
+#include &lt;vector&gt;
+
+std::vector&lt;int&gt; values{1, 2, 3, 4, 5};
+System::Span&lt;int&gt; all(values);
+auto middle = all.Slice(1, 3);
+middle.Fill(9);
+
+// values is now {1, 9, 9, 9, 5}
+</code></pre>
+<p>The vector owns. The span stores only <code>data()</code> and an element length. Its indexing and slicing are checked, but it cannot keep the vector alive.</p>
+
+<h2>Copy overlapping ranges</h2>
+<pre><code class="language-cpp">System::Span&lt;int&gt; source(values.data(), 4);
+System::Span&lt;int&gt; destination(values.data() + 1, 4);
+source.CopyTo(destination);
+
+// CopyTo chooses an overlap-safe direction.
+</code></pre>
+<p>Do not replace this with <code>memcpy</code>. Overlap requires memmove-like direction, and non-trivial elements require assignment rather than object-representation copying.</p>
+
+<h2>Use Array algorithms on owned storage</h2>
+<pre><code class="language-cpp">System::Array::Sort(values);
+const auto index = System::Array::IndexOf(values, 9);
+System::Array::Reverse(values, 0, 3);
+</code></pre>
+<p><code>System::Array</code> is a static algorithm class, not a base object. Its vector overloads validate signed ranges. Floating default sort uses the project’s explicit NaN-first policy.</p>
+
+<h2>Know what invalidates the view</h2>
+<pre><code class="language-cpp">auto view = System::Span&lt;int&gt;(values);
+values.push_back(6); // may reallocate
+
+// Do not use view after a potentially relocating operation.
+</code></pre>
+<p>Reserve is not a permanent lifetime contract: any later operation that exceeds capacity can relocate. Destruction always invalidates. Erase/insert can change which elements an offset describes even when the buffer does not move.</p>
+
+<h2>Read-only means through this alias</h2>
+<p><code>ReadOnlySpan&lt;T&gt;</code> prevents mutation through the view. Another alias can still mutate the same storage. For a retained immutable value, own a const value or enforce immutability at the owner rather than relying on one read-only borrow.</p>
+
+<h2>Do not use current Memory as an async owner</h2>
+<p><code>Memory&lt;T&gt;</code> and <code>ReadOnlyMemory&lt;T&gt;</code> borrow a vector in this implementation. <code>Pin()</code> returns its current native pointer but does not retain or immobilize the vector. Cross an async boundary with an explicit owner plus offsets, not a borrowed view alone.</p>
+
+<h2>Verification checklist</h2>
+<ul>
+  <li>Empty, exact-end, negative, and oversized slices.</li>
+  <li>Overlapping copy in both directions with non-trivial elements.</li>
+  <li>Owner destruction and vector reallocation.</li>
+  <li>Raw-pointer boundaries with explicit capacity proof.</li>
+  <li>Multidimensional index multiplication overflow if using flattened storage.</li>
+</ul>

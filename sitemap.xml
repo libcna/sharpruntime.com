@@ -1,6 +1,211 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://sharpruntime.com/api/components/buffers.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/collections-async.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/collections-blocking.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/collections-core.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/collections-objectmodel.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/componentmodel.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/console.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/core-base.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/diagnostics.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/globalization.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/io-compression-zip.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/io-compression.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/io-hashing.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/io-isolatedstorage.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/io.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-http-headers.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-http-json.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-http.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-mime.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-networkinformation.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-security.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-sockets.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net-websockets.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/net.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/numerics.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/runtime.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/security-cryptography-random.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/security-cryptography.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/security.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/storage.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/text-json.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/text-regularexpressions.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/text.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/threading-channels.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/threading-tasks.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/threading.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/timers.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/timezone.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/uri.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/xml-linq.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/api/components/xml.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/api/index.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.8</priority>
@@ -141,6 +346,21 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharpruntime.com/docs/io/filesystem-watcher.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/docs/io/filesystem.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/docs/io/streams.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/exceptions.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.8</priority>
@@ -276,12 +496,32 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharpruntime.com/tutorials/arrays-spans.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/channels.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/tutorials/compression-hashing.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://sharpruntime.com/tutorials/debug-components.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/dns-tcp-udp.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/filesystem-watcher.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.6</priority>
   </url>
@@ -306,7 +546,32 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharpruntime.com/tutorials/locks-threadpool.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/memory-stream.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/negative-consumer-fixture.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/nullable-values.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/tutorials/port-csharp-class.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/readers-writers.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.6</priority>
   </url>
@@ -326,6 +591,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharpruntime.com/tutorials/timers.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/tutorials/use-collections.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.6</priority>
@@ -336,7 +606,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://sharpruntime.com/tutorials/websockets.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://sharpruntime.com/tutorials/work-with-files.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://sharpruntime.com/tutorials/write-component-test.html</loc>
     <lastmod>2026-08-12</lastmod>
     <priority>0.6</priority>
   </url>

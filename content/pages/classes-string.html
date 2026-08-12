@@ -1,0 +1,120 @@
+<h2>What System::String is</h2>
+<p><code>System::String</code> is a non-instantiable class of static algorithms over <code>std::string</code>. The actual common string value is <code>SharpRuntime::String</code>, an alias for <code>std::string</code>. A string therefore owns a native byte buffer, copies and moves as a value, can be modified through standard C++ operations, and has no CLR object header.</p>
+<pre><code class="language-cpp">#include &lt;System/String.hpp&gt;
+
+using System::String;
+
+const std::string raw = "  alpha,beta,gamma  ";
+const std::string clean = String::Trim(raw);
+const auto parts = String::Split(clean, ',');
+const std::string label = String::Join(" | ", parts);</code></pre>
+<p>The example uses the static helpers without constructing a <code>System::String</code>. Select <code>Core.Base</code> and link <code>SharpRuntime::Core.Base</code>; no separate text component is needed for these foundational operations.</p>
+
+<h2>Construction and native values</h2>
+<p>Construct, copy, move, reserve, and mutate the underlying value exactly as an <code>std::string</code>. <code>System::String::Empty</code> supplies an empty constant, while <code>Create(count, ch)</code> constructs repeated bytes. The helper has no constructor because it stores no string instance.</p>
+<div class="table-wrap"><table><thead><tr><th>Intent</th><th>Native / Sharp Runtime form</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Empty value</td><td><code>std::string value;</code> or <code>String::Empty</code></td><td>An owned zero-byte string, not null</td></tr>
+<tr><td>Literal</td><td><code>std::string value = "text";</code></td><td>Copies literal bytes</td></tr>
+<tr><td>Repeated byte</td><td><code>String::Create(8, '-')</code></td><td>Eight copies of one <code>char</code></td></tr>
+<tr><td>Preallocate</td><td><code>value.reserve(bytes);</code></td><td>Native capacity optimization</td></tr>
+<tr><td>Optional string</td><td><code>std::optional&lt;std::string&gt;</code> or API-specific pointer</td><td>Presence is explicit; empty is not substituted for null</td></tr>
+</tbody></table></div>
+<div class="callout callout--warning"><div class="callout-title">Empty is not a universal null replacement</div><p>A reference parameter such as <code>const std::string&amp;</code> cannot be null. That does not mean every C# null should silently become empty. Preserve absence with an optional or pointer when it has distinct meaning.</p></div>
+
+<h2>Encoding and index units</h2>
+<p>The runtime treats ordinary strings as UTF-8 byte storage. The helper delegates much of its work to <code>std::string</code>, so lengths, positions, counts, ranges, and returned indices are bytes. .NET <code>System.String</code> uses UTF-16 code units. Neither unit is the same as a Unicode scalar or a user-perceived grapheme.</p>
+<div class="table-wrap"><table><thead><tr><th>Text</th><th>UTF-8 bytes here</th><th>UTF-16 units in .NET</th><th>Graphemes</th></tr></thead><tbody>
+<tr><td><code>A</code></td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td><code>é</code> precomposed</td><td>2</td><td>1</td><td>1</td></tr>
+<tr><td>😀</td><td>4</td><td>2</td><td>1</td></tr>
+<tr><td><code>e</code> + combining acute</td><td>3</td><td>2</td><td>1</td></tr>
+</tbody></table></div>
+<p><code>Substring</code>, <code>IndexOf</code>, <code>LastIndexOf</code>, <code>Remove</code>, <code>Insert</code>, <code>ToCharArray</code>, padding widths, and range-taking overloads all operate on this native byte representation. A valid byte range can still cut through a multi-byte scalar. Use an encoding/scalar-aware layer when a port stores human-character offsets.</p>
+
+<h2>Empty and whitespace tests</h2>
+<p><code>IsEmpty</code> and <code>IsNullOrEmpty</code> both test whether the supplied reference is empty; the parameter itself cannot be null. <code>IsNullOrWhiteSpace</code> scans bytes with the native character-classification function. It correctly recognizes the implemented byte/locale whitespace set but is not .NET Unicode whitespace classification.</p>
+<pre><code class="language-cpp">if (System::String::IsNullOrWhiteSpace(input)) {
+    throw System::ArgumentException("A non-blank name is required.");
+}</code></pre>
+
+<h2>Comparison modes</h2>
+<p>The API exposes the six familiar <code>StringComparison</code> names. The current implementation reduces them to two paths: the three IgnoreCase values lowercase each byte before comparing; the other three use case-sensitive byte comparison. It does not implement distinct current-culture, invariant-culture, and ordinal collation engines.</p>
+<div class="table-wrap"><table><thead><tr><th>Requested mode</th><th>Current implementation</th><th>Important reduction</th></tr></thead><tbody>
+<tr><td><code>Ordinal</code>, <code>CurrentCulture</code>, <code>InvariantCulture</code></td><td>Case-sensitive byte comparison</td><td>Culture names do not select different collation</td></tr>
+<tr><td>The three <code>*IgnoreCase</code> values</td><td>Per-byte <code>std::tolower</code>, then byte comparison</td><td>Not Unicode case folding; result can depend on C locale</td></tr>
+<tr><td><code>CompareOrdinal</code></td><td>Byte-by-byte ordering</td><td>UTF-8 byte ordering differs from UTF-16 ordering for some text</td></tr>
+</tbody></table></div>
+<p><code>Compare</code> returns negative, zero, or positive. <code>Equals</code>, <code>StartsWith</code>, <code>EndsWith</code>, <code>Contains</code>, <code>IndexOf</code>, and <code>LastIndexOf</code> offer comparison-aware overloads. Use the case-sensitive path for protocol tokens only when that protocol defines byte comparison; do not label the current ignore-case path as Unicode invariant.</p>
+
+<h2>Search and range validation</h2>
+<p>Search families cover strings, bytes, start positions, counts, comparison modes, and “any of” sets. A missing value returns <code>-1</code>. Range-taking overloads validate signed inputs and reject invalid positions with Sharp Runtime argument exceptions. The current post-audit implementation bounds backward searches instead of allowing a negative or oversized position to wrap into <code>size_t</code>.</p>
+<ul>
+  <li><code>IndexOf</code> searches forward and returns a byte offset.</li>
+  <li><code>LastIndexOf</code> searches backward and returns a byte offset.</li>
+  <li><code>IndexOfAny</code> and <code>LastIndexOfAny</code> compare individual <code>char</code> bytes.</li>
+  <li><code>Contains</code>, <code>StartsWith</code>, and <code>EndsWith</code> avoid exposing a numeric position.</li>
+</ul>
+<p>If a search result will later index another representation—UTF-16 text, code points, a rendered label, or a different normalization form—convert the unit explicitly.</p>
+
+<h2>Substring, insertion, removal, and replacement</h2>
+<p><code>Substring</code> returns a new owning <code>std::string</code>; it does not retain a view into the source. <code>Insert</code>, <code>Remove</code>, and both <code>Replace</code> families also return new strings, leaving their input unchanged. This helper-level immutability is convenient for ports even though callers can still mutate the underlying <code>std::string</code> directly.</p>
+<pre><code class="language-cpp">const std::string version = "v1.2.3";
+const std::string numbers = String::Substring(version, 1);
+const std::string major = String::Substring(numbers, 0, 1);
+const std::string masked = String::Replace(version, '.', '-');</code></pre>
+<p>The integer arguments are byte positions and lengths. Replacing a string walks non-overlapping matches and returns the original value when <code>oldValue</code> is empty. Character replacement compares single bytes.</p>
+
+<h2>Split and join</h2>
+<p><code>Split</code> supports a single byte delimiter, a set of delimiter bytes, or a string delimiter. Overloads accept <code>StringSplitOptions</code> for the implemented removal/trimming policy. <code>Join</code> supports string or byte separators and collections of strings, 32-bit integers, and doubles; an initializer-list string overload is also available.</p>
+<p>Delimiter semantics follow bytes unless a multi-byte delimiter is supplied as a whole string. A set of <code>char</code> delimiters is a set of bytes, not Unicode scalars. When parsing a textual protocol, first decide whether separators are ASCII protocol bytes or user-language characters.</p>
+<pre><code class="language-cpp">const auto fields = String::Split("alpha::beta::gamma", "::");
+const std::string csv = String::Join(',', fields);</code></pre>
+
+<h2>Trim, padding, and case conversion</h2>
+<p>The parameterless trim methods recognize the ASCII whitespace bytes space, tab, line feed, carriage return, form feed, and vertical tab. Custom trim sets are vectors of bytes. Padding returns a new byte string with spaces or a supplied byte until the requested byte width is reached.</p>
+<p><code>ToUpper</code> and <code>ToLower</code> apply the native C character conversion to each unsigned byte. The invariant-named helpers forward to the same basic behavior. This is suitable for ASCII-oriented identifiers and deliberately insufficient for general Unicode casing, expansions, Turkish-I behavior, or culture-aware display text.</p>
+
+<h2>Concatenation</h2>
+<p><code>Concat</code> supplies two-, three-, four-, and vector-of-string overloads. The vector implementation precomputes byte size and reserves once. Ordinary <code>operator+</code>, <code>append</code>, and <code>StringBuilder</code> remain valid native choices; choose based on clarity and allocation behavior rather than on managed syntax alone.</p>
+
+<h2>Composite formatting</h2>
+<p><code>Format</code> supports a finite set of overloads for strings, characters, booleans, 32/64-bit integers, floats, and doubles, with selected one-, two-, and three-argument combinations. The parser handles indexed placeholders and a bounded format-specifier grammar. Numeric formatting uses native/classic-locale machinery.</p>
+<pre><code class="language-cpp">const std::string status = String::Format(
+    "Processed {0} items in {1} ms", 42, 7);
+</code></pre>
+<p>Do not infer arbitrary CLR <code>IFormattable</code>, custom formatter providers, reflection over object arguments, or every .NET numeric/date specifier. If the exact overload or format is not present in the pinned header, prefer an explicit native formatter or add a tested runtime feature.</p>
+
+<h2>Conversions</h2>
+<p><code>ToString(int, width, fill)</code> formats a 32-bit integer with a native stream width and fill. Other numeric wrappers expose their own parse/format methods. Encoding conversions belong to <code>System::Text::Encoding</code>: <code>GetBytes</code> produces a byte vector and <code>GetString</code> decodes input according to the selected encoding.</p>
+<p>Do not treat a byte reinterpretation as a conversion. UTF-8, ASCII, Latin-1, UTF-16 little/big endian, UTF-32, and UTF-7 are distinct concrete surfaces. The current Encoding count APIs report UTF-8 storage-byte units, and shared factory instances have mutable fallback properties; those are documented limitations rather than CLR parity.</p>
+
+<h2>ToCharArray and charcs</h2>
+<p><code>ToCharArray</code> returns <code>std::vector&lt;char&gt;</code> containing UTF-8 storage bytes. It does not return <code>std::vector&lt;charcs&gt;</code> of UTF-16 units. <code>SharpRuntime::charcs</code> exists for APIs that explicitly model a 16-bit code unit, but it does not change the string storage type.</p>
+<div class="callout callout--warning"><div class="callout-title">The familiar name hides a unit difference</div><p>For non-ASCII input, <code>ToCharArray</code> is not the direct equivalent of C# <code>string.ToCharArray()</code>. Use the encoding or Unicode helper that matches the unit your algorithm needs.</p></div>
+
+<h2>Equality and hashing</h2>
+<p>Default helper equality compares bytes. Comparison-mode equality follows the two-path reduction described above. <code>GetHashCode</code> folds a native <code>std::hash&lt;std::string&gt;</code> result into a 32-bit signed value; the widening step avoids invalid shifts on 32-bit platforms.</p>
+<p>The hash is intended for an in-process native hash container under matching equality. It is not stable across standard-library implementations or processes, not suitable for persisted data or network protocols, and not promised to equal a .NET string hash.</p>
+
+<h2>Interning and identity</h2>
+<p><code>Intern</code> and <code>IsInterned</code> currently return their input value. There is no intern pool and no reference identity for ordinary strings. Comparing addresses or <code>c_str()</code> pointers is never a substitute for value equality.</p>
+
+<h2>Important differences from .NET</h2>
+<div class="table-wrap"><table><thead><tr><th>.NET String</th><th>Sharp Runtime</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td>UTF-16 code-unit storage</td><td>UTF-8 bytes in <code>std::string</code></td><td>Indices, lengths, ordering, and arrays differ</td></tr>
+<tr><td>Immutable managed object</td><td>Mutable native value; helpers return copies</td><td>Native mutation and invalidation are visible</td></tr>
+<tr><td>Reference can be null</td><td><code>std::string</code> value cannot be null</td><td>Use optional/pointer when absence matters</td></tr>
+<tr><td>Rich culture/ordinal comparison engines</td><td>Byte comparison plus bytewise ignore-case reduction</td><td>Do not promise Unicode/culture parity</td></tr>
+<tr><td>Unicode normalization</td><td>Current extension returns input and reports true</td><td>Use a real Unicode library when normalization matters</td></tr>
+<tr><td>Runtime interning</td><td>No intern pool</td><td>Only value comparison is meaningful</td></tr>
+<tr><td>Stable contract within CLR version</td><td>Native <code>std::hash</code> folded to 32 bits</td><td>Never persist the hash</td></tr>
+</tbody></table></div>
+
+<h2>When to use another representation</h2>
+<ul>
+  <li>Use <code>std::string_view</code> for a short synchronous byte-string borrow when the owner is clear.</li>
+  <li>Use byte spans for binary data; do not label arbitrary bytes as text.</li>
+  <li>Use <code>charcs</code> or an explicit UTF-16 container only at a boundary that requires UTF-16.</li>
+  <li>Use a Unicode library for normalization, grapheme segmentation, language-sensitive casing, or collation.</li>
+  <li>Use <code>StringBuilder</code> for repeated append/format operations where its byte-unit mutation model is acceptable.</li>
+</ul>

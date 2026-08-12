@@ -1,0 +1,189 @@
+<h2 id="how-to-use-this-page">How to use this page</h2>
+<p>This page records boundaries that are visible in the implementation at the pinned Sharp Runtime revision. A limitation may be an architectural non-goal, a deliberately reduced compatibility contract, a platform-specific implementation gap, or behavior that has not yet earned broad validation. It is not a list of every missing .NET member, and a matching namespace or type name is not evidence of CLR-equivalent semantics.</p>
+<p>Read these boundaries before choosing components for a port. Then inspect the owning headers, tests, and component page for the exact API you intend to call. The project is a native C++ compatibility library: it can preserve useful .NET shapes without supplying a CLR underneath them.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Boundary kind</th><th scope="col">What it means</th><th scope="col">How to respond</th></tr></thead>
+<tbody>
+<tr><td>Architectural non-goal</td><td>The behavior would require a managed runtime model the project does not provide</td><td>Redesign the port around native C++ ownership and build-time types</td></tr>
+<tr><td>Reduced semantic model</td><td>The named API exists, but implements a smaller, documented contract</td><td>Check whether your inputs and invariants stay inside that contract</td></tr>
+<tr><td>Platform gap</td><td>The source has an explicit unsupported branch or no native backend</td><td>Gate the feature, provide a backend, or select another component</td></tr>
+<tr><td>Evidence gap</td><td>A path may compile, but has not received a current native runtime gate</td><td>Validate it on the real compiler, OS, filesystem, and network</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="runtime-model">Native runtime model, not a CLR</h2>
+<p>Sharp Runtime compiles into ordinary native C++ libraries. It does not load managed assemblies, execute IL, provide a JIT, install a tracing garbage collector, or reproduce CLR metadata and execution services. Objects follow the ownership expressed by their C++ representation: values, automatic storage, standard containers, raw non-owning views, and explicit smart ownership where an API chooses it.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">C# / CLR facility</th><th scope="col">Sharp Runtime boundary</th><th scope="col">Porting implication</th></tr></thead>
+<tbody>
+<tr><td>Tracing garbage collection</td><td>No managed heap or tracing collector</td><td>Express ownership with RAII, values, containers, and smart pointers; break ownership cycles explicitly</td></tr>
+<tr><td>Universal <code>object</code> base</td><td><code>System::Object</code> is an opt-in C++ type, not a base of every value</td><td>Generic code cannot assume arbitrary native types have CLR object identity</td></tr>
+<tr><td>Assembly loading and IL execution</td><td>No managed loader, verifier, JIT, or application-domain isolation model</td><td>Compile all participating code and dependencies as native targets</td></tr>
+<tr><td>Runtime metadata universe</td><td>Only narrow RTTI-backed type information and explicit library metadata</td><td>Replace metadata-driven discovery with registration, templates, generated tables, or explicit factories</td></tr>
+<tr><td>General boxing/unboxing</td><td>No universal conversion between arbitrary values and managed objects; the generic boxing helper rejects the operation</td><td>Carry values in concrete types or an explicit variant/type-erasure design</td></tr>
+<tr><td>Dynamic delegate invocation</td><td>Typed delegates are useful; general <code>DynamicInvoke</code> is not implemented</td><td>Keep invocation typed at compile time</td></tr>
+<tr><td>P/Invoke, remoting, and binary formatter services</td><td>No CLR interop/remoting/formatter substrate</td><td>Use native libraries, explicit serialization, and application-defined transport contracts</td></tr>
+</tbody>
+</table></div>
+
+<p>Attribute-like types can preserve source structure and intent, but they do not imply that every native declaration is discoverable through a runtime metadata API. Likewise, <code>AppDomain</code> exposes selected process/application facts; it is not a managed isolation, loading, or unload boundary.</p>
+
+<h2 id="reflection-and-type">Reflection and type information</h2>
+<p><code>System::Type</code> wraps a limited native type identity. Names may follow compiler RTTI conventions rather than stable CLR full names, and several classification predicates are intentionally shallow. There is no complete catalogue of assemblies, constructors, members, custom attributes, generic definitions, or invocation metadata.</p>
+<p>This is sufficient for code that needs a modest type token or equality check. It is not sufficient for serializers, dependency-injection containers, test frameworks, or plugin loaders that discover an arbitrary object graph through CLR reflection. Those systems need an explicit registry or generated metadata layer. Do not persist native RTTI names as a durable wire format: compiler, ABI, and build changes can alter them.</p>
+
+<h2 id="strings-and-globalization">Strings, text, and globalization</h2>
+<p>The core <code>SharpRuntime::String</code> representation is a <code>std::string</code> byte value. <code>System::String</code> supplies static helpers over that representation; it is not the immutable UTF-16 reference type used by the CLR. Lengths, indexes, and substrings therefore operate on bytes unless a particular subsystem performs an explicit encoding conversion.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Topic</th><th scope="col">Current behavior</th><th scope="col">Consequence</th></tr></thead>
+<tbody>
+<tr><td>Representation</td><td><code>std::string</code> bytes</td><td>A byte offset is not necessarily a Unicode scalar or user-perceived character boundary</td></tr>
+<tr><td>Null string</td><td>No distinct managed-null string value in the ordinary alias</td><td>Use an optional/nullable wrapper when absence differs from an empty string</td></tr>
+<tr><td>Mutability</td><td>The underlying native string is mutable</td><td>Do not rely on CLR string identity or immutability for aliasing assumptions</td></tr>
+<tr><td>Comparison modes</td><td>The named comparison values collapse to case-sensitive or byte-oriented case-insensitive paths</td><td>Culture, ordinal, and invariant labels are not fully distinct semantic engines</td></tr>
+<tr><td>Case conversion</td><td>Byte/C-locale-oriented behavior</td><td>Do not use it as full Unicode locale-sensitive casing</td></tr>
+<tr><td>Trimming</td><td>Default helpers recognize the implemented ASCII whitespace set</td><td>Additional Unicode whitespace requires explicit handling</td></tr>
+<tr><td>Hashing</td><td>Native implementation-derived hash</td><td>Do not persist it or expect .NET-compatible/stable values across implementations</td></tr>
+<tr><td>Normalization</td><td>The normalization extension currently reports normalized and returns the input unchanged</td><td>Non-ASCII canonical equivalence is not normalized</td></tr>
+</tbody>
+</table></div>
+
+<p>Several boundary APIs do perform UTF-8 work. For example, binary character reading decodes UTF-8 bytes into UTF-16 code units. That local conversion does not change the project-wide string representation. Keep an explicit encoding contract at file, console, JSON, XML, HTTP, and native-library boundaries; never infer one merely from the C++ type name.</p>
+<p>See <a href="../internals/string-internals.html">String internals</a> and <a href="../classes/string.html">String class guide</a> for the operational model.</p>
+
+<h2 id="arrays-spans-memory">Arrays, spans, and memory</h2>
+<p><code>System::Array</code> is a set of algorithms over native contiguous storage, particularly <code>std::vector</code> and pointer ranges. It is not a CLR array object hierarchy. The current model does not supply general rectangular multidimensional arrays, runtime covariance, or managed bounds metadata.</p>
+<p><code>Span</code>, <code>ReadOnlySpan</code>, <code>Memory</code>, <code>ReadOnlyMemory</code>, and <code>ArraySegment</code> are non-owning views in the current implementation. Constructing one from a vector does not make the view retain that vector as a managed owner. Vector reallocation, destruction, moves, or mutation that invalidates addresses also invalidates the view. A pin operation exposes a pointer; it does not stop a native owner from moving or releasing storage.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">C# expectation</th><th scope="col">Native boundary</th><th scope="col">Safe discipline</th></tr></thead>
+<tbody>
+<tr><td>Array object retains its elements/storage</td><td>Vector owns storage; raw ranges do not</td><td>Keep the owner alive and stable for every borrowed view</td></tr>
+<tr><td><code>Memory&lt;T&gt;</code> may outlive the producing stack frame</td><td>Current memory views do not retain a managed backing owner</td><td>Do not return a view to temporary/local storage</td></tr>
+<tr><td>Pinning constrains a relocating collector</td><td>No relocating collector exists; pinning is pointer exposure</td><td>Prevent native reallocation/destruction through program structure</td></tr>
+<tr><td>Rectangular multidimensional arrays</td><td>No general CLR-equivalent representation</td><td>Choose a flat vector plus indexing policy or an application-specific matrix</td></tr>
+</tbody>
+</table></div>
+
+<p>These types are useful precisely because they are lightweight. Their cost model comes with an explicit lifetime contract. See <a href="../internals/array-internals.html">Array internals</a> and <a href="../memory-management.html">Memory management</a>.</p>
+
+<h2 id="io-boundaries">I/O and filesystem boundaries</h2>
+<p>The stream and filesystem surface is synchronous and intentionally smaller than <code>System.IO</code> in current .NET. The base <code>Stream</code> has no async virtual contract. Concrete classes vary in ownership: a <code>FileStream</code> owns its native file, a <code>MemoryStream</code> owns copied vector storage, an <code>UnmanagedMemoryStream</code> borrows its buffer, and wrappers/readers/writers commonly borrow a stream unless an explicit ownership flag says otherwise.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Area</th><th scope="col">Current limitation</th><th scope="col">Operational advice</th></tr></thead>
+<tbody>
+<tr><td>Async I/O</td><td>No base asynchronous stream operations</td><td>Schedule synchronous work at the application layer only when blocking and lifetime behavior are acceptable</td></tr>
+<tr><td><code>StreamReader</code></td><td>Reads bytes through the current narrow text path; no general encoding selection, BOM detection, or UTF-8 multibyte decoder</td><td>Use it for the documented byte-oriented inputs, not arbitrary international text</td></tr>
+<tr><td><code>StreamWriter</code></td><td>Writes native string bytes; no configurable encoder/BOM pipeline</td><td>Encode deliberately before writing when the file contract is not byte-transparent</td></tr>
+<tr><td><code>leaveOpen</code> close state</td><td>Some text readers/writers can remain callable after <code>Close</code> when the underlying stream is left open; string reader/writer close is also effectively non-terminal</td><td>Do not treat every text wrapper as enforcing the same disposed-state contract</td></tr>
+<tr><td>Whole-file text helpers</td><td>No encoding parameter or BOM policy; line writes use the implemented fixed newline behavior</td><td>Use explicit stream/encoding logic when interchange format matters</td></tr>
+<tr><td>Windows path grammar</td><td>The path model is smaller than complete drive-relative, device, and UNC semantics</td><td>Test production Windows path classes and normalization cases explicitly</td></tr>
+<tr><td>Directory enumeration</td><td>Eager, single-level APIs; no complete lazy <code>Enumerate*</code>/search-option family</td><td>Implement recursion and cancellation at the application layer</td></tr>
+<tr><td>Creation time on POSIX</td><td>May be approximated with inode metadata-change time</td><td>Do not use it as a portable birth-time guarantee</td></tr>
+<tr><td><code>DriveInfo</code></td><td>Reduced drive type/format/label model; non-Windows enumeration is minimal</td><td>Treat capacity as the strongest portable result and qualify the rest</td></tr>
+<tr><td>File sharing/options</td><td>Related enum/options types exist, but active <code>FileStream</code> constructors do not reproduce the complete .NET sharing/options contract</td><td>Do not assume Windows sharing-mode equivalence from the type names</td></tr>
+</tbody>
+</table></div>
+
+<p><code>FileStream</code> closed-state checks were repaired at this pin: reads, writes, flush, length, position, and length changes now route through the closed guard. That former warning is not a current limitation. The remaining text-wrapper and encoding boundaries are separate issues.</p>
+<p>Read <a href="../docs/io/streams.html">Streams, readers, and writers</a> and <a href="../docs/io/filesystem.html">Files, directories, paths, and metadata</a> for the detailed contracts.</p>
+
+<h2 id="filesystem-watcher">FileSystemWatcher</h2>
+<p><code>FileSystemWatcher</code> is Linux-only and watches one directory with inotify. Enabling it on Windows, macOS, Emscripten, or another unsupported target throws. <code>IncludeSubdirectories</code> is stored but not implemented, and <code>InternalBufferSize</code> does not size the actual inotify read buffer.</p>
+<p><code>NotifyFilter</code> now separates name events from content/metadata events, but values within each class remain coarser than .NET: file and directory names are not distinguished, and individual size, write-time, access-time, creation-time, attribute, and security causes cannot be recovered reliably from the selected inotify masks. Rename pairing is limited to matching cookies in one read batch. Kernel queue overflow is not explicitly translated to the managed-style overflow error, so a watcher stream must be treated as hints that may require a rescan.</p>
+<p>The callback self-stop defect is fixed at this source pin. An event handler may disable its own watcher without joining itself or terminating the process; ordinary handler exceptions are forwarded through <code>Error</code>, and error-handler exceptions on that callback-fault forwarding path are contained. Reassigning <code>Path</code> or <code>NotifyFilter</code> from inside a callback is deliberately rejected because those changes must retire and rearm the current worker. Handler and filter vectors are still public unsynchronized containers and must not be mutated concurrently with delivery.</p>
+<p>See <a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a> for the exact event mapping, rearm sequence, callback rules, and residual loss modes.</p>
+
+<h2 id="isolated-storage">Isolated storage</h2>
+<p><code>IsolatedStorageFile</code> now rejects common lexical escapes and resolved symlink escapes for its member operations. That is materially stronger than simple string-prefix containment, so the old blanket claim that member paths are unconstrained is obsolete.</p>
+<p>Two boundaries remain. First, validation and use are separate filesystem operations: another process can replace a checked path component between the check and the eventual operation, leaving a time-of-check/time-of-use race. Second, constructing <code>IsolatedStorageFileStream</code> directly does not apply the store member’s confinement policy. Applications with an adversarial local process or untrusted path input should not treat the current layer as a hardened security sandbox. The quota surface also does not provide enforced storage quotas.</p>
+
+<h2 id="networking">Networking, HTTP, and WebSockets</h2>
+<p>The networking stack provides useful native sockets, DNS, HTTP, WebSocket, and network-information APIs, but it is not the whole .NET networking/security stack.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Area</th><th scope="col">Current boundary</th><th scope="col">Porting consequence</th></tr></thead>
+<tbody>
+<tr><td><code>HttpClient</code></td><td>Plain HTTP over a buffered HTTP/1.1 TCP path; HTTPS/TLS and automatic redirects are not implemented</td><td>Do not send credentials or production traffic requiring TLS; provide a secure transport before claiming HTTPS compatibility</td></tr>
+<tr><td>HTTP body handling</td><td>Request/response path is buffered rather than a complete streaming transport</td><td>Account for memory use and avoid assuming progressive backpressure</td></tr>
+<tr><td><code>ClientWebSocket</code></td><td><code>ws://</code> only; <code>wss://</code> and per-message compression are absent</td><td>Secure WebSockets require another TLS-capable layer</td></tr>
+<tr><td>WebSocket async buffers</td><td>Send/receive work can retain references to caller-provided buffers until completion</td><td>Keep buffers alive and unmoved until the returned task finishes</td></tr>
+<tr><td><code>NetworkInterface</code></td><td>Linux-only implementation</td><td>Do not assume interface enumeration on Windows, macOS, or WebAssembly</td></tr>
+<tr><td><code>Ping</code></td><td>Linux host policy can require a raw-ICMP fallback that is currently incomplete</td><td>Expect environment-sensitive failures under restrictive <code>ping_group_range</code>/capability settings</td></tr>
+<tr><td>Emscripten native networking</td><td>Native socket/DNS operations reject the unsupported path</td><td>Use a browser-appropriate transport integration instead</td></tr>
+</tbody>
+</table></div>
+
+<p>The cryptography namespaces include useful primitives and secure-random support, but they do not form an X.509 validation, certificate-store, or TLS stack for <code>HttpClient</code>. Component names should not be combined into a security claim that the implementation does not make. See <a href="../components/networking.html">Networking components</a>.</p>
+
+<h2 id="threading-tasks-callbacks">Threading, tasks, and callback lifetimes</h2>
+<p>Native threads, synchronization primitives, cancellation tokens, tasks, timers, and typed delegates can support familiar control flow. They do not add C# <code>async</code>/<code>await</code> syntax, a CLR scheduler, execution-context flow, or automatic lifetime extension for every object captured by background work.</p>
+<p>The current <code>ThreadPool::QueueUserWorkItem</code> launches detached native work for each queued item rather than maintaining a CLR-style managed worker pool. <code>System::Threading::Timer</code> uses a dedicated native thread. This affects resource use, shutdown reasoning, affinity, and ordering. Single-threaded Emscripten builds reject operations that require pthreads.</p>
+<p>Callback-owning classes do not all share one lifetime strategy. Before destroying a socket, timer, watcher, WebSocket, or task owner, inspect whether work captures a raw object address, shared state, or caller-owned buffers, and use the type’s stop/join/completion mechanism. Cancellation requests are cooperative; they do not make borrowed memory safe or force native calls to unwind instantly.</p>
+
+<h2 id="date-time-time-zones">Date, time, and time zones</h2>
+<p><code>DateTime</code> implements a useful value model but does not store the full CLR <code>DateTimeKind</code> state. The surface does not provide the complete local/universal conversion, <code>SpecifyKind</code>, OLE Automation date, file-time, and binary-serialization family. Parsing and formatting are intentionally narrower and more invariant than the complete .NET culture-aware engine.</p>
+<p><code>TimeZoneInfo</code> exposes current-zone and named-zone support through platform paths, but the object behaves largely as a fixed standard-offset model. Daylight-saving transitions, ambiguous/invalid local-time detection, adjustment rules, and serialization are not fully modeled; adjustment-rule enumeration is empty and related predicates return the reduced result. System-zone enumeration is limited rather than a complete platform catalogue. Emscripten treats local time as UTC and rejects named system-zone lookup.</p>
+<p>Use an application-grade time-zone library when civil-time recurrence, historical transitions, scheduling across DST, or durable zone identifiers are requirements.</p>
+
+<h2 id="regex-and-xml">Regular expressions and XML</h2>
+<p><code>System::Text::RegularExpressions</code> is backed by the C++ standard library’s ECMAScript regular-expression engine plus Sharp Runtime compatibility work. Named captures are supported at this pin, so the older “no named groups” warning is obsolete. The option surface is still reduced: only the implemented ignore-case and multiline behavior affects matching, there is no match-timeout enforcement, and the replacement engine does not reproduce every .NET substitution token or multi-digit group-reference corner.</p>
+<p>The XML stack contains an actual tree, parser/serializer integration, LINQ-style operations, and a purpose-built XPath evaluator. XPath is a documented subset rather than a complete pluggable XPath/XSLT environment. Namespace resolver/context injection is absent, prefixes are handled by the reduced model, and unsupported grammar is rejected. <code>XObject</code> change-handler collections do not provide the full live notification behavior, while base-URI/line-information load options are currently inert.</p>
+<p>Several older XML parser/serializer defects—including embedded-NUL/name/DOCTYPE cases covered by the latest remediation—were fixed before this pin and should not be presented as current limitations.</p>
+
+<h2 id="platforms">Platform and compiler availability</h2>
+<p>Linux/GCC is the only environment with the recorded complete native gate at this revision. MinGW-w64 and Emscripten have recorded library cross-build evidence without native/browser test execution. macOS has downstream Xcode 15.4 build evidence but no current complete standalone gate. Windows contains substantial Win32 implementations, yet has no current native test gate. Android has a storage/SDL integration path rather than a recorded whole-project device gate.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Platform/compiler boundary</th><th scope="col">Current result</th></tr></thead>
+<tbody>
+<tr><td>MSVC native 128-bit integers</td><td><code>Decimal</code>, <code>Int128</code>, and <code>UInt128</code> require the GCC/Clang <code>__int128</code> extension and intentionally fail under the MSVC frontend</td></tr>
+<tr><td>Windows</td><td>No current native gate; <code>Process</code>, <code>FileSystemWatcher</code>, and <code>NetworkInterface</code> lack Windows backends</td></tr>
+<tr><td>macOS</td><td>No current full gate; watcher and network-interface gaps remain</td></tr>
+<tr><td>Emscripten</td><td>Library cross-build only; native sockets, DNS, process, random-access descriptors, and several threading operations throw</td></tr>
+<tr><td>Android</td><td>Storage uses parent-provided SDL3 and platform paths; no complete device/emulator result</td></tr>
+</tbody>
+</table></div>
+
+<p>The detailed evidence and subsystem matrix live in <a href="../platform-layer.html">Platforms and portability</a>. Configure/build evidence must not be promoted to runtime support without execution on the target.</p>
+
+<h2 id="verification-state">Verification state is not a blanket green claim</h2>
+<p>The selected revision records a full Linux gate of {{gate_cases}} executed cases: {{gate_passed}} passed, {{gate_skipped_words}}, and {{gate_failed_words}}. Five failures exercise Ping under the host’s Linux <code>ping_group_range</code> policy and expose the incomplete raw-ICMP receive fallback. One failure depends on absent host IPv6/interface state. These conditions are environment-sensitive, but they are not erased from the product record.</p>
+<p>A discovered test count, an executable count, and an executed gate are separate facts. Likewise, a passing component test does not validate a platform on which it was never run. Consumers should repeat the relevant native gate under their deployment toolchain and retain failures with enough environment data to distinguish portability defects from unavailable host facilities.</p>
+
+<h2 id="fixed-at-this-pin">Warnings fixed at this source pin</h2>
+<p>Limitations pages tend to become stale because resolved defects remain phrased as permanent product boundaries. The following first-pass warnings must not be carried forward as current claims:</p>
+<ul>
+<li><strong>FileStream closed metadata access:</strong> closed guards now cover length, position, flushing, reads, writes, and length mutation.</li>
+<li><strong>FileSystemWatcher live path mismatch:</strong> a live <code>Path</code> change now retires the old thread/watch, stores the validated path, and rearms the new directory.</li>
+<li><strong>FileSystemWatcher event-class filtering:</strong> <code>NotifyFilter</code> now distinguishes name events from content/metadata events, though it still cannot distinguish values within those classes.</li>
+<li><strong>FileSystemWatcher callback self-join:</strong> the #2347 repair permits callback-triggered disable without self-join or process termination and contains handler exceptions.</li>
+<li><strong>Isolated-storage lexical/symlink escape:</strong> ordinary store member operations now check lexical and resolved containment; the residual TOCTOU and direct-stream-constructor boundaries remain documented above.</li>
+<li><strong>Regular-expression named captures:</strong> named groups are implemented; the remaining regex limitations concern options, timeouts, engine compatibility, and replacement corners.</li>
+<li><strong>Recent XML malformed-input/serialization cases:</strong> the repaired NUL, XML-name, and DOCTYPE paths are no longer listed as open limitations.</li>
+</ul>
+
+<h2 id="decision-checklist">Compatibility decision checklist</h2>
+<ol>
+<li>Identify the exact C#/.NET behavior your application relies on; do not start from type-name similarity.</li>
+<li>Find the physical Sharp Runtime component and inspect its current public header and tests.</li>
+<li>Check representation and ownership: value, owner, borrowed pointer, borrowed span, or shared state.</li>
+<li>Check whether text is bytes, UTF-8, UTF-16 code units, or an API-specific conversion.</li>
+<li>Check platform implementation and native runtime evidence separately.</li>
+<li>Check error behavior, close/dispose state, and callback thread/lifetime rules.</li>
+<li>Write a focused consumer test for every reduced semantic boundary your product accepts.</li>
+<li>Document intentional deviations in the port so later maintainers do not “fix” them back into unsafe assumptions.</li>
+</ol>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="../compatibility.html">Compatibility model<small>How namespace familiarity differs from source and runtime compatibility.</small></a>
+<a href="../type-system.html">Type system<small>Values, references, arrays, nullable types, casts, equality, and RTTI boundaries.</small></a>
+<a href="../io.html">I/O overview<small>Component ownership and the current synchronous I/O model.</small></a>
+<a href="../platform-layer.html">Platforms and portability<small>Source, build, runtime, and gate evidence by target.</small></a>
+<a href="../running-tests.html">Testing and verification<small>How to reproduce and interpret project gates.</small></a>
+</div>

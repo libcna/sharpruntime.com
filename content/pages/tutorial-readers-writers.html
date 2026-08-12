@@ -1,0 +1,50 @@
+<h2>Choose binary or text deliberately</h2>
+<p>Readers and writers add a protocol over a Stream. <code>BinaryReader</code>/<code>BinaryWriter</code> define primitive layout and string length prefixes. <code>StreamReader</code>/<code>StreamWriter</code> expose text-shaped methods but have a narrower encoding model at this pin. <code>StringReader</code>/<code>StringWriter</code> work entirely with native strings.</p>
+
+<h2>Binary protocol</h2>
+<p>Use BinaryReader/Writer when both sides agree on Sharp Runtime’s format: little-endian integers/floats, one-byte booleans, UTF-8 strings with 7-bit encoded byte lengths, and explicit read order. Both borrow a raw <code>Stream*</code> and take an optional <code>leaveOpen</code>.</p>
+<pre><code class="language-cpp">System::IO::MemoryStream stream;
+System::IO::BinaryWriter writer(&amp;stream, true);
+
+writer.Write(static_cast&lt;SharpRuntime::uintcs&gt;(0x5352));
+writer.Write(true);
+writer.Write(std::string("payload"));
+writer.Flush();
+
+stream.setPositionProperty(0);
+System::IO::BinaryReader reader(&amp;stream, true);
+
+const auto magic = reader.ReadUInt32();
+const auto enabled = reader.ReadBoolean();
+const auto payload = reader.ReadString();</code></pre>
+<p>Do not serialize native structs by dumping their bytes. Padding, endianness, alignment, ABI, pointer fields, and object invariants make that format unstable and often unsafe.</p>
+
+<h2>Character reads in BinaryReader</h2>
+<p>BinaryReader’s character APIs decode UTF-8 and return <code>charcs</code> UTF-16 code units. A scalar outside the Basic Multilingual Plane is exposed as a surrogate pair across two reads. <code>PeekChar</code> requires a seekable stream because it decodes then restores position.</p>
+<p>This differs from <code>StreamReader</code>, whose current lightweight implementation reads individual bytes as Latin-1/ASCII-like characters and does not detect BOMs or decode multibyte UTF-8.</p>
+
+<h2>StreamWriter writes existing native bytes</h2>
+<p>StreamWriter writes the bytes already stored in the native <code>std::string</code>. In normal project convention those bytes are UTF-8. It does not run an arbitrary Encoding pipeline in the current constructor surface. Convert/validate text explicitly before writing if the external format requires another encoding.</p>
+
+<h2>StreamReader limitations</h2>
+<div class="table-wrap"><table><thead><tr><th>Operation</th><th>Current behavior</th><th>Do not assume</th></tr></thead><tbody>
+<tr><td><code>Peek</code>/<code>Read</code></td><td>One input byte as an integer</td><td>One Unicode scalar or UTF-16 unit</td></tr>
+<tr><td><code>ReadLine</code></td><td>Byte-oriented line terminators</td><td>BOM or encoding detection</td></tr>
+<tr><td><code>ReadToEnd</code></td><td>Remaining raw bytes as string</td><td>Multibyte decoding validation</td></tr>
+<tr><td>Construction</td><td>Rejects null or unreadable stream</td><td>Automatic recovery from invalid stream state</td></tr>
+</tbody></table></div>
+
+<h2>Close and leave-open ownership</h2>
+<p>With <code>leaveOpen=false</code>, destruction and Close close the underlying stream. With <code>leaveOpen=true</code>, the wrapper borrows it. There is a current lifecycle reduction: calling <code>Close</code> on StreamReader or StreamWriter does not mark the wrapper itself closed. With leave-open true, later wrapper operations can still succeed. Do not depend on this deviation; stop using the wrapper after Close.</p>
+
+<h2>StringReader and StringWriter</h2>
+<p>Use these for tests, templating, or transformations that do not need a byte stream. StringReader owns a copy of its input and handles LF, CRLF, and lone CR line endings. StringWriter owns an <code>ostringstream</code> and returns the accumulated value through <code>ToString</code>/<code>GetStringBuilder</code>. Their inherited Close behavior is effectively a no-op, another reason to scope rather than reuse closed wrappers.</p>
+
+<h2>Protocol checklist</h2>
+<ul>
+  <li>Record endianness, string encoding, length prefix, version, and maximum sizes.</li>
+  <li>Reject oversized declared lengths before allocation where possible.</li>
+  <li>Test partial streams and clean EOF separately from truncation.</li>
+  <li>Choose one owner for the Stream and set <code>leaveOpen</code> accordingly.</li>
+  <li>Do not mix byte positions with decoded character positions.</li>
+</ul>

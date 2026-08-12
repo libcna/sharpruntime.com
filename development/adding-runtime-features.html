@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Adding Runtime Features | Sharp Runtime</title>
-  <meta name="description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <meta name="description" content="Contributor workflow for selecting component ownership, implementing APIs, registering CMake, testing behavior and negative consumers, validating boundaries, and regenerating documentation.">
   <link rel="canonical" href="https://sharpruntime.com/development/adding-runtime-features.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
   <meta property="og:title" content="Adding Runtime Features | Sharp Runtime">
-  <meta property="og:description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <meta property="og:description" content="Contributor workflow for selecting component ownership, implementing APIs, registering CMake, testing behavior and negative consumers, validating boundaries, and regenerating documentation.">
   <meta property="og:url" content="https://sharpruntime.com/development/adding-runtime-features.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
@@ -17,13 +17,13 @@
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Adding Runtime Features | Sharp Runtime">
-  <meta name="twitter:description" content="Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.">
+  <meta name="twitter:description" content="Contributor workflow for selecting component ownership, implementing APIs, registering CMake, testing behavior and negative consumers, validating boundaries, and regenerating documentation.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Adding Runtime Features", "description": "Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.", "url": "https://sharpruntime.com/development/adding-runtime-features.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Adding Runtime Features", "item": "https://sharpruntime.com/development/adding-runtime-features.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Adding Runtime Features", "description": "Contributor workflow for selecting component ownership, implementing APIs, registering CMake, testing behavior and negative consumers, validating boundaries, and regenerating documentation.", "url": "https://sharpruntime.com/development/adding-runtime-features.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Development"}, {"@type": "ListItem", "position": 3, "name": "Adding Runtime Features", "item": "https://sharpruntime.com/development/adding-runtime-features.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,21 +33,171 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html" aria-current="page">Adding features</a><a href="debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Adding Runtime Features</span></nav><h1>Adding Runtime Features</h1><p class="lead">Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.</p><div class="page-meta"><span>Development</span><span>Source f827a6c5</span></div>
-<h2 id="evidence">1. Establish the contract</h2><p>Read the current implementation, headers, upstream reference source where applicable and existing tests. Treat project prose and audit tickets as evidence to corroborate—not automatic truth.</p>
-<h2 id="owner">2. Choose the owner</h2><p>Place the header/source/test under one physical module. Declare PUBLIC edges for headers, PRIVATE edges for implementation and TEST edges only for the test binary.</p>
-<h2 id="slice">3. Implement a bounded slice</h2><ul><li>Validate parameters before mutation.</li><li>Preserve exception type and causal error where established.</li><li>Define ownership, copy/move and disposal behavior.</li><li>Document intentional reductions and platform guards.</li></ul>
-<h2 id="test">4. Test behavior and boundaries</h2><p>Add normal, invalid, boundary and lifetime tests. For public includes or target behavior, add selective/negative consumer fixtures.</p>
-<h2 id="validate">5. Validate</h2><pre><code class="language-bash">python3 scripts/validate_module_boundaries.py
-python3 scripts/generate_component_catalog.py --check
-scripts/check_selective_components.sh
-scripts/local_ci_check.sh build</code></pre></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="adding-runtime-features.html" aria-current="page">Adding features</a><a href="debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Development</span><span>/</span><span aria-current="page">Adding Runtime Features</span></nav><h1>Adding Runtime Features</h1><p class="lead">Add the smallest correct compatibility slice while preserving native ownership, graph visibility, platform honesty, and reproducible evidence.</p><div class="page-meta"><span>Contributor workflow</span><span>CMake ownership</span><span>Tests + boundaries</span></div>
+<h2 id="start-with-evidence-not-a-status-label">Start with evidence, not a status label</h2>
+<p>A new API is complete only when its behavior, physical ownership, dependency visibility, tests, platform boundary, and documentation agree. Do not start from an old Todo/Stub/Partial badge or assume that a matching header comment is authoritative. Read the implementation around the proposed owner, its current CMake registration, its tests, and the upstream .NET contract when compatibility is intended.</p>
+<p>Write a short contract note before coding: supported overloads, parameter validation and precedence, return behavior, exceptions, ownership, mutation, concurrency, platform behavior, and deliberate exclusions. This makes review possible without pretending the entire upstream type will arrive in one patch.</p>
+
+<h2 id="1-identify-the-net-contract-and-the-compatibility-slice">1. Identify the .NET contract and the compatibility slice</h2>
+<p>Use current official .NET reference/source material as conceptual evidence, then decide which observable slice belongs in Sharp Runtime. Matching .NET can include argument validation order, special numeric values, collection versioning, cancellation transitions, or error translation—not only the happy-path result.</p>
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Record</th></tr></thead><tbody>
+<tr><td>What exact API is requested?</td><td>Names, templates, overloads, default values, and property naming</td></tr>
+<tr><td>What behavior matters?</td><td>Normal, boundary, invalid, empty, disposed, concurrent, and platform cases</td></tr>
+<tr><td>What cannot be reproduced?</td><td>CLR metadata, GC lifetime, managed encoding units, unavailable OS service</td></tr>
+<tr><td>What is the native representation?</td><td>Value, unique/shared owner, borrow, span, native handle, callback</td></tr>
+<tr><td>How will callers verify it?</td><td>Public tests, examples, and a precise deviation/limitation note</td></tr>
+</tbody></table></div>
+
+<h2 id="2-select-the-owning-physical-component">2. Select the owning physical component</h2>
+<p>Search the <a href="../api/index.html">generated API inventory</a> for neighboring types and inspect <code>cmake/SharpRuntimeModules.cmake</code>. One component must own every public header and production source. Do not place an API into a broad compatibility target; <code>Core</code>, <code>Collections</code>, <code>Xml.XPath</code>, and <code>All</code> do not own source.</p>
+<p>Use the narrowest coherent owner. A JSON/HTTP extension belongs in <code>Net.Http.Json</code>, not <code>Net.Http</code> merely because it sends a request. A checksum belongs in <code>IO.Hashing</code>, not <code>Security.Cryptography</code>. A public dependency is justified by the public header surface, not by convenience.</p>
+
+<h2 id="3-inspect-dependency-direction-before-including">3. Inspect dependency direction before including</h2>
+<p>Draw the required edges before implementation:</p>
+<ul>
+  <li><code>PUBLIC_DEPENDENCIES</code> when the public include/API exposes that component.</li>
+  <li><code>PRIVATE_DEPENDENCIES</code> when only a compiled implementation uses it.</li>
+  <li><code>TEST_DEPENDENCIES</code> when only tests need a helper or cross-component oracle.</li>
+</ul>
+<p>Header-only INTERFACE components cannot hide a private dependency. If a new include creates a cycle, do not bypass the validator: move a small contract downward, separate an adapter upward, or redesign the surface.</p>
+
+<h2 id="4-add-header-and-implementation-in-the-owner">4. Add header and implementation in the owner</h2>
+<p>Public declarations go beneath <code>modules/&lt;owner&gt;/include</code> in the namespace-shaped path. Compiled definitions go beneath <code>src</code>. Tests go beneath the same module’s <code>tests</code>. Include the MIT SPDX header and follow neighboring header guards, namespaces, names, and documentation style.</p>
+<pre><code class="language-cpp">// modules/io-hashing/include/System/IO/Hashing/ExampleHash.hpp
+#pragma once
+
+#include &lt;span&gt;
+#include &lt;cstdint&gt;
+
+namespace System::IO::Hashing
+{
+    class ExampleHash final
+    {
+    public:
+        [[nodiscard]] static std::uint32_t Hash(
+            std::span&lt;const std::uint8_t&gt; bytes) noexcept;
+    };
+}</code></pre>
+<p>The sample illustrates placement, not a proposal to duplicate an existing algorithm. Prefer current project types where compatibility requires them, but do not introduce a pointer-without-length boundary when a span can express capacity.</p>
+
+<h2 id="5-preserve-naming-without-hiding-semantics">5. Preserve naming without hiding semantics</h2>
+<p>Public names generally follow the familiar .NET type/member casing and the project’s <code>getNameProperty</code>/<code>setNameProperty</code> convention. Use <code>DDATA</code>/<code>IDATA</code> only for simple member-backed properties; an explicit accessor is clearer when validation, allocation, I/O, blocking, or ownership transfer occurs.</p>
+<p>Interfaces need virtual destructors. Overrides use <code>override</code>. Mark values <code>[[nodiscard]]</code> where ignoring the result is likely a defect. Use <code>noexcept</code> only when the complete implementation—including allocation, callbacks, and translation—can honor it.</p>
+
+<h2 id="6-define-native-ownership-and-lifetime">6. Define native ownership and lifetime</h2>
+<p>Document every pointer, reference, span, callback, task, and handle. State who owns it, how long a borrow lasts, whether an operation stores it, and which mutation invalidates it. Prefer values and RAII, then <code>unique_ptr</code>, then <code>shared_ptr</code> only for real shared lifetime.</p>
+<p>Pay special attention to asynchronous and callback APIs:</p>
+<ul>
+  <li>Never capture raw <code>this</code> into work that can outlive the object without a teardown proof.</li>
+  <li>Do not retain a caller buffer unless the API owns/copies it or retains an explicit owner.</li>
+  <li>Prevent a state object from strongly owning a callback that strongly owns the same state.</li>
+  <li>Define cancellation and join order, including calls made from the worker/callback thread itself.</li>
+  <li>Decide how user-handler exceptions propagate or are reported.</li>
+</ul>
+
+<h2 id="7-implement-validation-and-exception-translation">7. Implement validation and exception translation</h2>
+<p>Validate public arguments before mutation or native side effects, and test precedence when more than one input is invalid. Avoid signed-overflow guards such as <code>start + length &gt; size</code>; validate start, then compare length with <code>size - start</code>. Raw pointers cannot prove capacity, so prefer sized types or document the residual responsibility.</p>
+<p>Translate native failures at the component boundary into the established Sharp Runtime exception type. Preserve a causal exception or native error where the hierarchy supports it. Unsupported platforms should throw <code>PlatformNotSupportedException</code> or be intentionally excluded; do not silently succeed.</p>
+
+<h2 id="8-register-cmake-ownership">8. Register CMake ownership</h2>
+<p>Existing module registration discovers <code>src/*.cpp</code> and <code>tests/*.cpp</code> recursively. A typical compiled module registration is concise:</p>
+<pre><code class="language-cmake">sharp_runtime_register_module(
+    NAME IO.Hashing
+    TARGET sharp_runtime_io_hashing
+    TYPE STATIC
+    PUBLIC_DEPENDENCIES Core.Base IO
+)</code></pre>
+<p>If adding an entirely new physical module, add its directory once to <code>sharp_runtime_module_directories</code>, create its module <code>CMakeLists.txt</code>, and choose STATIC or INTERFACE honestly. CMake rejects missing sources for STATIC, sources/private edges for INTERFACE, duplicate names, invalid include owners, and mixed legacy/new dependency syntax.</p>
+
+<h2 id="9-add-behavior-tests-in-the-owning-module">9. Add behavior tests in the owning module</h2>
+<p>Tests are registered into the owning component executable. Cover more than examples:</p>
+<div class="table-wrap"><table><thead><tr><th>Test family</th><th>Examples</th></tr></thead><tbody>
+<tr><td>Normal behavior</td><td>Representative inputs, results, state transitions</td></tr>
+<tr><td>Boundary</td><td>Empty, one element, limits, exact end range</td></tr>
+<tr><td>Invalid</td><td>Negative, null/empty callable, malformed encoding, invalid state</td></tr>
+<tr><td>Precedence</td><td>Two invalid conditions; prove which exception wins and no mutation occurred</td></tr>
+<tr><td>Lifetime</td><td>Owner destruction, leave-open, disposal, retained views/callbacks</td></tr>
+<tr><td>Numeric</td><td>Overflow, NaN, infinity, signed zero, narrowing</td></tr>
+<tr><td>Concurrency</td><td>Reentrancy, racing configuration, cancellation, join, repeat under TSan</td></tr>
+<tr><td>Platform</td><td>Supported branch and explicit unsupported result</td></tr>
+</tbody></table></div>
+<p>Do not count <code>TEST</code> macros as discovered cases. Typed and parameterized suites expand at GoogleTest discovery time. Build and run the actual executable.</p>
+<pre><code class="language-bash">export SHARP_RUNTIME_BUILD_JOBS=1
+cmake -S . -B build-feature \
+  -DSHARP_RUNTIME_COMPONENTS=IO.Hashing \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON \
+  -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-feature \
+  --target SharpRuntimeTests_IO_Hashing --parallel 1
+./build-feature/SharpRuntimeTests_IO_Hashing</code></pre>
+
+<h2 id="10-add-positive-and-negative-consumer-fixtures-when-relevant">10. Add positive and negative consumer fixtures when relevant</h2>
+<p>A unit test that compiles inside the repository sees test dependencies and repository paths. A consumer fixture proves the public target in isolation. Add a positive fixture when a new header/target combination must compile and link. Add a negative fixture when a template constraint, forbidden include, private dependency, or invalid construction must fail.</p>
+<p>Fixtures live in <code>test/consumer</code>. The shared consumer CMake project enables only one requested component and collects only consumer-visible usage requirements in compile-only mode. Negative checks require the expected failure category; an unrelated compiler error does not count as success.</p>
+<pre><code class="language-bash">export SHARP_RUNTIME_BUILD_JOBS=1
+scripts/check_selective_components.sh \
+  IO.Hashing io_hashing.cpp
+python3 scripts/check_negative_consumer_fixtures.py --jobs 1</code></pre>
+
+<h2 id="11-validate-module-boundaries">11. Validate module boundaries</h2>
+<pre><code class="language-bash">python3 scripts/validate_module_boundaries.py
+python3 test/validate_module_boundaries_test.py
+python3 scripts/generate_component_catalog.py --check</code></pre>
+<p>The validator checks unique ownership, source registration, include and link edges, visibility, cycles, and related invariants. Fix the architecture when it fails. Do not add a global include directory or an allow-list exception merely to preserve a misplaced header.</p>
+
+<h2 id="12-handle-platform-behavior-explicitly">12. Handle platform behavior explicitly</h2>
+<p>For an OS-backed API, record separate evidence for source implementation, configure, build, runtime, and tests. A preprocessor branch is source support only. Add a supported implementation or a specific unsupported result. Keep Windows/POSIX error translation and resource cleanup symmetrical where possible.</p>
+<p>When behavior differs legitimately—path case, terminal facilities, socket error, time-zone data—document the difference and test per platform. Do not label macOS “same as Linux” without an actual macOS path and result.</p>
+
+<h2 id="13-document-deviations-and-limitations">13. Document deviations and limitations</h2>
+<p>Update the closest conceptual or class page with units, ownership, comparison policy, encoding, thread safety, and platform scope. Add a limitation only when it is material to users. Remove a limitation when the pinned implementation and tests fix it. Do not publish internal ticket prose as a public limitation without translating it into observable behavior.</p>
+<p>Avoid unsupported maturity scores. Prefer statements such as “Linux/inotify-only; recursive watching is not implemented” or “the dedicated module has no test executable at this pin.” These are evidence a reader can act on.</p>
+
+<h2 id="14-regenerate-catalogues-and-api-discovery">14. Regenerate catalogues and API discovery</h2>
+<pre><code class="language-bash">python3 scripts/generate_component_catalog.py
+
+# In the website checkout, using the explicit pinned runtime checkout:
+python3 tools/sync_components.py --runtime /path/to/pinned/runtime
+python3 tools/sync_api_inventory.py --runtime /path/to/pinned/runtime</code></pre>
+<p>The component catalogue records owners and dependency edges. The API inventory walks public include trees under those owners. Both embed the exact SHA. Never regenerate them from an arbitrary active branch.</p>
+
+<h2 id="15-run-the-local-gate-with-an-explicit-job-budget">15. Run the local gate with an explicit job budget</h2>
+<pre><code class="language-bash">export SHARP_RUNTIME_BUILD_JOBS=1
+scripts/local_ci_check.sh build-local</code></pre>
+<p>The local gate validates the graph, validator tests, catalogue, version seam, negative consumers, configure, a warning-clean build, and component tests. Its shared job policy has a hard ceiling; use a conservative explicit budget on a shared or memory-limited host. A failure must remain visible—do not convert an environment-sensitive network result into a green claim.</p>
+
+<h2 id="16-update-documentation-and-website-facts">16. Update documentation and website facts</h2>
+<p>If the change adds a public header, component, edge, test executable, discovered tests, platform result, or measured gate, update the canonical generated data and source audit. Add or compile examples for a user-facing workflow. Regenerate search, sitemap, metadata, and the static pages. Run the website drift verifier against the same explicit SHA.</p>
+
+<h2 id="adding-a-new-component">Adding a new component</h2>
+<ol>
+  <li>Create <code>modules/&lt;directory&gt;/include</code>, optional <code>src</code>, <code>tests</code>, and a module <code>CMakeLists.txt</code>.</li>
+  <li>Register its NAME, target, kind, and exact public/private/test edges.</li>
+  <li>Add the directory to <code>sharp_runtime_module_directories</code>.</li>
+  <li>Add positive isolated-consumer coverage and absence assertions for unrelated targets.</li>
+  <li>Add negative fixtures for private headers or generic constraints where relevant.</li>
+  <li>Regenerate the component catalogue and run boundary validation.</li>
+  <li>Add the component purpose/platform guidance and regenerate the API inventory.</li>
+</ol>
+
+<h2 id="review-checklist">Review checklist</h2>
+<ul>
+  <li>The public slice and intentional reductions are written down.</li>
+  <li>Exactly one physical component owns every new header/source.</li>
+  <li>Public/private/test dependencies reflect visibility, not convenience.</li>
+  <li>Ownership, borrowing, async capture, disposal, and thread safety are documented.</li>
+  <li>Argument validation cannot overflow and happens before mutation.</li>
+  <li>Normal, invalid, boundary, lifetime, platform, and concurrency behavior is tested as applicable.</li>
+  <li>Consumer fixtures prove the public boundary and reject forbidden surfaces.</li>
+  <li>Component catalogue, API inventory, limitations, tutorials, and source audit are current.</li>
+  <li>The local gate ran with a safe job budget and its exact outcome is recorded.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="known-limitations.html"><span class="next-label">Previous</span>Known Limitations</a><a href="debugging.html"><span class="next-label">Next</span>Debugging Sharp Runtime</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#start-with-evidence-not-a-status-label">Start with evidence, not a status label</a><a class="toc-level-2" href="#1-identify-the-net-contract-and-the-compatibility-slice">1. Identify the .NET contract and the compatibility slice</a><a class="toc-level-2" href="#2-select-the-owning-physical-component">2. Select the owning physical component</a><a class="toc-level-2" href="#3-inspect-dependency-direction-before-including">3. Inspect dependency direction before including</a><a class="toc-level-2" href="#4-add-header-and-implementation-in-the-owner">4. Add header and implementation in the owner</a><a class="toc-level-2" href="#5-preserve-naming-without-hiding-semantics">5. Preserve naming without hiding semantics</a><a class="toc-level-2" href="#6-define-native-ownership-and-lifetime">6. Define native ownership and lifetime</a><a class="toc-level-2" href="#7-implement-validation-and-exception-translation">7. Implement validation and exception translation</a><a class="toc-level-2" href="#8-register-cmake-ownership">8. Register CMake ownership</a><a class="toc-level-2" href="#9-add-behavior-tests-in-the-owning-module">9. Add behavior tests in the owning module</a><a class="toc-level-2" href="#10-add-positive-and-negative-consumer-fixtures-when-relevant">10. Add positive and negative consumer fixtures when relevant</a><a class="toc-level-2" href="#11-validate-module-boundaries">11. Validate module boundaries</a><a class="toc-level-2" href="#12-handle-platform-behavior-explicitly">12. Handle platform behavior explicitly</a><a class="toc-level-2" href="#13-document-deviations-and-limitations">13. Document deviations and limitations</a><a class="toc-level-2" href="#14-regenerate-catalogues-and-api-discovery">14. Regenerate catalogues and API discovery</a><a class="toc-level-2" href="#15-run-the-local-gate-with-an-explicit-job-budget">15. Run the local gate with an explicit job budget</a><a class="toc-level-2" href="#16-update-documentation-and-website-facts">16. Update documentation and website facts</a><a class="toc-level-2" href="#adding-a-new-component">Adding a new component</a><a class="toc-level-2" href="#review-checklist">Review checklist</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="../tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

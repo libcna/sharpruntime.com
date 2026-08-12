@@ -1,0 +1,49 @@
+<h2>Goal and component</h2>
+<p>Write a small binary record into an owned memory buffer, rewind it, read it back, and preserve the stream through reader/writer teardown. Select <code>IO</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS IO)
+target_link_libraries(app PRIVATE SharpRuntime::IO)</code></pre>
+
+<h2>Write, rewind, and read</h2>
+<pre><code class="language-cpp">#include &lt;System/IO/BinaryReader.hpp&gt;
+#include &lt;System/IO/BinaryWriter.hpp&gt;
+#include &lt;System/IO/MemoryStream.hpp&gt;
+
+System::IO::MemoryStream stream;
+
+{
+    System::IO::BinaryWriter writer(&amp;stream, true);
+    writer.Write(static_cast&lt;SharpRuntime::intcs&gt;(42));
+    writer.Write(std::string("sharp"));
+    writer.Flush();
+    writer.Close();
+}
+
+stream.setPositionProperty(0);
+
+System::IO::BinaryReader reader(&amp;stream, true);
+const auto number = reader.ReadInt32();
+const auto text = reader.ReadString();
+</code></pre>
+<p><code>true</code> is <code>leaveOpen</code>. It gives the writer and reader a borrowed stream rather than ownership of closure. The enclosing <code>MemoryStream</code> remains the owner.</p>
+
+<h2>Understand the binary protocol</h2>
+<p>Numeric primitives are little-endian. Strings are UTF-8 bytes prefixed by a 7-bit encoded byte length. <code>ReadString</code> validates the length and, on a seekable stream, refuses a declared length larger than the remaining bytes before attempting a huge allocation.</p>
+
+<h2>ToArray versus GetBuffer</h2>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Result</th><th>Lifetime</th></tr></thead><tbody>
+<tr><td><code>ToArray()</code></td><td>Independent vector copy</td><td>Unaffected by later stream writes or destruction</td></tr>
+<tr><td><code>GetBuffer()</code></td><td>Const reference to live internal vector</td><td>Writes can reallocate and invalidate references into it</td></tr>
+</tbody></table></div>
+<p>Both remain callable after <code>MemoryStream::Close</code>. Reads, writes, seeking, length, and position access then reject the disposed stream. <code>CanWrite</code> intentionally continues to report its original writability while <code>CanRead</code> and <code>CanSeek</code> become false, matching the documented source contract.</p>
+
+<h2>Start with existing bytes</h2>
+<p>The buffer constructor copies <code>size</code> bytes and is writable by default. A null pointer is accepted only for a zero-length source; negative lengths are rejected before any read. Because it copies, the source array can be released immediately after construction.</p>
+
+<h2>Test protocol failures</h2>
+<ul>
+  <li>Truncated primitive and string payloads.</li>
+  <li>Malformed or overlong 7-bit encoded lengths.</li>
+  <li>Invalid UTF-8 character operations where used.</li>
+  <li>Close with <code>leaveOpen</code> true and false.</li>
+  <li>Position beyond current length followed by write/resize.</li>
+</ul>

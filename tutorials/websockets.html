@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use WebSockets | Sharp Runtime</title>
+  <meta name="description" content="Connect, send, receive, fragment, and close with Sharp Runtime ClientWebSocket while preserving async buffer and object lifetimes.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/websockets.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Use WebSockets | Sharp Runtime">
+  <meta property="og:description" content="Connect, send, receive, fragment, and close with Sharp Runtime ClientWebSocket while preserving async buffer and object lifetimes.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/websockets.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Use WebSockets | Sharp Runtime">
+  <meta name="twitter:description" content="Connect, send, receive, fragment, and close with Sharp Runtime ClientWebSocket while preserving async buffer and object lifetimes.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Use WebSockets", "description": "Connect, send, receive, fragment, and close with Sharp Runtime ClientWebSocket while preserving async buffer and object lifetimes.", "url": "https://sharpruntime.com/tutorials/websockets.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Use WebSockets", "item": "https://sharpruntime.com/tutorials/websockets.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Use WebSockets</span></nav><h1>Use WebSockets</h1><p class="lead">Use the RFC 6455 client honestly: ws:// only, borrowed asynchronous buffers, and explicit task completion.</p><div class="page-meta"><span>Advanced</span><span>Net.WebSockets</span><span>Controlled peer required</span></div>
+<h2 id="scope-and-component">Scope and component</h2>
+<p><code>Net.WebSockets</code> implements an RFC 6455 client over Sharp Runtime sockets. It performs the HTTP upgrade, validates <code>Sec-WebSocket-Accept</code>, masks client frames, handles ping/pong, and supports the close handshake.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Net.WebSockets)
+target_link_libraries(app PRIVATE SharpRuntime::Net.WebSockets)</code></pre>
+<div class="callout callout--danger"><div class="callout-title">Only <code>ws://</code> is supported</div><p><code>wss://</code> throws <code>PlatformNotSupportedException</code>. There is no TLS, certificate validation, or per-message deflate in this component. Do not send credentials or sensitive data over an untrusted network with this transport.</p></div>
+
+<h2 id="connect-and-wait-explicitly">Connect and wait explicitly</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/WebSockets/ClientWebSocket.hpp&gt;
+#include &lt;System/Uri.hpp&gt;
+
+using System::Net::WebSockets::ClientWebSocket;
+
+ClientWebSocket socket;
+auto connect = socket.ConnectAsync(System::Uri("ws://127.0.0.1:8080/events"));
+connect.Wait();
+
+// State is Open only after successful task completion.
+const auto state = socket.getStateProperty();
+(void)state;</code></pre>
+<p>Sharp Runtime has no C++ language-level <code>await</code> integration. <code>Wait()</code> blocks and propagates task failure. In event-driven code, attach a continuation with an explicit executor/lifetime policy instead of blocking a UI or service loop.</p>
+
+<h2 id="keep-asynchronous-buffers-alive">Keep asynchronous buffers alive</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/WebSockets/WebSocketMessageType.hpp&gt;
+
+std::vector&lt;SharpRuntime::bytecs&gt; outbound{'h', 'e', 'l', 'l', 'o'};
+auto send = socket.SendAsync(
+    outbound,
+    System::Net::WebSockets::WebSocketMessageType::Text);
+send.Wait(); // outbound must remain alive and unmoved until here
+
+std::vector&lt;SharpRuntime::bytecs&gt; inbound(4096);
+auto receive = socket.ReceiveAsync(inbound);
+const auto result = receive.Wait(); // inbound remains stable until completion
+</code></pre>
+<p>The implementation starts real background work and captures the vectors by reference. Until the task completes, do not destroy, move, resize, append to, or concurrently access the buffer. Reserve/resize before starting the operation; holding the vector in a stable owner does not permit mutation that reallocates it.</p>
+<div class="callout callout--warning"><div class="callout-title">This differs materially from managed array lifetime</div><p>A C# async call keeps its managed buffer reachable. A native reference does not extend object lifetime. Letting a local vector leave scope before <code>Wait</code> is a use-after-free, not a canceled receive.</p></div>
+
+<h2 id="honor-message-boundaries">Honor message boundaries</h2>
+<p>One receive result can be a fragment rather than a complete application message. Inspect its message type, byte count, close state, and end-of-message flag; append only the reported bytes and continue until the message ends. Set a maximum assembled size before allocating from untrusted traffic.</p>
+<pre><code class="language-cpp">// Behavioral outline; application error/size handling omitted.
+std::vector&lt;SharpRuntime::bytecs&gt; chunk(4096);
+std::vector&lt;SharpRuntime::bytecs&gt; message;
+
+for (;;) {
+    const auto part = socket.ReceiveAsync(chunk).Wait();
+    // Append exactly part.Count bytes after checking the current public
+    // property names in the generated API inventory.
+    // Break on close or EndOfMessage according to your protocol.
+}</code></pre>
+<p>This fragment-processing block is deliberately labelled an outline: the result property spellings and close policy belong in the application’s compile-verified protocol wrapper.</p>
+
+<h2 id="close-abort-and-destroy">Close, abort, and destroy</h2>
+<ul>
+  <li><code>CloseOutputAsync</code> sends a close frame while retaining the receive side.</li>
+  <li><code>CloseAsync</code> performs the close exchange and can block through its task.</li>
+  <li><code>Abort</code> is the failure path when graceful protocol shutdown is no longer possible.</li>
+  <li><code>Dispose</code> releases transport state; the destructor calls it.</li>
+</ul>
+<p>Do not destroy the socket while connect/send/receive work still references it. Serialize application sends, coordinate receiver termination, complete outstanding tasks, and only then destroy the client.</p>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td><code>wss://</code> through platform TLS</td><td><code>ws://</code> only</td><td>Provide an audited secure transport elsewhere.</td></tr>
+<tr><td><code>Memory&lt;byte&gt;</code> survives async use</td><td>Borrowed vector reference</td><td>Keep storage alive, fixed, and unsynchronized until completion.</td></tr>
+<tr><td><code>await</code></td><td><code>Task::Wait</code> or continuations</td><td>Choose blocking/thread-affinity behavior explicitly.</td></tr>
+<tr><td><code>DangerousDeflateOptions</code></td><td>Not reproduced</td><td>No permessage-deflate negotiation.</td></tr>
+</tbody></table></div>
+
+<h2 id="test-with-a-controlled-peer">Test with a controlled peer</h2>
+<ol>
+  <li>Use a local RFC 6455 server with deterministic frames; never make public internet access a unit-test prerequisite.</li>
+  <li>Test fragmented text and binary messages, ping/pong, normal close, abrupt close, invalid accept hash, cancellation, and oversize payload policy.</li>
+  <li>Run under AddressSanitizer and ThreadSanitizer when investigating buffer ownership or teardown.</li>
+  <li>Keep transport-security tests separate, because this component does not claim them.</li>
+</ol><nav class="next-links" aria-label="Previous and next pages"><a href="dns-tcp-udp.html"><span class="next-label">Previous</span>Use DNS, TCP, and UDP</a><a href="locks-threadpool.html"><span class="next-label">Next</span>Use Locks and ThreadPool</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#scope-and-component">Scope and component</a><a class="toc-level-2" href="#connect-and-wait-explicitly">Connect and wait explicitly</a><a class="toc-level-2" href="#keep-asynchronous-buffers-alive">Keep asynchronous buffers alive</a><a class="toc-level-2" href="#honor-message-boundaries">Honor message boundaries</a><a class="toc-level-2" href="#close-abort-and-destroy">Close, abort, and destroy</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#test-with-a-controlled-peer">Test with a controlled peer</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

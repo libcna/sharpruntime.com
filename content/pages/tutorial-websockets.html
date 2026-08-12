@@ -1,0 +1,75 @@
+<h2>Scope and component</h2>
+<p><code>Net.WebSockets</code> implements an RFC 6455 client over Sharp Runtime sockets. It performs the HTTP upgrade, validates <code>Sec-WebSocket-Accept</code>, masks client frames, handles ping/pong, and supports the close handshake.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Net.WebSockets)
+target_link_libraries(app PRIVATE SharpRuntime::Net.WebSockets)</code></pre>
+<div class="callout callout--danger"><div class="callout-title">Only <code>ws://</code> is supported</div><p><code>wss://</code> throws <code>PlatformNotSupportedException</code>. There is no TLS, certificate validation, or per-message deflate in this component. Do not send credentials or sensitive data over an untrusted network with this transport.</p></div>
+
+<h2>Connect and wait explicitly</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/WebSockets/ClientWebSocket.hpp&gt;
+#include &lt;System/Uri.hpp&gt;
+
+using System::Net::WebSockets::ClientWebSocket;
+
+ClientWebSocket socket;
+auto connect = socket.ConnectAsync(System::Uri("ws://127.0.0.1:8080/events"));
+connect.Wait();
+
+// State is Open only after successful task completion.
+const auto state = socket.getStateProperty();
+(void)state;</code></pre>
+<p>Sharp Runtime has no C++ language-level <code>await</code> integration. <code>Wait()</code> blocks and propagates task failure. In event-driven code, attach a continuation with an explicit executor/lifetime policy instead of blocking a UI or service loop.</p>
+
+<h2>Keep asynchronous buffers alive</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/WebSockets/WebSocketMessageType.hpp&gt;
+
+std::vector&lt;SharpRuntime::bytecs&gt; outbound{'h', 'e', 'l', 'l', 'o'};
+auto send = socket.SendAsync(
+    outbound,
+    System::Net::WebSockets::WebSocketMessageType::Text);
+send.Wait(); // outbound must remain alive and unmoved until here
+
+std::vector&lt;SharpRuntime::bytecs&gt; inbound(4096);
+auto receive = socket.ReceiveAsync(inbound);
+const auto result = receive.Wait(); // inbound remains stable until completion
+</code></pre>
+<p>The implementation starts real background work and captures the vectors by reference. Until the task completes, do not destroy, move, resize, append to, or concurrently access the buffer. Reserve/resize before starting the operation; holding the vector in a stable owner does not permit mutation that reallocates it.</p>
+<div class="callout callout--warning"><div class="callout-title">This differs materially from managed array lifetime</div><p>A C# async call keeps its managed buffer reachable. A native reference does not extend object lifetime. Letting a local vector leave scope before <code>Wait</code> is a use-after-free, not a canceled receive.</p></div>
+
+<h2>Honor message boundaries</h2>
+<p>One receive result can be a fragment rather than a complete application message. Inspect its message type, byte count, close state, and end-of-message flag; append only the reported bytes and continue until the message ends. Set a maximum assembled size before allocating from untrusted traffic.</p>
+<pre><code class="language-cpp">// Behavioral outline; application error/size handling omitted.
+std::vector&lt;SharpRuntime::bytecs&gt; chunk(4096);
+std::vector&lt;SharpRuntime::bytecs&gt; message;
+
+for (;;) {
+    const auto part = socket.ReceiveAsync(chunk).Wait();
+    // Append exactly part.Count bytes after checking the current public
+    // property names in the generated API inventory.
+    // Break on close or EndOfMessage according to your protocol.
+}</code></pre>
+<p>This fragment-processing block is deliberately labelled an outline: the result property spellings and close policy belong in the application’s compile-verified protocol wrapper.</p>
+
+<h2>Close, abort, and destroy</h2>
+<ul>
+  <li><code>CloseOutputAsync</code> sends a close frame while retaining the receive side.</li>
+  <li><code>CloseAsync</code> performs the close exchange and can block through its task.</li>
+  <li><code>Abort</code> is the failure path when graceful protocol shutdown is no longer possible.</li>
+  <li><code>Dispose</code> releases transport state; the destructor calls it.</li>
+</ul>
+<p>Do not destroy the socket while connect/send/receive work still references it. Serialize application sends, coordinate receiver termination, complete outstanding tasks, and only then destroy the client.</p>
+
+<h2>C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td><code>wss://</code> through platform TLS</td><td><code>ws://</code> only</td><td>Provide an audited secure transport elsewhere.</td></tr>
+<tr><td><code>Memory&lt;byte&gt;</code> survives async use</td><td>Borrowed vector reference</td><td>Keep storage alive, fixed, and unsynchronized until completion.</td></tr>
+<tr><td><code>await</code></td><td><code>Task::Wait</code> or continuations</td><td>Choose blocking/thread-affinity behavior explicitly.</td></tr>
+<tr><td><code>DangerousDeflateOptions</code></td><td>Not reproduced</td><td>No permessage-deflate negotiation.</td></tr>
+</tbody></table></div>
+
+<h2>Test with a controlled peer</h2>
+<ol>
+  <li>Use a local RFC 6455 server with deterministic frames; never make public internet access a unit-test prerequisite.</li>
+  <li>Test fragmented text and binary messages, ping/pong, normal close, abrupt close, invalid accept hash, cancellation, and oversize payload policy.</li>
+  <li>Run under AddressSanitizer and ThreadSanitizer when investigating buffer ownership or teardown.</li>
+  <li>Keep transport-security tests separate, because this component does not claim them.</li>
+</ol>

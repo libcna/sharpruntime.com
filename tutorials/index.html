@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sharp Runtime Tutorials | Sharp Runtime</title>
-  <meta name="description" content="Practical Sharp Runtime learning paths for integration, C# porting, data, I/O, concurrency and component development.">
+  <title>Tutorials | Sharp Runtime</title>
+  <meta name="description" content="Task-oriented Sharp Runtime tutorials for consumers, C# ports, I/O, networking, concurrency, and contributors, with explicit components and verification status.">
   <link rel="canonical" href="https://sharpruntime.com/tutorials/index.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
-  <meta property="og:title" content="Sharp Runtime Tutorials | Sharp Runtime">
-  <meta property="og:description" content="Practical Sharp Runtime learning paths for integration, C# porting, data, I/O, concurrency and component development.">
+  <meta property="og:title" content="Tutorials | Sharp Runtime">
+  <meta property="og:description" content="Task-oriented Sharp Runtime tutorials for consumers, C# ports, I/O, networking, concurrency, and contributors, with explicit components and verification status.">
   <meta property="og:url" content="https://sharpruntime.com/tutorials/index.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Sharp Runtime Tutorials | Sharp Runtime">
-  <meta name="twitter:description" content="Practical Sharp Runtime learning paths for integration, C# porting, data, I/O, concurrency and component development.">
+  <meta name="twitter:title" content="Tutorials | Sharp Runtime">
+  <meta name="twitter:description" content="Task-oriented Sharp Runtime tutorials for consumers, C# ports, I/O, networking, concurrency, and contributors, with explicit components and verification status.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Sharp Runtime Tutorials", "description": "Practical Sharp Runtime learning paths for integration, C# porting, data, I/O, concurrency and component development.", "url": "https://sharpruntime.com/tutorials/index.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Sharp Runtime Tutorials", "item": "https://sharpruntime.com/tutorials/index.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Tutorials", "description": "Task-oriented Sharp Runtime tutorials for consumers, C# ports, I/O, networking, concurrency, and contributors, with explicit components and verification status.", "url": "https://sharpruntime.com/tutorials/index.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials", "item": "https://sharpruntime.com/tutorials/index.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,17 +33,76 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Sharp Runtime Tutorials</span></nav><h1>Tutorials</h1><p class="lead">Focused, buildable paths from a first CMake consumer to contributor-level component work.</p><div class="page-meta"><span>Beginner to advanced</span><span>Practical examples</span></div>
-<h2 id="start">Start here</h2><div class="page-index"><a href="first-consumer.html">1. Build a first consumer<small>Select Console and run a minimal C++23 app.</small></a><a href="select-components.html">2. Select components<small>Compose narrow targets and understand closure.</small></a><a href="port-csharp-class.html">3. Port a C# class<small>Translate properties, ownership and exceptions.</small></a><a href="use-collections.html">4. Port collections<small>Use typed native collection surfaces deliberately.</small></a></div>
-<h2 id="data">Text and data</h2><div class="page-index"><a href="strings-and-builder.html">Strings and StringBuilder<small>Understand UTF-8 storage semantics.</small></a><a href="json.html">JSON<small>Use the curated Text.Json surface.</small></a><a href="xml-linq.html">XML LINQ<small>Parse and navigate names/elements.</small></a></div>
-<h2 id="systems">Systems programming</h2><div class="page-index"><a href="work-with-files.html">Files and streams<small>Scope streams and handle failures.</small></a><a href="compression-hashing.html">Compression and hashing<small>Choose distinct components for distinct jobs.</small></a><a href="http.html">HTTP boundaries<small>Build requests without assuming TLS.</small></a><a href="tasks-cancellation.html">Tasks and cancellation<small>Translate async-shaped control flow to native lifetimes.</small></a></div>
-<h2 id="contribute">Contributor path</h2><div class="page-index"><a href="use-events.html">Events and delegates<small>Typed callables and subscription lifetime.</small></a><a href="add-component.html">Add a component<small>Registration, ownership, fixtures and catalogue.</small></a><a href="debug-components.html">Debug component selection<small>Diagnose missing targets and leaked headers.</small></a></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span aria-current="page">Tutorials</span></nav><h1>Tutorials</h1><p class="lead">Build working native programs, port managed patterns deliberately, and contribute verified runtime behavior.</p><div class="page-meta"><span>26 tutorials</span><span>C++23</span><span>Source-checked</span></div>
+<h2 id="choose-a-learning-path">Choose a learning path</h2>
+<p>Tutorials are organized by the task you need to complete, not by the size of a namespace. Every page names its direct CMake component, calls out native ownership, and distinguishes a source-checked example from an environment-dependent network or filesystem scenario.</p>
+
+<h2 id="beginner-build-and-core-values">Beginner: build and core values</h2>
+<div class="page-index">
+  <a href="first-consumer.html">Build a first consumer<small>Beginner · Console · Configure and run one native executable.</small></a>
+  <a href="select-components.html">Select components<small>Beginner · CMake · Understand direct targets and dependency closure.</small></a>
+  <a href="strings-and-builder.html">Strings and StringBuilder<small>Beginner · Core.Base + Text · Work safely with UTF-8 byte units.</small></a>
+  <a href="nullable-values.html">Nullable values<small>Beginner · Core.Base · Preserve absent values without heap ownership.</small></a>
+  <a href="arrays-spans.html">Arrays and spans<small>Beginner · Core.Base · Separate owned vectors from borrowed views.</small></a>
+  <a href="use-collections.html">Use collections<small>Beginner · Collections.Core · Choose containers and element ownership.</small></a>
+  <a href="json.html">Read and write JSON<small>Intermediate · Text.Json · Serialize explicit native shapes.</small></a>
+</div>
+
+<h2 id="porting-c-patterns">Porting C# patterns</h2>
+<div class="page-index">
+  <a href="port-csharp-class.html">Port a C# class<small>Intermediate · Values, properties, ownership, and exceptions.</small></a>
+  <a href="use-events.html">Delegates and events<small>Intermediate · Core.Base · Subscription tokens and capture lifetime.</small></a>
+  <a href="tasks-cancellation.html">Tasks and cancellation<small>Intermediate · Threading.Tasks · Native continuations and cooperative cancellation.</small></a>
+  <a href="work-with-files.html">Filesystem workflow<small>Intermediate · IO · Paths, files, errors, and scoped resources.</small></a>
+  <a href="http.html">HTTP boundaries<small>Intermediate · Net.Http · Requests without assuming TLS.</small></a>
+  <a href="xml-linq.html">XML LINQ<small>Intermediate · Xml.Linq · Names, elements, documents, and strictness.</small></a>
+</div>
+
+<h2 id="i-o-and-storage">I/O and storage</h2>
+<div class="page-index">
+  <a href="memory-stream.html">MemoryStream round trip<small>Intermediate · IO · Binary values, positions, and leave-open ownership.</small></a>
+  <a href="readers-writers.html">Readers and writers<small>Intermediate · IO · Binary protocol versus reduced text decoding.</small></a>
+  <a href="filesystem-watcher.html">Watch a directory<small>Advanced · IO · Linux/inotify callbacks, self-stop, and reconciliation.</small></a>
+  <a href="compression-hashing.html">Compression and hashing<small>Intermediate · IO.Compression + IO.Hashing · Distinct jobs and boundaries.</small></a>
+</div>
+
+<h2 id="networking">Networking</h2>
+<div class="page-index">
+  <a href="dns-tcp-udp.html">DNS, TCP, and UDP<small>Advanced · Net + Net.Sockets · Resolution, owned sockets, and host evidence.</small></a>
+  <a href="http.html">HTTP client<small>Intermediate · Net.Http · Plain HTTP/1.1 and content lifetime.</small></a>
+  <a href="websockets.html">WebSockets<small>Advanced · Net.WebSockets · ws:// framing, tasks, and buffer lifetime.</small></a>
+</div>
+
+<h2 id="concurrency">Concurrency</h2>
+<div class="page-index">
+  <a href="locks-threadpool.html">Locks and ThreadPool<small>Advanced · Threading · RAII locks, Monitor semantics, and detached work.</small></a>
+  <a href="tasks-cancellation.html">Tasks and cancellation<small>Intermediate · Threading.Tasks · Completion, faults, and ownership.</small></a>
+  <a href="channels.html">Channels<small>Advanced · Threading.Channels · Backpressure, completion, and reader/writer lifetime.</small></a>
+  <a href="timers.html">Timers<small>Advanced · Timers · Background callbacks and teardown hazards.</small></a>
+</div>
+
+<h2 id="contributor-path">Contributor path</h2>
+<div class="page-index">
+  <a href="write-component-test.html">Write a component test<small>Contributor · GoogleTest · Behavior, boundaries, discovery, and focused execution.</small></a>
+  <a href="negative-consumer-fixture.html">Add a negative consumer fixture<small>Contributor · CMake · Prove forbidden headers and constraints stay forbidden.</small></a>
+  <a href="add-component.html">Add a component<small>Contributor · Registration, ownership, edges, and catalogue regeneration.</small></a>
+  <a href="debug-components.html">Debug component selection<small>Contributor · Diagnose unknown targets, leaked includes, and link visibility.</small></a>
+</div>
+
+<h2 id="verification-labels">Verification labels</h2>
+<div class="table-wrap"><table><thead><tr><th>Label in a tutorial</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Compile-checked</td><td>The published translation unit compiled against public headers at the pinned SHA.</td></tr>
+<tr><td>Built and run</td><td>The example linked and executed with its stated result in the audit environment.</td></tr>
+<tr><td>Source-checked</td><td>Names, signatures, and semantics were checked in implementation/tests, but the scenario needs external state or a long build.</td></tr>
+<tr><td>Environment-dependent</td><td>Network, watcher, permission, or platform state prevents a universal runtime result.</td></tr>
+</tbody></table></div>
+<p>Code that intentionally illustrates a design without being directly compilable is labelled pseudocode. No tutorial treats plausible syntax as tested behavior.</p><nav class="next-links" aria-label="Previous and next pages"><span></span><a href="first-consumer.html"><span class="next-label">Next</span>Build a First Consumer</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#choose-a-learning-path">Choose a learning path</a><a class="toc-level-2" href="#beginner-build-and-core-values">Beginner: build and core values</a><a class="toc-level-2" href="#porting-c-patterns">Porting C# patterns</a><a class="toc-level-2" href="#i-o-and-storage">I/O and storage</a><a class="toc-level-2" href="#networking">Networking</a><a class="toc-level-2" href="#concurrency">Concurrency</a><a class="toc-level-2" href="#contributor-path">Contributor path</a><a class="toc-level-2" href="#verification-labels">Verification labels</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="../assets/script.js"></script>
 </body>
 </html>

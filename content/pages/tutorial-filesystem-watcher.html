@@ -1,0 +1,65 @@
+<h2>Scope and prerequisites</h2>
+<p>This tutorial is for the selected Linux/inotify backend. Non-Linux enablement throws <code>PlatformNotSupportedException</code>. The watcher observes one existing directory; recursive subdirectories are not implemented even though the property is stored.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS IO)
+target_link_libraries(app PRIVATE SharpRuntime::IO)</code></pre>
+
+<h2>Subscribe before enabling</h2>
+<pre><code class="language-cpp">#include &lt;System/IO/FileSystemWatcher.hpp&gt;
+
+#include &lt;iostream&gt;
+
+System::IO::FileSystemWatcher watcher("/tmp/incoming", "*.json");
+
+watcher.Created.push_back(
+    [](void*, const System::IO::FileSystemEventArgs&amp; event) {
+        std::cout &lt;&lt; "created: "
+                  &lt;&lt; event.getFullPathProperty() &lt;&lt; '\n';
+    });
+
+watcher.Error.push_back(
+    [](void*, const System::IO::ErrorEventArgs&amp; event) {
+        try {
+            event.GetException();
+        } catch (const std::exception&amp; error) {
+            std::cerr &lt;&lt; "watch error: " &lt;&lt; error.what() &lt;&lt; '\n';
+        }
+    });
+
+watcher.setEnableRaisingEventsProperty(true);</code></pre>
+<p>Handlers run on the watcher thread. The watcher object, handler vectors, captured objects, and output facilities must remain valid and appropriately synchronized.</p>
+
+<h2>Choose the notification class</h2>
+<p><code>FileName</code>/<code>DirectoryName</code> admit Created, Deleted, and Renamed events. Content-class values admit Changed. Changing NotifyFilter on a live watcher stops, stores, and rearms the kernel watch, discarding queued undelivered events.</p>
+<p>Linux cannot distinguish every .NET vocabulary item. Size and LastWrite share inotify information; several attribute-like values collapse; FileName and DirectoryName are not yet separated. Treat the filter as a current coarse class policy.</p>
+
+<h2>Self-stop is supported</h2>
+<pre><code class="language-cpp">watcher.Created.push_back(
+    [&amp;watcher](void*, const System::IO::FileSystemEventArgs&amp;) {
+        watcher.setEnableRaisingEventsProperty(false);
+    });</code></pre>
+<p>At the selected pin this no longer joins the watcher thread from itself. It signals stop, returns from the setter, and defers joining until later external reconfiguration or destruction. This is the #2347 remediation.</p>
+
+<h2>Do not rearm from the callback</h2>
+<p>Changing Path or NotifyFilter from a live watcher handler throws <code>InvalidOperationException</code> and leaves state unchanged. Schedule the reconfiguration on an external owner thread. External live changes stop the old watch before storing/arming the new value, so old-directory events are not mislabeled with the new path.</p>
+
+<h2>Reconcile hints with filesystem truth</h2>
+<p>Filesystem notifications are hints. Events can coalesce, race file completion, arrive in batches, lose rename pairing across batches, or overflow a kernel queue. On a meaningful event, rescan or stat the authoritative path and make processing idempotent. A Created event does not guarantee the writer has closed the file.</p>
+
+<h2>Current residual limits</h2>
+<ul>
+  <li>Linux only, one watched directory, no recursive watches.</li>
+  <li><code>InternalBufferSize</code> is clamped/stored but the loop still uses a fixed read buffer.</li>
+  <li>No explicit public translation for <code>IN_Q_OVERFLOW</code>.</li>
+  <li>Rename pairing is limited to one read batch; unmatched move-from can appear deleted.</li>
+  <li>Public filter/handler vectors are not synchronized for concurrent mutation.</li>
+  <li>Whether an already-running handler can still be executing when an external disable returns remains a separately deferred measurement.</li>
+</ul>
+
+<h2>Teardown checklist</h2>
+<ol>
+  <li>Stop accepting new work in the owner.</li>
+  <li>Disable from an external thread when possible.</li>
+  <li>Do not destroy objects captured by handlers until dispatch is quiescent under your protocol.</li>
+  <li>Reconcile the directory once more if missing events would matter.</li>
+  <li>Let watcher destruction reap a self-stopped thread.</li>
+</ol>

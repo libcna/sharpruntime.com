@@ -1,0 +1,92 @@
+<h2>Role and deliberate design difference</h2>
+<p><code>System::EventHandler&lt;TEventArgs&gt;</code> is a header-only event collection in <code>Core.Base</code>. Its name is familiar, but its role is intentionally broader than .NET's type. In .NET, <code>EventHandler&lt;TEventArgs&gt;</code> describes one delegate signature and the C# <code>event</code> language feature manages a multicast subscription list. Sharp Runtime combines both jobs: one object owns copied callables, issues removal tokens, and invokes subscribers.</p>
+<p>The callback signature is:</p>
+<pre><code class="language-cpp">using HandlerType =
+    std::function&lt;void(System::Object* sender,
+                       const TEventArgs&amp; args)&gt;;</code></pre>
+<p>The sender is always <code>Object*</code> and may be null. Event arguments are borrowed as a const reference for the duration of each call. Instantiate <code>EventHandler&lt;System::EventArgs&gt;</code> for the traditional non-generic event shape. The newer two-type-parameter .NET delegate with a typed sender is not modeled.</p>
+
+<h2>Public operations</h2>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Behavior</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>Add(handler)</code></td><td>Subscribes a copied/moved <code>std::function</code> and returns a token</td><td>Use the token for precise removal</td></tr>
+<tr><td><code>operator+=(handler)</code></td><td>Delegates to Add and discards the token</td><td>Convenient when the subscription lasts as long as the event owner</td></tr>
+<tr><td><code>Remove(token)</code></td><td>Removes the matching subscription</td><td>Unknown or already-removed tokens are a no-op</td></tr>
+<tr><td><code>Clear()</code></td><td>Removes all stored handlers</td><td>Does not clear the replay hook</td></tr>
+<tr><td><code>Empty()</code> / <code>Size()</code></td><td>Inspect the current stored list</td><td>No synchronization is performed</td></tr>
+<tr><td><code>Raise(sender, args)</code></td><td>Invokes a snapshot in subscription order</td><td>Mutations during dispatch affect the next raise</td></tr>
+<tr><td><code>Invoke(sender, args)</code></td><td>Alias for Raise</td><td>Identical behavior</td></tr>
+<tr><td><code>SetReplayHook(hook)</code></td><td>Installs subscription-time replay behavior</td><td>Special compatibility facility, not normal .NET event semantics</td></tr>
+</tbody></table></div>
+
+<h2>Subscribe, raise, and remove</h2>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;System/EventHandler.hpp&gt;
+
+struct ProgressArgs {
+    int completed;
+};
+
+System::EventHandler&lt;ProgressArgs&gt; progress;
+const auto token = progress.Add(
+    [](System::Object*, const ProgressArgs&amp; args) {
+        std::cout &lt;&lt; args.completed &lt;&lt; '\n';
+    });
+
+progress.Raise(nullptr, ProgressArgs{3});
+progress.Remove(token);
+progress.Raise(nullptr, ProgressArgs{4}); // no subscriber remains</code></pre>
+<p>Multiple subscriptions are independent. Adding the same callable twice stores two entries and invokes it twice. Each non-empty <code>Add</code> receives a unique numeric <code>Token</code>; removing one token does not remove another subscription that happens to wrap the same callable. There is no <code>operator-=</code> because arbitrary <code>std::function</code> values do not provide a reliable general equality operation.</p>
+
+<h2>Empty handlers</h2>
+<p>An empty <code>HandlerType</code> is treated like adding a null delegate in C#: it is not stored, does not invoke the replay hook, and does not change <code>Size()</code> or <code>Empty()</code>. <code>Raise</code> and <code>Invoke</code> therefore do not encounter a deliberately empty subscriber through the public API.</p>
+<p><code>Add</code> still consumes and returns a unique token for the ignored handler. Calling <code>Remove</code> with that token is safe and has no effect. Consuming the token prevents a later real subscription from reusing it and being accidentally removed through the ignored subscription's token.</p>
+
+<h2>Dispatch order, snapshots, and reentrancy</h2>
+<p><code>Raise</code> copies the current vector of token/callable pairs, then invokes that snapshot in subscription order. A handler may add, remove, or clear subscriptions on the same event without invalidating the loop. A handler that removes itself still runs once in the current raise; a not-yet-invoked handler removed by an earlier callback also remains in the current snapshot. Those changes are visible on the next raise.</p>
+<p>A nested call to <code>Raise</code> takes its own snapshot of the then-current list. This makes reentrancy memory-safe at the collection level, but it does not make application state reentrancy-safe. Handlers must still protect invariants if they trigger nested events, mutate shared objects, or cause the owner to begin shutdown.</p>
+<div class="callout callout--warning"><div class="callout-title">Snapshot means copied callables</div><p>Each raise copies the stored <code>std::function</code> objects. Captured shared owners remain shared; captured references and raw pointers remain non-owning. Copying a callable does not repair a dangling capture.</p></div>
+
+<h2>Replay hooks</h2>
+<p><code>SetReplayHook</code> installs one <code>std::function&lt;void(const HandlerType&amp;)&gt;</code> that runs synchronously whenever a non-empty handler is added. It receives the new handler before that handler is stored. The intended use is a specific compatibility event whose documented contract replays already-existing state to a new subscriber—for example, an owner can call the handler once for each pending item.</p>
+<p>The hook's own calls are not subscriptions and do not change the event size. Replacing it with an empty function clears it. Plain events should leave it unset. It is not a general event-history queue, and <code>Clear()</code> removes handlers without removing this hook.</p>
+<pre><code class="language-cpp">progress.SetReplayHook(
+    [](const System::EventHandler&lt;ProgressArgs&gt;::HandlerType&amp; handler) {
+        handler(nullptr, ProgressArgs{2}); // current state replay
+    });
+
+const auto replayed = progress.Add(onProgress);
+// onProgress ran synchronously before Add returned, then was stored.</code></pre>
+<p>A replay hook can call user code during subscription, so <code>Add</code> is not necessarily a passive mutation. Avoid holding locks across subscription if the hook or callback could call back into the owner.</p>
+
+<h2>Exception behavior</h2>
+<p>The event collection does not catch callback exceptions. If a handler invoked by <code>Raise</code> throws, that exception escapes immediately and later handlers in the snapshot are not called. The stored subscription list remains intact unless callbacks changed it before the exception. Code that must isolate subscriber failures should catch at an explicit application boundary and define logging or aggregation policy there.</p>
+<p>A replay-hook exception escapes from <code>Add</code>. Because the hook runs before insertion, the new handler is not stored when that call fails. Copying the snapshot can also propagate native allocation or callable-copy failures before any subscriber runs.</p>
+
+<h2>Thread safety</h2>
+<p><code>EventHandler</code> contains a vector, a token counter, and a replay callable with no mutex or atomic coordination. Concurrent <code>Add</code>, <code>Remove</code>, <code>Clear</code>, <code>SetReplayHook</code>, <code>Size</code>, or <code>Raise</code> on the same instance is not supported without external synchronization. The snapshot protects mutation performed synchronously by a handler on the same thread; it is not a cross-thread safety mechanism.</p>
+<p>If an event crosses threads, choose and document the owner of the lock or message queue. Do not hold an event lock while invoking arbitrary handlers unless reentrancy and deadlock behavior have been designed explicitly.</p>
+
+<h2>Ownership and lifetime</h2>
+<p>The event owns its stored <code>std::function</code> values. What those functions own depends on their captures:</p>
+<ul>
+  <li>A value capture is copied into the callable.</li>
+  <li>A <code>shared_ptr</code> capture extends the target's lifetime and can participate in a reference cycle.</li>
+  <li>A reference, raw pointer, or captured <code>this</code> does not extend lifetime and can dangle.</li>
+  <li>A weak capture must be locked and checked on every invocation.</li>
+</ul>
+<p>Tokens are plain integers, not RAII subscription objects. The caller must remove a subscription at the appropriate teardown boundary. If the event owner dies first, its handler list dies with it; if it outlives a referenced subscriber, the callback must be removed or use an expiry-aware capture.</p>
+<p>The class has ordinary compiler-generated copy and move behavior. Copying an <code>EventHandler</code> duplicates its current handler list, replay hook, counter value, and callable captures into an independent event object. Tokens should be treated as meaningful only for the particular event instance that returned them. If event identity must not be duplicated, make the containing owner non-copyable.</p>
+
+<h2>Differences from C# and .NET</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Consequence</th></tr></thead><tbody>
+<tr><td><code>EventHandler&lt;T&gt;</code> is one delegate type</td><td>The template owns a multicast subscription list</td><td>Declaring the value also declares event storage</td></tr>
+<tr><td><code>event</code> restricts external invocation and assignment</td><td>A public <code>EventHandler</code> value exposes <code>Raise</code>, <code>Clear</code>, and mutation</td><td>Encapsulation must be designed by the containing C++ class</td></tr>
+<tr><td><code>+=</code> and <code>-=</code> combine/remove delegates</td><td><code>+=</code> adds; removal uses an Add token</td><td>Keep the token when teardown is required</td></tr>
+<tr><td>Managed delegate captures keep managed targets reachable</td><td>Native capture ownership is explicit</td><td>Audit raw <code>this</code>, references, shared cycles, and weak expiry</td></tr>
+<tr><td>Multicast invocation uses a delegate snapshot</td><td><code>Raise</code> copies the stored handlers before invocation</td><td>Mid-raise mutations take effect next time</td></tr>
+<tr><td>Typed-sender newer overload may be available</td><td>Sender remains <code>System::Object*</code></td><td>No <code>EventHandler&lt;TSender,TArgs&gt;</code> shape</td></tr>
+<tr><td>No general subscription-time replay in EventHandler</td><td>Optional owner-installed replay hook</td><td>Use only for a specifically documented compatibility event</td></tr>
+</tbody></table></div>
+
+<h2>Encapsulation pattern</h2>
+<p>When only the owning type should raise an event, avoid exposing a freely mutable public field. A native owner can keep <code>EventHandler</code> private, expose a subscription method returning a token, expose a matching unsubscribe method, and call <code>Raise</code> internally. This is more verbose than the C# <code>event</code> keyword but preserves its important access boundary.</p>

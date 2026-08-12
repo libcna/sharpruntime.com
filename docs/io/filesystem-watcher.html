@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en" data-search-url="../../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FileSystemWatcher | Sharp Runtime</title>
+  <meta name="description" content="Linux inotify event semantics, live reconfiguration, callback threading, self-stop repair, and current Sharp Runtime watcher limits.">
+  <link rel="canonical" href="https://sharpruntime.com/docs/io/filesystem-watcher.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="FileSystemWatcher | Sharp Runtime">
+  <meta property="og:description" content="Linux inotify event semantics, live reconfiguration, callback threading, self-stop repair, and current Sharp Runtime watcher limits.">
+  <meta property="og:url" content="https://sharpruntime.com/docs/io/filesystem-watcher.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FileSystemWatcher | Sharp Runtime">
+  <meta name="twitter:description" content="Linux inotify event semantics, live reconfiguration, callback threading, self-stop repair, and current Sharp Runtime watcher limits.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "FileSystemWatcher", "description": "Linux inotify event semantics, live reconfiguration, callback threading, self-stop repair, and current Sharp Runtime watcher limits.", "url": "https://sharpruntime.com/docs/io/filesystem-watcher.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "FileSystemWatcher", "item": "https://sharpruntime.com/docs/io/filesystem-watcher.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../../index.html">Home</a><a class="nav-link" href="../../getting-started.html">Start</a><a class="nav-link" href="../../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../../components/index.html">Components</a><a class="nav-link" href="../../api/index.html">API</a><a class="nav-link" href="../../tutorials/index.html">Tutorials</a><a class="nav-link" href="../../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../../overview.html">What is Sharp Runtime?</a><a href="../../architecture.html">Architecture</a><a href="../../runtime-overview.html">Runtime model</a><a href="../../compatibility.html">Compatibility</a><a href="../../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../../getting-started.html">Getting Started</a><a href="../../build.html">Build & integration</a><a href="../../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../../guides/porting-csharp.html">Port C# to C++</a><a href="../../memory-management.html">Memory & ownership</a><a href="../../exceptions.html">Exceptions</a><a href="../../cna-integration.html">CNA integration</a><a href="../../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../../components/index.html">Complete catalogue</a><a href="../../components/core.html">Core & collections</a><a href="../../components/text-data.html">Text, JSON & XML</a><a href="../../components/io-storage.html">I/O & storage</a><a href="../../components/networking.html">Networking</a><a href="../../components/concurrency.html">Concurrency</a><a href="../../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../../type-system.html">Type system</a><a href="../../strings.html">Strings</a><a href="../../arrays.html">Arrays & memory</a><a href="../../delegates.html">Delegates & events</a><a href="../../reflection.html">Reflection</a><a href="../../io.html">I/O overview</a><a href="streams.html">Streams & readers</a><a href="filesystem.html">Filesystem</a><a href="filesystem-watcher.html" aria-current="page">FileSystemWatcher</a><a href="../../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../../development/index.html">Development guide</a><a href="../../project-structure.html">Project structure</a><a href="../../development/adding-runtime-features.html">Adding features</a><a href="../../development/debugging.html">Debugging</a><a href="../../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">FileSystemWatcher</span></nav><h1>FileSystemWatcher</h1><p class="lead">A precise guide to what the watcher delivers, how it rearms and stops, and where the Linux backend remains intentionally partial.</p><div class="page-meta"><span>Linux inotify</span><span>Callbacks</span><span>Remediated at source pin</span></div>
+<h2 id="current-scope">Current scope</h2>
+<p><code>System::IO::FileSystemWatcher</code> has a real Linux backend built on inotify, <code>poll</code>, and <code>eventfd</code>. It watches one configured directory on a dedicated native thread and raises <code>Created</code>, <code>Deleted</code>, <code>Changed</code>, <code>Renamed</code>, and <code>Error</code> handlers. The common single-directory case is implemented; the complete cross-platform .NET watcher is not.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Platform</th><th scope="col">Backend</th><th scope="col">What enabling does</th></tr></thead>
+<tbody>
+<tr><td>Linux</td><td>inotify plus a background dispatch thread</td><td>Arms the configured directory for the selected event classes</td></tr>
+<tr><td>Windows</td><td>None</td><td>Throws <code>PlatformNotSupportedException</code>; there is no <code>ReadDirectoryChangesW</code> backend</td></tr>
+<tr><td>macOS</td><td>None</td><td>Throws <code>PlatformNotSupportedException</code>; there is no FSEvents/kqueue backend</td></tr>
+<tr><td>Emscripten and other targets</td><td>None</td><td>Throws <code>PlatformNotSupportedException</code></td></tr>
+</tbody>
+</table></div>
+
+<p>The watcher is non-copyable and non-movable. Its thread captures <code>this</code>, so changing the object’s address while the thread runs would invalidate the callback owner. Destruction stops or reaps the thread before releasing its descriptors.</p>
+
+<h2 id="surface">Public surface and configuration</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Member</th><th scope="col">Current meaning</th><th scope="col">Important boundary</th></tr></thead>
+<tbody>
+<tr><td><code>Path</code></td><td>Existing directory to watch</td><td>A live change retires the old watch before storing and arming the new path</td></tr>
+<tr><td><code>Filter</code></td><td>Convenience view over the first entry in <code>Filters</code></td><td>Pattern changes are not synchronized with the dispatch thread</td></tr>
+<tr><td><code>Filters</code></td><td>Mutable vector of name patterns</td><td>Empty vector admits all names; matching is current-implementation glob translation</td></tr>
+<tr><td><code>NotifyFilter</code></td><td>Selects name-event and/or content-event classes</td><td>Values within each class are not faithfully distinguishable on inotify</td></tr>
+<tr><td><code>IncludeSubdirectories</code></td><td>Stored and returned</td><td>Has no effect; only the configured directory is watched</td></tr>
+<tr><td><code>InternalBufferSize</code></td><td>Stored, with values below 4,096 clamped</td><td>Does not size the current inotify read buffer</td></tr>
+<tr><td><code>EnableRaisingEvents</code></td><td>Starts or stops delivery</td><td>Starting without a path records the enabled state but cannot arm until a path is assigned</td></tr>
+<tr><td>Handler vectors</td><td>Public vectors for five event families</td><td>Handlers execute on the watcher thread; subscription mutation is not synchronized</td></tr>
+</tbody>
+</table></div>
+
+<p>The constructors that accept a path require a non-empty existing directory. A default-constructed watcher can be enabled before its path is assigned; no watch is created until a valid path arrives. Invalid <code>NotifyFilter</code> bits throw <code>ArgumentException</code>. <code>NotifyFilters(0)</code> is accepted as “watch no event class”: the enabled property remains set, no inotify watch is armed, and a later filter change can arm one.</p>
+
+<h2 id="event-flow">Event flow</h2>
+<p>On Linux, enabling allocates an inotify descriptor, registers the directory, allocates a close-on-exec <code>eventfd</code> used to wake shutdown, and starts the watch thread. The thread blocks in <code>poll</code> on the inotify and stop descriptors. A stop signal wins before queued inotify data is dispatched, so queued-but-not-delivered events can be discarded when the watch is disabled or reconfigured.</p>
+<p>Each native record becomes a Sharp Runtime event after name-pattern matching:</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">inotify input</th><th scope="col">Sharp Runtime event</th><th scope="col">Details</th></tr></thead>
+<tbody>
+<tr><td><code>IN_CREATE</code></td><td><code>Created</code></td><td>Name and full path are built under the configured directory</td></tr>
+<tr><td><code>IN_DELETE</code></td><td><code>Deleted</code></td><td>Reports the removed directory entry</td></tr>
+<tr><td><code>IN_MODIFY</code> or <code>IN_ATTRIB</code></td><td><code>Changed</code></td><td>The backend cannot identify every .NET content property independently</td></tr>
+<tr><td>Paired <code>IN_MOVED_FROM</code>/<code>IN_MOVED_TO</code></td><td><code>Renamed</code></td><td>Pairs by inotify cookie within one read batch and carries old/new names</td></tr>
+<tr><td>Unpaired <code>IN_MOVED_TO</code></td><td><code>Created</code></td><td>Represents an entry moved into the watched directory</td></tr>
+<tr><td>Unpaired <code>IN_MOVED_FROM</code></td><td><code>Deleted</code></td><td>Represents an entry moved out of the watched directory</td></tr>
+</tbody>
+</table></div>
+
+<p>Handlers in each vector run in vector order on the same watcher thread. A slow handler delays every later handler and all subsequent event parsing. There is no dispatcher, synchronization context, thread pool handoff, or main-thread marshalling layer. Applications that need one should enqueue a small immutable message and return promptly.</p>
+
+<h2 id="name-filters">Name filters</h2>
+<p><code>Filters</code> is translated from a simple <code>*</code>/<code>?</code> glob into a regular expression. <code>*.*</code> is treated as <code>*</code>, so extensionless names are not excluded. The regular expression uses case-insensitive matching even on Linux. An empty filter vector admits every name.</p>
+<p>This filter is applied after the kernel reports an event. It reduces handler delivery, not kernel work. It is also a public mutable vector that the watch thread reads without a lock. Configure <code>Filter</code>/<code>Filters</code> before enabling, or disable and externally synchronize before mutation. Concurrent vector modification and event dispatch is not supported.</p>
+
+<h2 id="notify-filter">NotifyFilter: class separation is implemented</h2>
+<p>The current implementation divides <code>NotifyFilters</code> into two classes. A filter that names only one class no longer admits events from the other class, and changing <code>NotifyFilter</code> while enabled rebuilds the kernel watch so the new mask actually takes effect.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">NotifyFilters values</th><th scope="col">Kernel mask</th><th scope="col">Possible Sharp Runtime events</th></tr></thead>
+<tbody>
+<tr><td><code>FileName</code>, <code>DirectoryName</code></td><td><code>IN_CREATE</code>, <code>IN_DELETE</code>, <code>IN_MOVED_FROM</code>, <code>IN_MOVED_TO</code></td><td><code>Created</code>, <code>Deleted</code>, <code>Renamed</code></td></tr>
+<tr><td><code>Attributes</code>, <code>Size</code>, <code>LastWrite</code>, <code>LastAccess</code>, <code>CreationTime</code>, <code>Security</code></td><td><code>IN_MODIFY</code>, <code>IN_ATTRIB</code></td><td><code>Changed</code></td></tr>
+<tr><td>No bits</td><td>No watch mask</td><td>No event delivery</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="within-class-limit">Within-class mapping remains reduced</h3>
+<p>The names in each class are not independently implemented:</p>
+<ul>
+<li><code>FileName</code> and <code>DirectoryName</code> behave alike; the current dispatch does not use <code>IN_ISDIR</code> to split them.</li>
+<li><code>Size</code> and <code>LastWrite</code> both rely on <code>IN_MODIFY</code>, which does not say which managed property changed.</li>
+<li><code>IN_ATTRIB</code> covers several metadata changes without identifying attributes, security, timestamps, or link-count changes separately.</li>
+<li>Creation-time changes have no direct inotify event.</li>
+<li>The current mask does not register <code>IN_ACCESS</code>, so <code>LastAccess</code> has no distinct source.</li>
+</ul>
+<p>Accordingly, <code>NotifyFilter</code> is useful for choosing name events, content events, both, or none. It should not be described as a complete .NET property-level filter.</p>
+
+<h2 id="live-path">Live Path changes are rearmed safely</h2>
+<p>At older revisions, assigning <code>Path</code> on an enabled watcher changed only the stored string. The inotify descriptor continued watching the old directory, while event arguments were built under the new path. That could report a full path naming a file that never existed and also raced a string write against the dispatch thread.</p>
+<p>At the selected source pin, a live path change follows a defined sequence:</p>
+<ol>
+<li>Validate the candidate while leaving the current watch untouched.</li>
+<li>Signal and join the current watcher thread.</li>
+<li>Remove and close the old native watch resources.</li>
+<li>Store the new directory only after the old thread can no longer read the field.</li>
+<li>Arm a new watch if the component was enabled.</li>
+</ol>
+<p>An invalid candidate leaves the existing live watch intact. If the new directory validated but native rearming later fails, the old watch is not restored; the enabled state becomes false and the error path is raised. Queued events from the old watch are discarded during reconfiguration.</p>
+
+<h2 id="callback-reentrancy">Callback reentrancy and the self-stop repair</h2>
+<p>Handlers run on the watcher thread. Earlier code treated every reconfiguration as an external call and unconditionally joined that thread. A handler that disabled its own watcher therefore attempted to join itself, raised <code>std::system_error</code>, and—because event-handler calls were not caught—could reach <code>std::terminate</code>.</p>
+<p>The selected revision includes the dedicated callback self-stop repair:</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Operation inside an event handler</th><th scope="col">Current result</th><th scope="col">Reason</th></tr></thead>
+<tbody>
+<tr><td>Set <code>EnableRaisingEvents=false</code></td><td>Permitted</td><td>Signals stop without self-joining; the loop exits after the handler returns</td></tr>
+<tr><td>Set <code>Path</code></td><td>Throws <code>InvalidOperationException</code></td><td>Rearming must retire the thread that is currently dispatching</td></tr>
+<tr><td>Set <code>NotifyFilter</code></td><td>Throws <code>InvalidOperationException</code></td><td>The kernel mask also requires a rearm</td></tr>
+<tr><td>Throw from a normal event handler</td><td>Exception is delivered to <code>Error</code> handlers</td><td>It no longer escapes the native watch thread into <code>std::terminate</code></td></tr>
+<tr><td>Throw from an <code>Error</code> handler while a callback fault is being forwarded</td><td>Swallowed</td><td>Prevents recursive error delivery and watch-thread termination on that forwarding path</td></tr>
+</tbody>
+</table></div>
+
+<p>A thread-local marker identifies the watcher currently dispatching on each thread, avoiding a race on the <code>std::thread</code> object itself. A callback-triggered stop leaves the finished thread joinable; the next safe external reconfiguration or the destructor reaps it and closes the descriptors. Do not attempt a stop-and-immediate-reenable sequence inside the same callback; perform later reconfiguration from another thread after the callback returns.</p>
+
+<div class="callout callout--success"><div class="callout-title">The old termination warning is obsolete</div><p>Callback-triggered disable is no longer a self-join/termination risk at this source pin. The remaining restrictions are narrower: path/filter reconfiguration from the callback is rejected, and general concurrent mutation of public vectors is still outside the synchronized contract.</p></div>
+
+<h2 id="disable-semantics">Disabling and teardown</h2>
+<p>An external disable writes the stop <code>eventfd</code>, joins the watcher thread, removes the inotify watch, and closes all descriptors before returning. Activity occurring after the setter returns does not produce a handler. Repeated disable is safe, and the watcher can be armed again.</p>
+<p>The source records a narrower unanswered concurrency question: it has not established a separately measured contract for whether a handler that was already executing at the instant another thread begins disabling can still be considered running at the setter’s return boundary. Code should not use watcher disable as its only application-level barrier for arbitrary work a handler launched elsewhere.</p>
+
+<h2 id="errors-and-overflow">Errors, buffering, and loss</h2>
+<p>Native startup failures can disable the watcher and report an <code>IOException</code> through the <code>Error</code> handler path. Exceptions from normal event handlers are also wrapped in <code>ErrorEventArgs</code> and delivered on the watcher thread. The callback-fault forwarding path catches exceptions from <code>Error</code> handlers to prevent recursion; startup/rearm error delivery is synchronous on the configuring thread and does not use that wrapper.</p>
+<p><code>InternalBufferSize</code> does not currently control the allocation used by <code>read(inotify)</code>. The loop allocates a fixed vector sized for sixteen maximum-name events. More importantly, Linux maintains its own inotify queue; a long-running handler or burst of filesystem activity can overflow that queue. The implementation has no explicit <code>IN_Q_OVERFLOW</code> translation into <code>InternalBufferOverflowException</code> or <code>Error</code>. Applications must treat events as change hints and reconcile important state by rescanning the directory.</p>
+
+<h2 id="recursive-watching">Recursive watching is not implemented</h2>
+<p><code>IncludeSubdirectories</code> is stored but ignored. A recursive implementation would need a watch per existing subdirectory, dynamic registration for directories created later, removal handling, rename/move reconciliation, queue-overflow recovery, and a platform-independent policy. None of that is provided by the current single-watch loop.</p>
+
+<h2 id="thread-safety">Thread-safety boundary</h2>
+<p>The lifecycle fields needed by callback self-stop are atomic or confined by joining, but the object is not generally thread-safe. Handler vectors and name-filter vectors are public containers read directly by the dispatch loop. Adding/removing a handler, replacing <code>Filter</code>, or mutating <code>Filters</code> concurrently with delivery can race and can invalidate iterators.</p>
+<p>A safe application pattern is:</p>
+<ol>
+<li>Construct and fully configure the watcher.</li>
+<li>Register handlers before enabling.</li>
+<li>Keep callbacks short and transfer work to an application-owned queue.</li>
+<li>For configuration changes, disable or use the implemented external <code>Path</code>/<code>NotifyFilter</code> rearm, and ensure no other thread mutates public vectors.</li>
+<li>Destroy the watcher only after application work no longer retains its address.</li>
+<li>Periodically reconcile authoritative directory state instead of assuming an event stream is lossless.</li>
+</ol>
+
+<h2 id="comparison">C#/.NET comparison</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">C# / .NET expectation</th><th scope="col">Sharp Runtime at this pin</th><th scope="col">Porting consequence</th></tr></thead>
+<tbody>
+<tr><td>Windows, Linux, and macOS backends</td><td>Linux/inotify only</td><td>Gate the feature or supply another backend outside Linux</td></tr>
+<tr><td>Optional recursive tree watching</td><td>Property stored, behavior absent</td><td>Implement explicit traversal/polling or restrict the product requirement</td></tr>
+<tr><td>Notify filters identify managed properties</td><td>Name/content classes only; values within a class collapse</td><td>Inspect the changed path rather than trusting a fine-grained reason</td></tr>
+<tr><td>Internal buffer size affects event buffering</td><td>Property does not size the actual read buffer</td><td>Do not tune reliability through this property</td></tr>
+<tr><td>Callback may disable watcher</td><td>Supported by deferred self-stop</td><td>No special catch around the disable is required</td></tr>
+<tr><td>Callback reconfigures path/filter</td><td>Rejected with <code>InvalidOperationException</code></td><td>Schedule reconfiguration on another thread</td></tr>
+<tr><td>Events are notifications, not a transactional log</td><td>Same practical rule, with explicit overflow gaps</td><td>Rescan after bursts, errors, and startup/rearm boundaries</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="../../io.html">I/O overview<small>Where the watcher sits in the physical component.</small></a>
+<a href="filesystem.html">Files, directories, and paths<small>The authoritative operations used to reconcile watcher hints.</small></a>
+<a href="../../platform-layer.html">Platforms and portability<small>Evidence labels and platform-specific runtime surfaces.</small></a>
+<a href="../../development/known-limitations.html">Known limitations<small>Current project-wide gaps without obsolete watcher warnings.</small></a>
+</div><nav class="next-links" aria-label="Previous and next pages"><a href="filesystem.html"><span class="next-label">Previous</span>Files, Directories, Paths, and Metadata</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#current-scope">Current scope</a><a class="toc-level-2" href="#surface">Public surface and configuration</a><a class="toc-level-2" href="#event-flow">Event flow</a><a class="toc-level-2" href="#name-filters">Name filters</a><a class="toc-level-2" href="#notify-filter">NotifyFilter: class separation is implemented</a><a class="toc-level-3" href="#within-class-limit">Within-class mapping remains reduced</a><a class="toc-level-2" href="#live-path">Live Path changes are rearmed safely</a><a class="toc-level-2" href="#callback-reentrancy">Callback reentrancy and the self-stop repair</a><a class="toc-level-2" href="#disable-semantics">Disabling and teardown</a><a class="toc-level-2" href="#errors-and-overflow">Errors, buffering, and loss</a><a class="toc-level-2" href="#recursive-watching">Recursive watching is not implemented</a><a class="toc-level-2" href="#thread-safety">Thread-safety boundary</a><a class="toc-level-2" href="#comparison">C#/.NET comparison</a><a class="toc-level-2" href="#related-reading">Related reading</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../../getting-started.html">Getting Started</a></li><li><a href="../../components/index.html">Components</a></li><li><a href="../../api/index.html">API discovery</a></li><li><a href="../../tutorials/index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../../architecture.html">Architecture</a></li><li><a href="../../platform-layer.html">Platforms</a></li><li><a href="../../running-tests.html">Testing</a></li><li><a href="../../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../../assets/script.js"></script>
+</body>
+</html>

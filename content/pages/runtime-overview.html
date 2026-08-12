@@ -1,0 +1,67 @@
+<h2>How to read the runtime</h2>
+<p>Sharp Runtime is easier to understand as a set of subsystem families than as a flat list of more than a thousand public headers. The lowest layer supplies native representations and contracts. Above it sit collections, text and data, I/O, networking, concurrency, and platform-facing utilities. Each family remains selectable through a physical CMake graph.</p>
+<div class="architecture-flow architecture-flow--stack" role="img" aria-label="Sharp Runtime families build from core representations through libraries and systems services to application consumers.">
+  <div><strong>Applications and ports</strong><span>CNA, frameworks, tools, and direct consumers</span></div>
+  <div><strong>Data and systems families</strong><span>JSON/XML · I/O/storage · networking · threading/tasks</span></div>
+  <div><strong>Reusable libraries</strong><span>collections · text · numerics · globalization · diagnostics</span></div>
+  <div><strong>Core native model</strong><span>aliases · values · Object/Type · exceptions · arrays/views · delegates</span></div>
+</div>
+
+<h2>Representation map</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET concept</th><th>Sharp Runtime / C++ representation</th><th>Important difference</th></tr></thead><tbody>
+<tr><td><code>string</code></td><td><code>SharpRuntime::String</code> = <code>std::string</code>; <code>System::String</code> static helpers</td><td>UTF-8 byte storage, mutable native value, no managed null or interning contract</td></tr>
+<tr><td><code>T[]</code></td><td><code>std::vector&lt;T&gt;</code> plus <code>System::Array</code> algorithms</td><td>Vector owns and can reallocate; no CLR array base or runtime covariance</td></tr>
+<tr><td><code>Span&lt;T&gt;</code></td><td>Pointer and signed element length</td><td>Non-owning; source storage must outlive it</td></tr>
+<tr><td><code>Memory&lt;T&gt;</code></td><td>Borrowed vector plus offset and length</td><td>Does not retain a managed owner; <code>Pin</code> only exposes native storage</td></tr>
+<tr><td><code>Nullable&lt;T&gt;</code></td><td>Wrapper over <code>std::optional&lt;T&gt;</code></td><td>Contained C++ value’s copy, move, and destruction semantics remain visible</td></tr>
+<tr><td><code>object</code></td><td>Opt-in <code>System::Object</code> hierarchy or an unrelated native value</td><td>No universal root, boxing header, or GC identity</td></tr>
+<tr><td><code>Type</code></td><td>Wrapper around <code>std::type_info</code></td><td>Identity only; no member metadata or dependable CLR classification</td></tr>
+<tr><td>Delegate/event</td><td>Typed C++ callables and handler collections</td><td>Capture and subscription lifetime are native and explicit</td></tr>
+<tr><td><code>Task</code></td><td>Native task/continuation objects and scheduler abstractions</td><td>No C# language async/await state machine or CLR synchronization context guarantee</td></tr>
+</tbody></table></div>
+
+<h2>Foundation: Core.Base and narrow core components</h2>
+<p><code>Core.Base</code> is the largest foundational owner. It supplies fixed-width aliases, <code>Object</code>, <code>Type</code>, numeric wrappers, exceptions, arrays and views, nullable values, delegates, environment/version helpers, and many other contracts used by higher layers. <code>Console</code>, <code>Uri</code>, and <code>TimeZone</code> are separate physical components so applications can avoid unrelated platform code; the compatibility target <code>Core</code> aggregates them for older consumers.</p>
+<p>The core layer is intentionally heterogeneous. <code>System::String</code> and <code>System::Array</code> are static algorithm containers over standard native storage. <code>Object</code> is a polymorphic base only for participating hierarchies. Numeric wrappers and nullable values are ordinary value-like C++ types. This is more honest and useful than forcing every API into an artificial CLR-shaped object.</p>
+
+<h2>Collections and buffers</h2>
+<p><code>Buffers</code> provides span-oriented and binary/text buffer contracts. The collection family is split into synchronous core collections, blocking producer/consumer support, async enumeration contracts, and object-model/observable collections. This split keeps threading and component-model dependencies out of applications that only need a list or dictionary.</p>
+<p>Native ownership affects every collection choice. A <code>List&lt;Widget&gt;</code>-shaped container of values copies or moves widgets; a container of <code>shared_ptr</code> values shares identity; a container of raw pointers merely borrows. Mutation can invalidate iterators, enumerators, references, spans, and views. Concurrent containers coordinate their own structure, not the thread safety of stored objects.</p>
+
+<h2>Text, JSON, regular expressions, and XML</h2>
+<p>The <code>Text</code> component supplies builders, encodings, formatting, Base64, web encoders, and Unicode-shaped helpers around the project’s UTF-8 byte-string model. It does not turn <code>std::string</code> into a UTF-16 CLR string. Index units, case conversion, normalization, collation, and grapheme behavior therefore need explicit evaluation.</p>
+<p><code>Text.Json</code> wraps a vendored nlohmann JSON backend with familiar documents, nodes, readers, writers, serializers, options, and converters. It is broad enough for real native data work, but it is not reflection-driven serializer parity or a source generator. <code>Text.RegularExpressions</code> exposes a curated regex family over a native backend; .NET-only constructs and Unicode/culture behavior are not inferred from matching names.</p>
+<p><code>Xml</code> owns readers, writers, documents, schema, and XPath-shaped behavior over tinyxml2. <code>Xml.Linq</code> adds names, nodes, elements, attributes, documents, and LINQ-to-XML-shaped operations. Recent remediation corrected namespace lookup, lexical validation, embedded NUL handling, document-type parsing, and other strictness boundaries. XPath variables, custom functions, and a general extension context remain outside the supported subset.</p>
+
+<h2>I/O, compression, hashing, and storage</h2>
+<p>The <code>IO</code> component contains the abstract stream model, memory and file streams, binary and text readers/writers, file and directory helpers, metadata wrappers, random access, drives, unmanaged memory streams, and FileSystemWatcher. Capability properties and lifecycle must be consulted per stream; not every base operation is abstract or supported in the same way as .NET.</p>
+<p>Compression and ZIP are separate owners. <code>IO.Compression</code> uses ZLIB privately; <code>IO.Compression.Zip</code> uses vendored miniz. <code>IO.Hashing</code> holds checksums and non-cryptographic hashes, which should never be presented as security primitives. <code>Storage</code> resolves application paths, while <code>IO.IsolatedStorage</code> builds store-relative operations and confinement checks over the filesystem. It is not an OS-enforced sandbox.</p>
+<p>FileSystemWatcher is deliberately documented as Linux/inotify-only at this pin. The current remediation makes self-disable from a callback safe and contains handler failures, but recursive watching and live notify-filter remapping remain limited. See the dedicated watcher page rather than extrapolating from the class name.</p>
+
+<h2>Networking</h2>
+<p>The networking family separates base address/DNS types, sockets, HTTP messages and transport, headers, HTTP/JSON integration, MIME, network information, security-shaped contracts, and WebSockets. This keeps a consumer’s direct need visible even though CMake resolves the shared closure.</p>
+<p>Windows and POSIX socket implementations exist; host DNS, interfaces, raw sockets, ICMP permissions, and IPv6 configuration remain environment inputs. HTTP is currently buffered plain HTTP/1.1 over TCP. WebSockets support <code>ws://</code>. Certificates, <code>SslStream</code>, HTTPS, and <code>wss://</code> are not supplied merely because <code>Net.Security</code> contains familiar names.</p>
+
+<h2>Threading, tasks, channels, and timers</h2>
+<p><code>Threading</code> supplies native threads, monitors, events, locks, cancellation, synchronization contexts, atomics, and thread-pool-shaped behavior. <code>Threading.Tasks</code> adds tasks, completion sources, continuations, schedulers, and aggregate coordination. <code>Threading.Channels</code> adds bounded and unbounded channel readers and writers. <code>Timers</code> dispatches delayed or periodic callbacks.</p>
+<p>These facilities help preserve familiar control-flow shapes, but they cannot import C# language semantics into C++. Every asynchronous path needs an owner, cancellation strategy, exception-observation path, and shutdown protocol. Capturing a raw pointer does not retain it. A callback can race destruction or reconfiguration unless the concrete type documents serialization.</p>
+
+<h2>Numerics, globalization, diagnostics, runtime, and security</h2>
+<p><code>Numerics</code> includes vectors, matrices, quaternion, BigInteger, Complex, Decimal, and wide numeric wrappers. Correctness remediation covers overflow, parsing, special floating-point values, rounding, and defined arithmetic, but compiler capability remains visible: native <code>__int128</code> is required by some surfaces and constrains current MSVC coverage.</p>
+<p><code>Globalization</code> supplies cultures, calendars, regions, comparison options, and parsing/formatting data. It is not ICU or the full .NET data set. <code>Diagnostics</code> provides debug, trace, stopwatch, process, stack, and analysis-shaped APIs with platform-specific depth. <code>Runtime</code> holds compiler-services, interop, serialization markers, handles, and runtime helpers without implementing a CLR.</p>
+<p>The security family offers principals, permissions, authentication-shaped contracts, hashes, HMAC, PBKDF2, cryptographic operations, and platform secure random. It does not amount to a complete encryption/certificate/TLS platform. Security promises are made per algorithm and transport, not per namespace.</p>
+
+<h2>Component graph and external attachment</h2>
+<p>At the pinned SHA the runtime has {{physical_components}} physical components and {{production_edges}} direct production edges. Header-only components can only have public dependencies; compiled components may hide implementation dependencies privately. Tests have their own edges and cannot expand the production surface. ZLIB, miniz, tinyxml2, nlohmann JSON, platform socket libraries, BCrypt, and Android SDL3 are attached by their owning component rather than globally.</p>
+<p>Use the <a href="components/index.html">component catalogue</a> to select a target, the <a href="api/index.html">API inventory</a> to locate public entries, and the conceptual pages to understand semantics. Those layers are complementary: a generated header list alone cannot explain ownership or a Unicode reduction, while prose alone should not hand-maintain {{public_headers}} public header names.</p>
+
+<h2>Verification snapshot</h2>
+<p>The selected source registers {{component_test_executables}} physical component test executables and {{integration_test_executables_words}}. The complete measured gate at that same SHA discovered and ran {{gate_cases}} GoogleTest cases: {{gate_passed}} passed, {{gate_skipped_words}}, and {{gate_failed_words}}. Five failures expose a Ping/raw-ICMP fallback gap under the host’s ping-group policy; one depends on missing IPv6 host state. Component graph, selective consumer, negative boundary, catalogue, and documentation checks provide evidence that a large pass count cannot provide by itself.</p>
+
+<h2>Choose a path</h2>
+<div class="page-index">
+  <a href="getting-started.html">Build a first consumer<small>Select one physical target and observe its closure.</small></a>
+  <a href="development/porting-csharp-code.html">Port C# deliberately<small>Translate language shapes, ownership, and behavioral reductions.</small></a>
+  <a href="architecture.html">Study the architecture<small>Understand ownership, visibility, platform, and test layers.</small></a>
+  <a href="development/adding-runtime-features.html">Contribute an API<small>Choose an owner and prove behavior and boundaries.</small></a>
+</div>

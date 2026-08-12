@@ -1,0 +1,67 @@
+<h2>What a negative fixture proves</h2>
+<p>A negative consumer fixture proves that deliberately invalid public-consumer code is rejected for the intended reason. It is appropriate for private seams, deleted operations, template requirements, forbidden conversions, or a header that must not enter a component’s public include closure.</p>
+<div class="callout"><div class="callout-title">Compilation failure alone is not evidence</div><p>An unrelated broken include can make every forbidden line appear protected. Sharp Runtime compiles an all-sites-off baseline and then enables one numbered site at a time, checking that diagnostics point into that site and contain a declared fragment.</p></div>
+
+<h2>Create the fixture</h2>
+<pre><code class="language-cpp">// NEGATIVE-FIXTURE: component=Collections.Core
+#include "System/Collections/Generic/List.hpp"
+
+#ifndef SHARP_RUNTIME_NEGATIVE_SITE
+#define SHARP_RUNTIME_NEGATIVE_SITE 0
+#endif
+
+int main() {
+    System::Collections::Generic::List&lt;int&gt; values;
+
+#if SHARP_RUNTIME_NEGATIVE_SITE == 1
+    // NEGATIVE(copy-from-const-view): expected diagnostic fragment
+    //     | second accepted compiler diagnostic fragment
+    deliberately_invalid_expression(values);
+#else
+    values.Add(1); // migrated/valid spelling keeps baseline compilable
+#endif
+    return 0;
+}</code></pre>
+<p>This is a scaffold, not a ready repository fixture: replace both the marker id and diagnostic fragments with the actual compiler output for the contract under test. Site numbers must be contiguous from 1, marker ids unique, and every enabled site must add—not remove—code relative to the clean baseline.</p>
+
+<h2>Select the real owning component</h2>
+<p>The <code>NEGATIVE-FIXTURE</code> directive names a physical component registered in CMake. The checker derives that target’s public include directories, definitions, language features, options, and public dependency closure. It intentionally does not expose private dependencies, which is often exactly the boundary being tested.</p>
+
+<h2>Write stable diagnostic expectations</h2>
+<p>Use one or more short semantic fragments from diagnostics, not a complete compiler paragraph with paths, line numbers, template backtraces, or toolchain-specific punctuation. The checker accepts a site only when at least one declared fragment appears and fixture-attributed diagnostics stay inside the enabled region.</p>
+<div class="table-wrap"><table><thead><tr><th>Fragile expectation</th><th>Better expectation</th></tr></thead><tbody>
+<tr><td>Complete GCC message with absolute paths</td><td><code>use of deleted function</code></td></tr>
+<tr><td>Exact template instantiation stack</td><td><code>constraints not satisfied</code></td></tr>
+<tr><td>Only “compilation failed”</td><td>A fragment identifying the protected contract</td></tr>
+</tbody></table></div>
+
+<h2>Run one fixture with one compiler job</h2>
+<pre><code class="language-bash">SHARP_RUNTIME_BUILD_JOBS=1 \
+python3 scripts/check_negative_consumer_fixtures.py \
+  --root /path/to/pinned/sharp-runtime \
+  --fixture 'collections_mutation_version_negative.cpp' \
+  --jobs 1 \
+  --no-ccache \
+  --verbose</code></pre>
+<p>The checker permits one or two jobs; explicit <code>--jobs 1</code> is the conservative choice on a memory-constrained host. Use <code>--list</code> first to inspect discovered fixtures and site identifiers without compiling them.</p>
+
+<h2>Interpret the outcomes</h2>
+<ul>
+  <li><strong>Baseline fails:</strong> repair the fixture scaffolding or public include closure before trusting site results.</li>
+  <li><strong>Site compiles:</strong> the formerly forbidden expression is now legal; decide whether that is an intended API change.</li>
+  <li><strong>Site fails outside its region:</strong> the failure does not prove the intended contract.</li>
+  <li><strong>Expected fragment absent:</strong> review whether the compiler found a different, possibly earlier error.</li>
+  <li><strong>Unknown component:</strong> correct ownership rather than supplying ad hoc include paths.</li>
+</ul>
+
+<h2>Keep a positive migration path</h2>
+<p>The all-sites-off branch should show the supported replacement when one exists. A private test seam may have no consumer migration; say so in the file and point users to the public observable behavior they can test instead. Avoid documenting private implementation names as if consumers may depend on them.</p>
+
+<h2>Complete boundary validation</h2>
+<p>Run the fixture checker alongside the repository’s module-boundary validator and ordinary positive consumer fixtures. The three answer different questions:</p>
+<ol>
+  <li>Can a valid consumer build and link?</li>
+  <li>Does a forbidden expression remain rejected for the intended reason?</li>
+  <li>Does the declared component graph expose exactly the intended headers and links?</li>
+</ol>
+<p>Record compiler identity and selected source SHA with results. A negative diagnostic validated on GCC is not automatically a current Clang or MSVC evidence claim.</p>

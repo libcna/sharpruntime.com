@@ -96,11 +96,18 @@ def expected_canonical(relative: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--runtime", type=Path, help="Also verify component data against this checkout")
+    parser.add_argument(
+        "--runtime",
+        type=Path,
+        help="Also verify every pinned source fact against this explicit checkout",
+    )
     args = parser.parse_args()
     failures: list[str] = []
 
-    html_files = sorted(ROOT.rglob("*.html"))
+    html_files = sorted(
+        path for path in ROOT.rglob("*.html")
+        if "content" not in path.relative_to(ROOT).parts
+    )
     documents: dict[Path, Document] = {}
     for path in html_files:
         relative = path.relative_to(ROOT).as_posix()
@@ -219,7 +226,20 @@ def main() -> int:
     # Whole-worktree sweeps, excluding Git internals and Python caches.
     legacy_hits: list[str] = []
     stale_hits: list[str] = []
-    stale_patterns = [r"40 physical", r"983 public", r"369 test", r"C\+\+17", r"C\+\+20"]
+    stale_patterns = [
+        r"f827a6c5349234d5ac938886788ed8eca8fe1c10",
+        r"16,341",
+        r"16,310",
+        r"16,303",
+        r"37 test executables",
+        r"17,057",
+        r"16,941",
+        r"40 physical",
+        r"983 public",
+        r"369 test",
+        r"C\+\+17",
+        r"C\+\+20",
+    ]
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or "__pycache__" in path.parts:
             continue
@@ -245,10 +265,15 @@ def main() -> int:
         failures.append("robots.txt does not point to the canonical sitemap")
 
     if args.runtime:
-        command = [sys.executable, str(ROOT / "tools" / "sync_components.py"), "--runtime", str(args.runtime), "--check"]
+        command = [
+            sys.executable,
+            str(ROOT / "tools" / "verify_source_facts.py"),
+            "--runtime",
+            str(args.runtime),
+        ]
         result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
         if result.returncode:
-            failures.append("component synchronization failed: " + (result.stderr or result.stdout).strip())
+            failures.append("source-fact verification failed: " + (result.stderr or result.stdout).strip())
 
     if failures:
         print("Site validation failed:")
@@ -267,6 +292,8 @@ def main() -> int:
     print("JSON/XML parsing: OK")
     print("Legacy-domain leaks: 0")
     print("Stale global-fact sweep: OK")
+    if args.runtime:
+        print("Pinned source-fact drift check: OK")
     return 0
 
 

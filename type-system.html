@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Type System and Core Values | Sharp Runtime</title>
-  <meta name="description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <title>Type System | Sharp Runtime</title>
+  <meta name="description" content="Sharp Runtime primitive aliases, native values, Object, Type, strings, arrays, spans, nullable, enums, boxing limits, casts, equality, and ownership.">
   <link rel="canonical" href="https://sharpruntime.com/type-system.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
-  <meta property="og:title" content="Type System and Core Values | Sharp Runtime">
-  <meta property="og:description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <meta property="og:title" content="Type System | Sharp Runtime">
+  <meta property="og:description" content="Sharp Runtime primitive aliases, native values, Object, Type, strings, arrays, spans, nullable, enums, boxing limits, casts, equality, and ownership.">
   <meta property="og:url" content="https://sharpruntime.com/type-system.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Type System and Core Values | Sharp Runtime">
-  <meta name="twitter:description" content="Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.">
+  <meta name="twitter:title" content="Type System | Sharp Runtime">
+  <meta name="twitter:description" content="Sharp Runtime primitive aliases, native values, Object, Type, strings, arrays, spans, nullable, enums, boxing limits, casts, equality, and ownership.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Type System and Core Values", "description": "Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.", "url": "https://sharpruntime.com/type-system.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Type System and Core Values", "item": "https://sharpruntime.com/type-system.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Type System", "description": "Sharp Runtime primitive aliases, native values, Object, Type, strings, arrays, spans, nullable, enums, boxing limits, casts, equality, and ownership.", "url": "https://sharpruntime.com/type-system.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Type System", "item": "https://sharpruntime.com/type-system.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,15 +33,147 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html" aria-current="page">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Type System and Core Values</span></nav><h1>Type System and Core Values</h1><p class="lead">Primitive aliases, wrappers, Object, Type, nullable, enums, date/time and conversions.</p><div class="page-meta"><span>Concepts</span><span>Source f827a6c5</span></div>
-<h2 id="categories">Type categories</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Category</th><th scope="col">Examples</th><th scope="col">Native consideration</th></tr></thead><tbody><tr><td>Primitive aliases</td><td><code>intcs</code>, <code>longcs</code>, byte/unsigned aliases</td><td>Fixed intent, but C++ overload/formatting rules apply</td></tr><tr><td>Wrappers</td><td>Numeric and value wrappers</td><td>Copyable native values with curated .NET-shaped APIs</td></tr><tr><td>Object / Type</td><td>Base identity and runtime type naming</td><td>Not a CLR metadata graph</td></tr><tr><td>Array / Span / Memory</td><td>Owned sequences and borrowed views</td><td>View lifetime must not exceed backing storage</td></tr><tr><td>Nullable / enums</td><td>Optional/value and enum compatibility helpers</td><td>Template and C++ enum semantics remain visible</td></tr><tr><td>Date/time</td><td>DateTime, DateOnly, TimeOnly, TimeSpan, TimeZoneInfo</td><td>Local-zone and platform data matter</td></tr></tbody></table></div>
-<h2 id="conversion">Conversion and validation</h2><p>Conversions and parsers are implemented per type. Edge behavior—including overflow, separators, culture and Try-output rules—has been an active compatibility-audit area; consult tests when contributing rather than copying an old overview count.</p></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html" aria-current="page">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O overview</a><a href="docs/io/streams.html">Streams & readers</a><a href="docs/io/filesystem.html">Filesystem</a><a href="docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Type System</span></nav><h1>Type System</h1><p class="lead">Use familiar type landmarks without mistaking native C++ values, ownership, RTTI, and templates for a CLR type system.</p><div class="page-meta"><span>Core model</span><span>Ownership</span><span>Compatibility boundaries</span></div>
+<h2 id="a-native-type-system-with-compatibility-landmarks">A native type system with compatibility landmarks</h2>
+<p>Sharp Runtime does not recreate the Common Type System. C++ remains the language and runtime: templates are instantiated at compile time, values have native layout, polymorphism is opt-in, RTTI is compiler-provided, destructors are deterministic, and there is no managed heap. The library supplies familiar aliases, wrappers, interfaces, exceptions, and helper algorithms where they make source ports clearer.</p>
+<p>The most important design question is therefore not “what is the C++ spelling of this C# type?” but “is this concept a value, an owner, a shared identity, or a borrow in this port?” The spelling follows that decision.</p>
+
+<h2 id="primitive-aliases">Primitive aliases</h2>
+<p><code>SharpRuntime/SharpRuntimeHelper.hpp</code> defines exact-width aliases used throughout the library and by ports. They are type aliases, not boxed runtime objects.</p>
+<div class="table-wrap"><table><thead><tr><th>C# name</th><th>Sharp Runtime alias</th><th>Native type and width</th></tr></thead><tbody>
+<tr><td><code>sbyte</code> / <code>SByte</code></td><td><code>sbytecs</code> / <code>SByte</code></td><td><code>int8_t</code>, 8-bit signed</td></tr>
+<tr><td><code>byte</code> / <code>Byte</code></td><td><code>bytecs</code> / <code>Byte</code></td><td><code>uint8_t</code>, 8-bit unsigned</td></tr>
+<tr><td><code>short</code> / <code>Int16</code></td><td><code>shortcs</code> / <code>Int16</code></td><td><code>int16_t</code>, 16-bit signed</td></tr>
+<tr><td><code>ushort</code> / <code>UInt16</code></td><td><code>ushortcs</code> / <code>UInt16</code></td><td><code>uint16_t</code>, 16-bit unsigned</td></tr>
+<tr><td><code>int</code> / <code>Int32</code></td><td><code>intcs</code> / <code>Int32</code></td><td><code>int32_t</code>, 32-bit signed</td></tr>
+<tr><td><code>uint</code> / <code>UInt32</code></td><td><code>uintcs</code> / <code>UInt32</code></td><td><code>uint32_t</code>, 32-bit unsigned</td></tr>
+<tr><td><code>long</code> / <code>Int64</code></td><td><code>longcs</code> / <code>Int64</code></td><td><code>int64_t</code>, 64-bit signed</td></tr>
+<tr><td><code>ulong</code> / <code>UInt64</code></td><td><code>ulongcs</code> / <code>UInt64</code></td><td><code>uint64_t</code>, 64-bit unsigned</td></tr>
+<tr><td><code>float</code> / <code>Single</code></td><td><code>Single</code></td><td><code>float</code></td></tr>
+<tr><td><code>char</code></td><td><code>charcs</code></td><td><code>char16_t</code>, a UTF-16 code unit type</td></tr>
+<tr><td><code>string</code></td><td><code>String</code></td><td><code>std::string</code>, used as UTF-8 byte storage</td></tr>
+<tr><td><code>IntPtr</code></td><td><code>IntPtr</code></td><td><code>std::uintptr_t</code>, unsigned pointer-sized integer</td></tr>
+</tbody></table></div>
+<p>The aliases reproduce useful widths and names. They do not import checked arithmetic, CLR numeric conversions, boxing identity, or metadata. Signed overflow still follows C++ rules unless a checked wrapper or algorithm explicitly intercepts it.</p>
+<div class="callout callout--warning"><div class="callout-title">Two different character units</div><p><code>charcs</code> is a 16-bit code unit, while the common <code>String</code> representation stores UTF-8 bytes. Do not index an <code>std::string</code> with a UTF-16 offset or assume one <code>char</code> is one user-visible character.</p></div>
+
+<h2 id="value-like-types">Value-like types</h2>
+<p>Primitive aliases, numeric wrappers, <code>DateTime</code>-shaped structures, <code>Guid</code>, <code>Version</code>, <code>Nullable&lt;T&gt;</code>, vectors and matrices, strings, and many option/result types are ordinary C++ values. Construction, assignment, copying, moving, destruction, alignment, and container placement follow their C++ definitions.</p>
+<p>A value member is usually the safest translation for a required C# value type. It cannot be null, it shares the enclosing object’s lifetime, and its destructor runs deterministically. But copying a native value may duplicate state where managed code copied only a reference. Review each port for identity rather than classifying by name alone.</p>
+
+<h2 id="reference-like-and-polymorphic-types">Reference-like and polymorphic types</h2>
+<p>Some hierarchies participate in <code>System::Object</code>, some implement native abstract interfaces, and some APIs exchange pointers or smart pointers. C++ has no universal reference-type category. The port must choose an owner:</p>
+<div class="table-wrap"><table><thead><tr><th>Need</th><th>Typical C++ form</th><th>Consequence</th></tr></thead><tbody>
+<tr><td>Required subobject with same lifetime</td><td>Direct member</td><td>No null; enclosing owner controls destruction</td></tr>
+<tr><td>Exclusive dynamic object</td><td><code>std::unique_ptr&lt;T&gt;</code></td><td>Move-only ownership; borrows invalidate on destruction</td></tr>
+<tr><td>Genuinely shared identity</td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Reference count retains object; cycles need <code>weak_ptr</code></td></tr>
+<tr><td>Non-owning observer</td><td>Reference or raw pointer</td><td>Caller must prove owner outlives access</td></tr>
+<tr><td>Optional value</td><td><code>Nullable&lt;T&gt;</code> or <code>std::optional&lt;T&gt;</code></td><td>Presence is distinct from pointer identity</td></tr>
+</tbody></table></div>
+
+<h2 id="system-object-an-opt-in-base">System::Object: an opt-in base</h2>
+<p><code>System::Object</code> is an abstract polymorphic base for participating Sharp Runtime hierarchies. Its virtual destructor allows destruction through an <code>Object*</code>. Default <code>Equals</code> uses pointer identity, static <code>ReferenceEquals</code> compares pointers, and default <code>GetHashCode</code> derives a non-negative value from the address. A derived value-equality class must override equality and hashing together.</p>
+<p><code>ToString</code> defaults to the project-specific <code>GetTypeName</code>. Concrete derived classes supply a stable type-name string, commonly through declaration/definition macros. <code>GetType</code> uses <code>typeid(*this)</code> to observe the dynamic C++ type.</p>
+<p>None of this makes <code>Object</code> a universal root. <code>std::string</code>, <code>std::vector</code>, primitives, templates, and unrelated native classes do not acquire an object header or become assignable to <code>Object*</code>. Code that accepts arbitrary managed <code>object</code> must be redesigned around a constrained variant, template, interface, or explicitly owned hierarchy.</p>
+
+<h2 id="system-type-and-the-reflection-boundary">System::Type and the reflection boundary</h2>
+<p><code>System::Type</code> wraps a pointer to <code>std::type_info</code>. <code>Type::From&lt;T&gt;()</code> represents a compile-time C++ type, while <code>Object::GetType()</code> wraps dynamic RTTI. Equality compares RTTI identity and hashing uses <code>type_info::hash_code</code>.</p>
+<p>This is type identity, not CLR reflection. Names come from <code>type_info::name()</code> and may be mangled. <code>Name</code> and <code>FullName</code> return the same string. The current <code>IsClass</code>, <code>IsValueType</code>, <code>IsAbstract</code>, <code>IsSealed</code>, and <code>IsInterface</code> properties are fixed compatibility stubs; they are not mutually dependable classifications. There is no member enumeration, custom-attribute discovery, generic metadata, dynamic construction table, or method invocation engine.</p>
+<pre><code class="language-cpp">const System::Type key = System::Type::From&lt;MyService&gt;();
+
+// Appropriate: an RTTI-backed key or identity comparison.
+services.emplace(key, service);
+
+// Inappropriate: branching on getIsValueTypeProperty() as CLR truth.</code></pre>
+
+<h2 id="strings">Strings</h2>
+<p><code>SharpRuntime::String</code> is an alias for <code>std::string</code>. It owns its byte buffer, copies and moves as a native value, can be mutated, and cannot represent managed null by itself. <code>System::String</code> is a deleted-constructor static helper class over that representation; it is not a wrapper instance.</p>
+<p>Most indices and lengths are UTF-8 byte units. Substring returns a copy, not a shared backing view. Comparisons are byte-oriented, and the six <code>StringComparison</code> names collapse largely to case-sensitive versus per-byte case-insensitive behavior; they do not provide complete current/invariant/ordinal culture engines. Hashes use native <code>std::hash&lt;std::string&gt;</code> and are not stable serialized identifiers or .NET-compatible hash codes.</p>
+
+<h2 id="arrays-and-owned-sequences">Arrays and owned sequences</h2>
+<p>The common one-dimensional owned sequence is <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> is a static algorithm class operating primarily on vectors and some raw buffers. It offers sorting, copying, clearing, searching, reversing, resizing, and related helpers; it is not a base object for every array.</p>
+<p>A vector owns elements and may reallocate when size or capacity changes. Reallocation invalidates pointers, references, iterators, spans, memory views, and segments into its old storage. Copying a vector copies elements according to <code>T</code>; copying a vector of <code>shared_ptr</code> shares pointees, while copying values duplicates them. Raw-buffer overloads cannot validate capacity because pointers carry no length; callers must supply valid storage.</p>
+<p>There is no general CLR rectangular multidimensional array model in the current core. Use nested vectors for jagged structure, a checked flattened index for rectangular data, or a domain-specific matrix type where appropriate. Document layout and bounds rather than assuming C# array rank behavior.</p>
+
+<h2 id="span-readonlyspan-memory-and-arraysegment">Span, ReadOnlySpan, Memory, and ArraySegment</h2>
+<p><code>Span&lt;T&gt;</code> and <code>ReadOnlySpan&lt;T&gt;</code> are pointer-plus-length views over contiguous native elements. They bounds-check indexing and slicing, and their copy operations are overlap-safe. Equality describes view identity—pointer and length—not sequence content. They never own or extend the source lifetime.</p>
+<p><code>Memory&lt;T&gt;</code> and <code>ReadOnlyMemory&lt;T&gt;</code> are also non-owning in this implementation: they retain a pointer to a vector plus offset and length. This is a major difference from managed <code>Memory&lt;T&gt;</code>, which can retain its backing owner. The current <code>Pin</code> exposes a pointer in a <code>MemoryHandle</code>; it does not prevent a native vector from reallocating and does not retain that vector.</p>
+<p><code>ArraySegment&lt;T&gt;</code> is a borrowed vector range. A default segment is empty/null-shaped and several property or operation accesses reject it, while iteration over its null begin/end behaves as an empty range. Do not retain any of these views across vector mutation unless the operation is proven not to relocate storage.</p>
+
+<h2 id="nullable-values">Nullable values</h2>
+<p><code>System::Nullable&lt;T&gt;</code> wraps <code>std::optional&lt;T&gt;</code>. A default instance has no value; construction from <code>T</code> stores a value. <code>HasValue</code> reports presence, <code>Value</code> returns the contained value or throws <code>InvalidOperationException</code> when absent, and <code>GetValueOrDefault</code> returns either the value or an established default.</p>
+<div class="table-wrap"><table><thead><tr><th>C#</th><th>Sharp Runtime / C++</th><th>Porting note</th></tr></thead><tbody>
+<tr><td><code>int? score = null;</code></td><td><code>System::Nullable&lt;int&gt; score;</code></td><td>No heap allocation or object boxing</td></tr>
+<tr><td><code>score.HasValue</code></td><td><code>score.getHasValueProperty()</code></td><td>Property naming follows current generated accessor conventions</td></tr>
+<tr><td><code>score.Value</code></td><td><code>score.getValueProperty()</code></td><td>Throws when absent</td></tr>
+<tr><td><code>score ?? 0</code></td><td><code>score.GetValueOrDefault()</code></td><td>Or branch explicitly when fallback is not <code>T{}</code></td></tr>
+</tbody></table></div>
+<p>The contained type controls copy, move, destruction, and resource semantics. A nullable <code>unique_ptr</code> usually adds little; the pointer is already nullable. A nullable value is different from a borrowed pointer that can dangle.</p>
+
+<h2 id="enums">Enums</h2>
+<p>C++ <code>enum class</code> remains the primary representation for closed named integral choices. Sharp Runtime supplies enum-shaped helpers and numerous familiar enum declarations, but there is no CLR metadata table that automatically maps every value to attributes or names. Numeric conversion, parsing, validation, and flags behavior exist only where the concrete enum/helper implements them.</p>
+<p>Use explicit casts at interop boundaries and validate unknown integral values when the upstream protocol can evolve. Do not assume that a value lying within the underlying integer range is a declared enum member.</p>
+
+<h2 id="boxing-and-unboxing">Boxing and unboxing</h2>
+<p>There is no general boxing operation that turns any C++ value into a managed <code>Object</code>. The current <code>RuntimeHelpers::Box</code> path throws <code>PlatformNotSupportedException</code>. Consequently, APIs that rely on arbitrary <code>object</code> payloads need an explicit native representation such as:</p>
+<ul>
+  <li>a constrained <code>std::variant</code> for a closed set of values;</li>
+  <li>a polymorphic base plus smart pointers for a deliberate hierarchy;</li>
+  <li>a type-erased callable or <code>std::any</code> when its reduced guarantees are acceptable;</li>
+  <li>a template when the type is known at compile time.</li>
+</ul>
+<p>Each alternative has different lifetime, conversion, and failure behavior. Hiding the choice behind a fake boxing label makes a port harder to reason about.</p>
+
+<h2 id="casts-and-type-tests">Casts and type tests</h2>
+<p>Use C++ casts according to the representation. <code>dynamic_cast</code> is appropriate for a polymorphic hierarchy with RTTI; <code>static_cast</code> is appropriate only when the relationship is established; numeric casts may narrow and should be validated or replaced by checked helpers; pointer casts do not establish ownership.</p>
+<div class="table-wrap"><table><thead><tr><th>C# intent</th><th>Native technique</th><th>Boundary</th></tr></thead><tbody>
+<tr><td><code>x is IFoo</code></td><td><code>dynamic_cast&lt;IFoo*&gt;(x) != nullptr</code></td><td>Requires a participating polymorphic hierarchy</td></tr>
+<tr><td><code>x as IFoo</code></td><td><code>dynamic_cast&lt;IFoo*&gt;(x)</code></td><td>Borrowed pointer; owner remains elsewhere</td></tr>
+<tr><td>Numeric conversion</td><td>Checked helper or validated <code>static_cast</code></td><td>C++ narrowing and overflow rules differ</td></tr>
+<tr><td>Generic conversion</td><td>Constrained template/converter</td><td>No universal CLR conversion service</td></tr>
+</tbody></table></div>
+
+<h2 id="equality-and-hashing">Equality and hashing</h2>
+<p>Equality is type-specific. Native values usually use their operators. <code>Object</code> defaults to identity. Collection comparers may impose .NET-oriented policies—for example, current array sorting treats floating-point NaN ordering deliberately rather than passing a non-strict comparator to <code>std::sort</code>. String helper equality is byte/case-policy based.</p>
+<p>The invariant is familiar but still manual: if a type supplies value equality, equal values must produce equal hashes under the comparer used by a dictionary or set. Address-derived object hashes are only suitable for identity equality. Standard-library hash results and RTTI hashes should not be persisted or compared with .NET outputs.</p>
+
+<h2 id="conversions-and-formatting">Conversions and formatting</h2>
+<p>Wrapper types expose parsing and conversion surfaces where implemented. They may translate established overflow, format, and argument errors into Sharp Runtime exceptions. That does not create CLR-wide <code>IConvertible</code> semantics. Culture inputs, floating special values, integer widths, and native compiler capabilities remain part of each contract.</p>
+<p>Composite string formatting supports a bounded grammar and a bounded set of argument behavior, using native/classic-locale machinery. It is not a general reflection-based formatter. Encoding conversions belong to <code>System::Text</code>; they should not be replaced with byte reinterpretation when source and destination encodings differ.</p>
+
+<h2 id="interfaces">Interfaces</h2>
+<p>Interfaces are expressed as C++ abstract base classes or templates. They provide compile-time names and virtual contracts, not CLR interface maps. Use virtual destructors when deleting through an interface pointer. Decide whether an API borrows an interface, uniquely owns it, or shares it; the interface declaration itself does not answer that question.</p>
+<p>Default interface methods, variance, runtime interface enumeration, and arbitrary managed casts do not appear automatically. Some familiar generic variance can be represented through templates, but each C++ instantiation remains a distinct type.</p>
+
+<h2 id="exceptions-are-types-not-a-clr">Exceptions are types, not a CLR</h2>
+<p>The runtime defines a broad hierarchy of familiar exception names. They are thrown as native C++ objects, caught by reference, and unwind destructors. Causal exceptions may be retained through the implemented pointer fields; native system errors are translated at component boundaries. Exact message text, stack traces, filters, serialization, and managed dispatch behavior are not universal.</p>
+<pre><code class="language-cpp">try {
+    const auto value = nullable.getValueProperty();
+    use(value);
+} catch (const System::InvalidOperationException&amp; error) {
+    log(error.what());
+}</code></pre>
+
+<h2 id="ownership-consequences-at-a-glance">Ownership consequences at a glance</h2>
+<div class="table-wrap"><table><thead><tr><th>Type family</th><th>Usually owns?</th><th>Invalidation or lifetime concern</th></tr></thead><tbody>
+<tr><td>Primitive/wrapper/value</td><td>Owns its value</td><td>Copy/move and native overflow</td></tr>
+<tr><td><code>std::string</code>/<code>std::vector</code></td><td>Own their buffers/elements</td><td>Mutation can invalidate references and views</td></tr>
+<tr><td><code>Span</code>/<code>Memory</code>/<code>ArraySegment</code></td><td>No</td><td>Owner destruction or relocation</td></tr>
+<tr><td><code>Object*</code>/interface pointer</td><td>Not by itself</td><td>Must identify a longer-lived owner</td></tr>
+<tr><td><code>unique_ptr</code></td><td>Yes, exclusively</td><td>Moves transfer ownership</td></tr>
+<tr><td><code>shared_ptr</code></td><td>Yes, jointly</td><td>Cycles and delayed cleanup</td></tr>
+<tr><td>Delegate/event callback</td><td>Owns captures according to callable</td><td>Publisher may outlive captured objects</td></tr>
+</tbody></table></div>
+
+<h2 id="what-has-no-native-clr-equivalent">What has no native CLR equivalent</h2>
+<p>Compiler templates, deterministic destructors, references, move-only ownership, allocator behavior, iterator invalidation, object layout, undefined behavior, and ABI compatibility have no direct CLR equivalents. Conversely, garbage-collector reachability, universal boxing, runtime generic metadata, managed array covariance, reflection invocation, and assembly loading have no direct Sharp Runtime equivalents.</p>
+<p>A high-quality port acknowledges both directions. Use Sharp Runtime where a familiar API and tested behavior reduce translation risk; use idiomatic C++ where emulating a managed-only mechanism would hide lifetime or type constraints.</p><nav class="next-links" aria-label="Previous and next pages"><span></span><a href="strings.html"><span class="next-label">Next</span>Strings and Text</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#a-native-type-system-with-compatibility-landmarks">A native type system with compatibility landmarks</a><a class="toc-level-2" href="#primitive-aliases">Primitive aliases</a><a class="toc-level-2" href="#value-like-types">Value-like types</a><a class="toc-level-2" href="#reference-like-and-polymorphic-types">Reference-like and polymorphic types</a><a class="toc-level-2" href="#system-object-an-opt-in-base">System::Object: an opt-in base</a><a class="toc-level-2" href="#system-type-and-the-reflection-boundary">System::Type and the reflection boundary</a><a class="toc-level-2" href="#strings">Strings</a><a class="toc-level-2" href="#arrays-and-owned-sequences">Arrays and owned sequences</a><a class="toc-level-2" href="#span-readonlyspan-memory-and-arraysegment">Span, ReadOnlySpan, Memory, and ArraySegment</a><a class="toc-level-2" href="#nullable-values">Nullable values</a><a class="toc-level-2" href="#enums">Enums</a><a class="toc-level-2" href="#boxing-and-unboxing">Boxing and unboxing</a><a class="toc-level-2" href="#casts-and-type-tests">Casts and type tests</a><a class="toc-level-2" href="#equality-and-hashing">Equality and hashing</a><a class="toc-level-2" href="#conversions-and-formatting">Conversions and formatting</a><a class="toc-level-2" href="#interfaces">Interfaces</a><a class="toc-level-2" href="#exceptions-are-types-not-a-clr">Exceptions are types, not a CLR</a><a class="toc-level-2" href="#ownership-consequences-at-a-glance">Ownership consequences at a glance</a><a class="toc-level-2" href="#what-has-no-native-clr-equivalent">What has no native CLR equivalent</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

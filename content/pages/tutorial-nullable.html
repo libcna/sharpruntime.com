@@ -1,0 +1,43 @@
+<h2>Goal and component</h2>
+<p>Represent a value that may be absent without allocating an object or using a sentinel. <code>Nullable&lt;T&gt;</code> belongs to <code>Core.Base</code> and wraps <code>std::optional&lt;T&gt;</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Core.Base)
+target_link_libraries(app PRIVATE SharpRuntime::Core.Base)</code></pre>
+
+<h2>Create present and absent values</h2>
+<pre><code class="language-cpp">#include &lt;System/Nullable.hpp&gt;
+
+System::Nullable&lt;int&gt; missing;
+System::Nullable&lt;int&gt; score = 42;
+
+if (!missing.getHasValueProperty() &amp;&amp;
+    score.getHasValueProperty()) {
+    const int value = score.getValueProperty();
+    (void)value;
+}</code></pre>
+<p>A default value is absent. Construction from <code>T</code> is intentionally implicit, mirroring the convenient C# conversion from <code>T</code> to <code>T?</code>. <code>getValueProperty()</code> returns a const reference and throws <code>InvalidOperationException</code> when absent.</p>
+
+<h2>Choose a fallback</h2>
+<pre><code class="language-cpp">const int defaultLimit = missing.GetValueOrDefault();   // int{} == 0
+const int configured = missing.GetValueOrDefault(100); // explicit policy
+</code></pre>
+<p>Prefer the explicit overload when the domain fallback is not the type’s default. Do not translate every C# <code>??</code> into zero or empty text by convention.</p>
+
+<h2>Equality has a floating-point nuance</h2>
+<p><code>Nullable::Equals</code> uses the runtime’s default-equality policy, which treats two floating NaNs as equal and supplies a matching hash. <code>operator==</code> models C# lifted <code>==</code> and uses the underlying operator, so two nullable NaNs compare false. That asymmetry is deliberate and tested.</p>
+
+<h2>Nullable is not pointer ownership</h2>
+<div class="table-wrap"><table><thead><tr><th>Need</th><th>Use</th></tr></thead><tbody>
+<tr><td>Optional small/value type</td><td><code>Nullable&lt;T&gt;</code> or <code>std::optional&lt;T&gt;</code></td></tr>
+<tr><td>Optional exclusive object</td><td><code>std::unique_ptr&lt;T&gt;</code></td></tr>
+<tr><td>Observer that may expire</td><td><code>std::weak_ptr&lt;T&gt;</code></td></tr>
+<tr><td>Borrow that is either present or absent</td><td>Documented raw pointer</td></tr>
+</tbody></table></div>
+<p>The contained <code>T</code> still controls copy, move, destruction, and cost. Avoid <code>Nullable&lt;unique_ptr&lt;T&gt;&gt;</code> unless three states are genuinely required.</p>
+
+<h2>Verify the edge cases</h2>
+<ul>
+  <li>Absent <code>Value</code> throws the expected Sharp Runtime exception.</li>
+  <li>Fallback is evaluated according to your own control flow.</li>
+  <li>Copy/move behavior of a resource-owning <code>T</code> is acceptable.</li>
+  <li>Equality and hash policy match the dictionary/set comparer that consumes it.</li>
+</ul>

@@ -1,0 +1,41 @@
+<h2>Owned sequences, algorithms, and views</h2>
+<p>Sharp Runtime maps most C# one-dimensional array work to an owned <code>std::vector&lt;T&gt;</code>, familiar <code>System::Array</code> algorithms, and explicit borrowed views. Those pieces are intentionally separate: an algorithm class should not pretend to own a vector, and a view should not pretend to retain its owner.</p>
+
+<h2>Selection guide</h2>
+<div class="table-wrap"><table><thead><tr><th>If you need…</th><th>Use…</th><th>Remember…</th></tr></thead><tbody>
+<tr><td>Owned resizable contiguous elements</td><td><code>std::vector&lt;T&gt;</code></td><td>Growth can relocate storage</td></tr>
+<tr><td>Familiar sort/copy/search/clear helpers</td><td><code>System::Array</code></td><td>Static algorithms over vectors/raw buffers</td></tr>
+<tr><td>Synchronous writable borrow</td><td><code>Span&lt;T&gt;</code></td><td>Owner must outlive it</td></tr>
+<tr><td>Synchronous read-only borrow</td><td><code>ReadOnlySpan&lt;T&gt;</code></td><td>Read-only through this alias only</td></tr>
+<tr><td>Offset/count vector view</td><td><code>ArraySegment&lt;T&gt;</code></td><td>Default segment and mutation have edge cases</td></tr>
+<tr><td>Managed-style Memory name</td><td><code>Memory&lt;T&gt;</code></td><td>Still non-owning in this implementation</td></tr>
+<tr><td>Collection interfaces/versioned enumeration</td><td>List-shaped collection</td><td>Element ownership remains a C++ choice</td></tr>
+</tbody></table></div>
+
+<h2>Key differences from C#</h2>
+<ul>
+  <li>There is no universal CLR <code>System.Array</code> base object or runtime covariance.</li>
+  <li>Native <code>vector[]</code> is unchecked; Span and runtime helpers add explicit checks.</li>
+  <li>A vector can resize, so views and references can become invalid.</li>
+  <li>Copying follows the exact C++ element type, including smart-pointer or move-only semantics.</li>
+  <li>Current Memory and ArraySegment types borrow their vector instead of retaining managed storage.</li>
+  <li>Rectangular multidimensional arrays need a deliberate nested, flat, matrix, or domain representation.</li>
+</ul>
+
+<h2>Core component</h2>
+<p>Array, Span, Memory, and ArraySegment are public entries in <code>Core.Base</code>. Select it directly for a narrow consumer:</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Core.Base)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+target_link_libraries(app PRIVATE SharpRuntime::Core.Base)</code></pre>
+
+<h2>Detailed documentation</h2>
+<div class="page-index">
+  <a href="classes/array.html">System::Array reference<small>Sort, copy, resize, search, clear, fill, conversion, and predicate families.</small></a>
+  <a href="internals/array-internals.html">Array internals<small>Ownership, bounds, overlap, views, invalidation, multidimensional choices, and porting.</small></a>
+  <a href="tutorials/use-collections.html">Collections tutorial<small>Choose sequence and element ownership together.</small></a>
+  <a href="type-system.html">Type system<small>Value, reference, nullable, Object, and view relationships.</small></a>
+</div>
+
+<h2>Safety invariant</h2>
+<div class="callout callout--warning"><div class="callout-title">A view is never the owner</div><p>Do not retain Span, Memory, ArraySegment, iterators, references, or raw pointers after owner destruction or vector relocation. Current <code>Memory::Pin</code> exposes a pointer; it does not retain or immobilize native storage.</p></div>

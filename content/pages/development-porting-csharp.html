@@ -1,0 +1,368 @@
+<h2>Port behavior, not punctuation</h2>
+<p>A successful port preserves the behavior that callers depend on while making native ownership, lifetime, threading, and platform constraints explicit. Sharp Runtime supplies familiar landmarks, but C# and C++ remain different languages with different execution models. Start by writing down what the code does, what it owns, which callbacks can escape, which failures are observable, and which runtime-only mechanisms it assumes.</p>
+<div class="callout"><div class="callout-title">Recommended order</div><p>Choose components and representations first. Translate the public shape second. Translate behavior in small tested slices third. A line-by-line transliteration usually postpones the hardest decisions until dangling pointers or semantic reductions are already hidden.</p></div>
+
+<h2>Establish the porting boundary</h2>
+<p>Before changing code, classify the source:</p>
+<ul>
+  <li><strong>Portable domain logic:</strong> calculations, validation, state transitions, and data models can often become direct C++ values.</li>
+  <li><strong>BCL-shaped logic:</strong> strings, collections, files, JSON, XML, networking, and tasks may map to Sharp Runtime components.</li>
+  <li><strong>CLR-dependent logic:</strong> reflection, dynamic invocation, assembly loading, remoting, P/Invoke, GC finalization, and universal boxing require redesign.</li>
+  <li><strong>Platform logic:</strong> paths, watchers, sockets, process behavior, terminals, and time zones need an evidence-backed target matrix.</li>
+</ul>
+<p>Define the supported platforms and input contracts now. “It compiled on Linux” is not evidence of Windows runtime behavior; a matching method name is not evidence of every .NET edge case.</p>
+
+<h2>Select components before writing includes</h2>
+<p>Request direct physical needs. CMake resolves their transitive closure. This makes dependencies reviewable and prevents a port from relying accidentally on <code>All</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS
+    Collections.Core
+    IO
+    Text.Json
+)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+
+target_link_libraries(ported_app PRIVATE
+    SharpRuntime::Collections.Core
+    SharpRuntime::IO
+    SharpRuntime::Text.Json
+)</code></pre>
+<p>Use the <a href="../api/index.html">API inventory</a> to identify a header’s owner. Do not add global include directories or list private/transitive targets merely to make compilation pass.</p>
+
+<h2>Namespaces</h2>
+<p>C# dotted namespaces become nested C++ namespaces. Modern C++23 nested namespace syntax is concise, but headers and sources still need normal declarations and definitions.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">namespace Game.Model;
+
+public sealed class Score
+{
+    public int Value { get; }
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">namespace Game::Model
+{
+    class Score final
+    {
+    public:
+        explicit Score(int value) : value_(value) {}
+        [[nodiscard]] int getValueProperty() const noexcept
+        {
+            return value_;
+        }
+
+    private:
+        int value_;
+    };
+}</code></pre></div></div>
+<p>Do not put <code>using namespace</code> directives in public headers. Fully qualify types when two familiar namespaces contain the same short name.</p>
+
+<h2>Classes, structs, and value decisions</h2>
+<p>C# <code>class</code> says “managed reference type”; C++ <code>class</code> says nothing about heap allocation or shared identity. Decide the representation from semantics:</p>
+<div class="table-wrap"><table><thead><tr><th>C# intent</th><th>Typical C++ representation</th><th>Review</th></tr></thead><tbody>
+<tr><td>Small immutable/value-like data</td><td>Direct class/struct value</td><td>Copy/move cost and equality</td></tr>
+<tr><td>Unique polymorphic service</td><td><code>std::unique_ptr&lt;Interface&gt;</code></td><td>Virtual destructor and borrow lifetime</td></tr>
+<tr><td>Shared long-lived identity</td><td><code>std::shared_ptr&lt;T&gt;</code></td><td>Cycles and delayed deterministic cleanup</td></tr>
+<tr><td>Observer of an existing owner</td><td>Reference/raw pointer/<code>weak_ptr</code></td><td>Prove the owner outlives every access</td></tr>
+<tr><td>Optional value</td><td><code>Nullable&lt;T&gt;</code>/<code>optional&lt;T&gt;</code></td><td>Different from optional object ownership</td></tr>
+</tbody></table></div>
+<p>A direct value should be the default when identity is not observable. Do not allocate every translated C# class with <code>new</code>; that recreates managed syntax without a collector.</p>
+
+<h2>Constructors and initialization</h2>
+<p>Use member initializer lists. Establish class invariants before the constructor body, validate inputs before publishing the object, and let members clean themselves up if construction throws.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">public sealed class Endpoint
+{
+    public string Host { get; }
+    public int Port { get; }
+
+    public Endpoint(string host, int port)
+    {
+        Host = host ?? throw new ArgumentNullException(nameof(host));
+        if (port is &lt; 1 or &gt; 65535)
+            throw new ArgumentOutOfRangeException(nameof(port));
+        Port = port;
+    }
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">class Endpoint final
+{
+public:
+    Endpoint(std::string host, int port)
+        : host_(std::move(host)), port_(port)
+    {
+        if (host_.empty())
+            throw System::ArgumentException("host");
+        if (port_ &lt; 1 || port_ &gt; 65535)
+            throw System::ArgumentOutOfRangeException("port");
+    }
+
+private:
+    std::string host_;
+    int port_;
+};</code></pre></div></div>
+<p>The C++ value cannot be null; the example chooses empty as invalid because that is its own contract. If null and empty were distinct source values, use an optional parameter instead.</p>
+
+<h2>Inheritance and interfaces</h2>
+<p>Translate an interface to a native abstract base with a virtual destructor. Use <code>override</code> on every override and <code>final</code> where further inheritance is not intended.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">public interface IClock
+{
+    DateTime UtcNow { get; }
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">class IClock
+{
+public:
+    virtual ~IClock() = default;
+    [[nodiscard]] virtual System::DateTime
+        getUtcNowProperty() const = 0;
+};</code></pre></div></div>
+<p>Pass the interface by reference for a synchronous borrow, <code>unique_ptr</code> for transfer, or <code>shared_ptr</code> for genuine shared ownership. The interface type itself does not choose ownership. C++ multiple inheritance, slicing, object layout, and cast rules remain native.</p>
+
+<h2>Properties</h2>
+<p>Explicit accessors are usually clearest. The repository also provides <code>DDATA</code>/<code>IDATA</code> for member-backed read/write properties, <code>DGETTER</code>/<code>IGETTER</code> for read-only properties, and a static getter pair. They generate names such as <code>getWidthProperty()</code> and <code>setWidthProperty(...)</code>.</p>
+<pre><code class="language-cpp">class Texture final
+{
+    DDATA(int, Width)
+    DGETTER(int, Height)
+};
+
+// In the .cpp file:
+IDATA(int, Width, Texture)
+IGETTER(int, Height, Texture)</code></pre>
+<p>Prefer explicit methods when a setter validates, clamps, allocates, blocks, transfers ownership, or mutates several fields. The experimental <code>Property&lt;T&gt;</code> wrapper stores per-instance <code>std::function</code> delegates and is deliberately not the production default.</p>
+
+<h2>Nullable values and null coalescing</h2>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">int? limit = options.Limit;
+int effective = limit ?? 100;
+
+if (limit.HasValue)
+    Console.WriteLine(limit.Value);</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">System::Nullable&lt;int&gt; limit = options.limit();
+const int effective = limit.GetValueOrDefault(100);
+
+if (limit.getHasValueProperty())
+    System::Console::WriteLine(
+        limit.getValueProperty());</code></pre></div></div>
+<p><code>Value</code> throws <code>InvalidOperationException</code> when absent. Do not implement <code>??</code> by substituting empty strings or zero globally. The correct fallback is domain-specific. A nullable smart pointer is usually redundant because the pointer already has an empty state.</p>
+
+<h2>Arrays, spans, and memory</h2>
+<p>Port owned one-dimensional arrays to <code>std::vector&lt;T&gt;</code> unless fixed compile-time extent or a higher-level collection is more appropriate. Use <code>System::Array</code> for familiar algorithms and <code>Span</code>/<code>ReadOnlySpan</code> for bounded synchronous borrows.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">static void ZeroMiddle(int[] values)
+{
+    values.AsSpan(1, values.Length - 2).Clear();
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">void ZeroMiddle(std::vector&lt;int&gt;&amp; values)
+{
+    if (values.size() &lt; 2)
+        throw System::ArgumentException("values");
+    System::Span&lt;int&gt; all(values);
+    all.Slice(1, static_cast&lt;SharpRuntime::intcs&gt;(
+        values.size() - 2)).Clear();
+}</code></pre></div></div>
+<p>A view does not retain its vector. Vector reallocation or destruction invalidates it. Current <code>Memory&lt;T&gt;</code> is also non-owning, so it is not an automatic answer for an async boundary. See <a href="../internals/array-internals.html">array internals</a>.</p>
+
+<h2>Collections</h2>
+<p>Choose a collection from behavior, not just its C# name:</p>
+<div class="table-wrap"><table><thead><tr><th>C# pattern</th><th>Candidate</th><th>Native decision</th></tr></thead><tbody>
+<tr><td><code>List&lt;T&gt;</code></td><td>Sharp Runtime List-shaped type or <code>std::vector</code></td><td>Do interfaces/versioned enumerators matter?</td></tr>
+<tr><td><code>Dictionary&lt;K,V&gt;</code></td><td>Runtime dictionary or <code>unordered_map</code></td><td>Comparer/hash policy, especially strings/floats</td></tr>
+<tr><td><code>HashSet&lt;T&gt;</code></td><td>Runtime set or <code>unordered_set</code></td><td>Same equality/hash invariant</td></tr>
+<tr><td><code>Queue</code>/<code>Stack</code></td><td>Matching runtime or STL adapter</td><td>Exception and enumeration behavior</td></tr>
+<tr><td><code>BlockingCollection</code></td><td><code>Collections.Blocking</code></td><td>Completion, cancellation, blocking, shutdown</td></tr>
+<tr><td><code>ObservableCollection</code></td><td><code>Collections.ObjectModel</code></td><td>Callback lifetime and reentrancy</td></tr>
+</tbody></table></div>
+<p>Mutation invalidates versioned enumerators and often native iterators/references. A concurrent collection protects its structure, not the thread safety of objects stored inside it.</p>
+
+<h2>Strings</h2>
+<p>Port ordinary text to <code>std::string</code>/<code>SharpRuntime::String</code> and use <code>System::String</code> helpers where their tested surface matches. Audit every stored index and length: Sharp Runtime uses UTF-8 bytes while .NET uses UTF-16 code units.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">string label = string.Join(", ", names)
+    .Trim()
+    .ToUpperInvariant();</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">const std::string label = System::String::ToUpperInvariant(
+    System::String::Trim(
+        System::String::Join(", ", names)));</code></pre></div></div>
+<p>The example preserves the shape for ASCII-oriented data. Current invariant case conversion is still per-byte native casing, not full Unicode invariant behavior. Use a Unicode library when that distinction matters.</p>
+
+<h2>Exceptions</h2>
+<p>Throw Sharp Runtime exceptions where the implemented contract calls for them and catch by <code>const</code> reference. C++ unwinding runs destructors, so use RAII instead of <code>finally</code> for resource cleanup.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">try
+{
+    Load(path);
+}
+catch (IOException ex)
+{
+    Log(ex.Message);
+}
+finally
+{
+    stream.Dispose();
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">try
+{
+    load(path); // scoped stream cleans up during unwind
+}
+catch (const System::IO::IOException&amp; error)
+{
+    log(error.what());
+}</code></pre></div></div>
+<p>Matching names do not imply identical message text, filters, serialization, stack traces, or CLR dispatch. Preserve the specific exceptions that callers actually use; do not translate every failure to <code>runtime_error</code> or catch <code>...</code> and discard causes.</p>
+
+<h2>Delegates and lambdas</h2>
+<p>Typed callables map naturally to lambdas, function objects, function pointers, and <code>std::function</code>. Sharp Runtime supplies <code>Action</code>, <code>Func</code>, <code>Predicate</code>, and related aliases/shapes where useful.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">Func&lt;int, int&gt; twice = value =&gt; value * 2;
+int result = twice(21);</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">std::function&lt;int(int)&gt; twice =
+    [](int value) { return value * 2; };
+const int result = twice(21);</code></pre></div></div>
+<p>A capture chooses lifetime. <code>[this]</code> is a raw borrow. A value capture copies. Capturing a <code>shared_ptr</code> retains and can form a cycle; capturing a <code>weak_ptr</code> requires a lock/check at invocation. Empty callables are validated or ignored according to the specific API—never rely on a later <code>bad_function_call</code>.</p>
+
+<h2>Events</h2>
+<p><code>EventHandler&lt;TEventArgs&gt;</code> intentionally combines the delegate signature, subscription list, and Raise/Invoke behavior because C++ has no <code>event</code> keyword. <code>Add</code> returns a token for <code>Remove</code>; <code>operator+=</code> discards the token. Raise snapshots the handlers so add/remove/clear during dispatch affects the next raise, not the current one.</p>
+<pre><code class="language-cpp">System::EventHandler&lt;System::EventArgs&gt; changed;
+
+const auto token = changed.Add(
+    [](System::Object* sender, const System::EventArgs&amp;) {
+        (void)sender;
+        System::Console::WriteLine("changed");
+    });
+
+changed.Raise(nullptr, System::EventArgs::Empty);
+changed.Remove(token);</code></pre>
+<p>Test exception propagation and thread safety for the actual publisher. Unsubscribe before captured owners die. A replay hook exists for the small set of XNA-style events that replay prior state on subscription; it is not normal event semantics.</p>
+
+<h2>Tasks and async patterns</h2>
+<p>Sharp Runtime Task objects preserve useful state, cancellation, waiting, results, faults, continuations, and aggregate patterns. They do not add C# language <code>async</code>/<code>await</code>. Current task actions use native asynchronous machinery; continuations can run synchronously on the thread that completes the antecedent.</p>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">await Task.Run(() =&gt; Rebuild(index), token);
+Publish(index);</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">System::Threading::Tasks::Task work(
+    [&amp;index, token] {
+        token.ThrowIfCancellationRequested();
+        rebuild(index);
+    }, token);
+
+work.Wait();
+publish(index);</code></pre></div></div>
+<p>The reference capture in this synchronous-wait example is safe only because <code>Wait</code> completes before the scope ends. If the task escapes, retain an owner or copy the data. Observe faults, design cooperative cancellation, and avoid strong reference cycles from a task state back into its continuation.</p>
+<p>Single-threaded Emscripten builds reject task paths that require pthreads. A pthread-enabled whole program also needs the browser/server isolation configuration required by Web Workers and shared memory.</p>
+
+<h2>Streams and readers/writers</h2>
+<p>Port against <code>Stream</code> capabilities, not an assumption that every stream reads, writes, seeks, and flushes identically. MemoryStream owns bytes; FileStream owns a native file handle; BinaryReader/Writer and text readers/writers borrow a Stream pointer and can optionally leave it open.</p>
+<ul>
+  <li>Scope owners with RAII and decide who closes the underlying stream.</li>
+  <li>Handle short reads and end-of-stream.</li>
+  <li>Do not retain a caller buffer across an async operation without an owner.</li>
+  <li>BinaryReader/Writer use little-endian primitives and UTF-8-oriented string routines in the implemented subset.</li>
+  <li>StreamReader has narrower decoding/BOM behavior than .NET; consult the I/O docs before porting arbitrary text files.</li>
+</ul>
+
+<h2>Filesystem</h2>
+<p><code>File</code>, <code>Directory</code>, <code>Path</code>, metadata objects, random access, and FileSystemWatcher can reduce mechanical changes, but filesystem semantics remain native. Separators, roots, case sensitivity, permissions, links, sharing, rename atomicity, and error values differ by platform.</p>
+<p>FileSystemWatcher is Linux/inotify-only at the pin and does not implement recursive watching. Callback self-disable is now safe; reconfiguration rules and notification masks remain documented reductions. Isolated storage now rejects path traversal through its confinement resolver, but it is not a complete adversarial OS sandbox.</p>
+
+<h2>Networking and HTTP</h2>
+<p>Separate address/DNS, sockets, HTTP messages, headers, JSON helpers, and WebSockets. Keep protocol behavior and transport security distinct. Current HttpClient transport is buffered plain HTTP/1.1; <code>https://</code> is not supplied by a hidden TLS stack. WebSockets support <code>ws://</code>, not <code>wss://</code>.</p>
+<div class="callout callout--danger"><div class="callout-title">Do not port a secure endpoint by changing only the type names</div><p>If the C# application requires TLS, certificate validation, redirects, proxy policy, HTTP/2, or secure WebSockets, provide an audited native transport or keep that subsystem outside the current Sharp Runtime transport.</p></div>
+<p>DNS, raw ICMP, IPv6, interfaces, and socket permissions depend on the host. Async wrappers require explicit owner and buffer lifetime.</p>
+
+<h2>JSON</h2>
+<p><code>Text.Json</code> supports documents, nodes, reader/writer shapes, options, converters, and curated template serialization over nlohmann JSON. It is not CLR reflection serialization. Prefer explicit native data shapes, validate required fields and numeric ranges, and test invalid JSON.</p>
+<pre><code class="language-cpp">const std::vector&lt;int&gt; ids{3, 7, 11};
+const std::string json =
+    System::Text::Json::JsonSerializer::Serialize(ids);
+const auto restored =
+    System::Text::Json::JsonSerializer::Deserialize&lt;
+        std::vector&lt;int&gt;&gt;(json);</code></pre>
+<p>HTTP/JSON helpers inherit both the JSON subset and the plain-HTTP transport boundary.</p>
+
+<h2>XML</h2>
+<p>Use <code>Xml</code> for reader/writer/document/XPath-shaped work and <code>Xml.Linq</code> for XName/XElement/XDocument-shaped object graphs. Do not infer complete schema, DTD, XPath extension, event, or LINQ provider semantics. Namespace and lexical handling has current remediation coverage, but every API used by the port still needs tests around malformed and namespaced input.</p>
+
+<h2>GC to RAII and explicit ownership</h2>
+<p>The collector no longer keeps reachable objects alive or breaks the need for deterministic resource protocols. For every reference field, local, callback, task, and container element, answer:</p>
+<ol>
+  <li>Who owns the object?</li>
+  <li>Can ownership transfer?</li>
+  <li>Can more than one party keep it alive?</li>
+  <li>Can the graph cycle?</li>
+  <li>Which operations borrow it, and for how long?</li>
+  <li>Which thread destroys it?</li>
+</ol>
+<p>RAII members and <code>unique_ptr</code> should dominate. Add <code>shared_ptr</code> only when shared lifetime is a requirement, not as a blanket GC substitute. Break back-references with <code>weak_ptr</code> or a teardown protocol. Avoid finalizer-shaped cleanup; destructors and scoped guards are deterministic.</p>
+
+<h2>Reflection and activation</h2>
+<p><code>System::Type</code> provides RTTI identity and hashing, not members, attributes, generic metadata, or dynamic invocation. Its classification properties are fixed stubs. General boxing is unavailable. <code>Activator</code> only supports explicitly implementable construction shapes; it is not assembly-driven activation.</p>
+<p>Replace reflection with explicit registration, factories, templates, variants, generated tables, or virtual interfaces. This usually improves native link-time visibility and removes hidden dependencies.</p>
+
+<h2>Unsupported managed runtime behavior</h2>
+<ul>
+  <li>Managed assemblies, JIT, GC reachability/finalization, and AppDomain assembly isolation.</li>
+  <li>General member reflection, <code>DynamicInvoke</code>, arbitrary boxing, and runtime generic metadata.</li>
+  <li>P/Invoke and remoting infrastructure.</li>
+  <li>C# language async/await, iterators, query expressions, pattern matching, and dynamic dispatch as syntax.</li>
+  <li>BinaryFormatter-style general object serialization.</li>
+  <li>CLR array covariance and universal <code>object</code> containers.</li>
+</ul>
+<p>Some source patterns have good native equivalents; others should be removed from the architecture rather than emulated.</p>
+
+<h2>A complete small-class transformation</h2>
+<div class="code-compare"><div><div class="code-compare-title">C#</div><pre><code class="language-csharp">public sealed class Counter
+{
+    public string Name { get; }
+    public int? Limit { get; }
+    public event EventHandler? Changed;
+    public int Value { get; private set; }
+
+    public Counter(string name, int? limit = null)
+    {
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Limit = limit;
+    }
+
+    public void Increment()
+    {
+        if (Limit.HasValue &amp;&amp; Value &gt;= Limit.Value)
+            throw new InvalidOperationException("Limit reached.");
+        Value++;
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+}</code></pre></div><div><div class="code-compare-title">C++ / Sharp Runtime</div><pre><code class="language-cpp">class Counter final : public System::Object
+{
+public:
+    Counter(std::string name,
+            System::Nullable&lt;int&gt; limit = {})
+        : name_(std::move(name)), limit_(std::move(limit))
+    {
+        if (name_.empty())
+            throw System::ArgumentException("name");
+    }
+
+    [[nodiscard]] const std::string&amp;
+        getNameProperty() const noexcept { return name_; }
+    [[nodiscard]] const System::Nullable&lt;int&gt;&amp;
+        getLimitProperty() const noexcept { return limit_; }
+    [[nodiscard]] int getValueProperty() const noexcept
+        { return value_; }
+
+    void Increment()
+    {
+        if (limit_.getHasValueProperty() &amp;&amp;
+            value_ &gt;= limit_.getValueProperty())
+            throw System::InvalidOperationException(
+                "Limit reached.");
+        ++value_;
+        Changed.Raise(this, System::EventArgs::Empty);
+    }
+
+    [[nodiscard]] const std::string&amp;
+        GetTypeName() const override
+    {
+        static const std::string name = "Counter";
+        return name;
+    }
+
+    System::EventHandler&lt;System::EventArgs&gt; Changed;
+
+private:
+    std::string name_;
+    System::Nullable&lt;int&gt; limit_;
+    int value_ = 0;
+};</code></pre></div></div>
+<p>The translation makes several choices explicit: empty is invalid under this constructor’s contract; values are owned directly; the nullable contains a value rather than a pointer; the event stores subscriptions and needs removal/lifetime discipline; <code>Object</code> participation is opt-in; and exception cleanup is ordinary C++ unwinding.</p>
+
+<h2>Verification checklist</h2>
+<ul>
+  <li>Compile with C++23, warnings enabled, and only direct component targets.</li>
+  <li>Test normal, empty, malformed, boundary, and extreme numeric inputs.</li>
+  <li>Test copy/move and destruction for every resource-owning type.</li>
+  <li>Run ASan/UBSan for memory and undefined behavior; use TSan where concurrency is in scope.</li>
+  <li>Test Unicode with non-ASCII and malformed UTF-8, not just English literals.</li>
+  <li>Test callback removal, reentrancy, owner destruction, cancellation, and exception observation.</li>
+  <li>Test filesystem/network behavior on each claimed platform or narrow the claim.</li>
+  <li>Document every intentional reduction from the source contract.</li>
+</ul>

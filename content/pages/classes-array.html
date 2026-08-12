@@ -1,0 +1,73 @@
+<h2>Role and representation</h2>
+<p><code>System::Array</code> is a non-instantiable class of static algorithms over <code>std::vector&lt;T&gt;</code>. It is not a common base class for runtime array objects, does not erase an element type, and does not provide CLR array metadata. The owned sequence is the vector itself; <code>Array</code> supplies familiar operations such as sorting, copying, searching, clearing, and resizing.</p>
+<p>The header is <code>System/Array.hpp</code> in <code>Core.Base</code>. Consumers select that component and link <code>SharpRuntime::Core.Base</code>. <code>MaxLengthProperty()</code> returns the compatibility constant <code>intcs</code> maximum; it is not a promise that the host can allocate that many elements.</p>
+
+<h2>API families</h2>
+<div class="table-wrap"><table><thead><tr><th>Family</th><th>Operations</th><th>Result or mutation</th></tr></thead><tbody>
+<tr><td>Ordering</td><td><code>Sort</code>, <code>Reverse</code>, <code>BinarySearch</code></td><td>Sort and Reverse mutate; BinarySearch returns an index or complemented insertion point</td></tr>
+<tr><td>Copy and size</td><td><code>Copy</code>, <code>ConstrainedCopy</code>, <code>Resize</code></td><td>Copy assigns into existing storage; Resize changes vector size</td></tr>
+<tr><td>Value search</td><td><code>IndexOf</code>, <code>LastIndexOf</code></td><td>First/last matching index, or <code>-1</code></td></tr>
+<tr><td>Predicate search</td><td><code>Exists</code>, <code>Find</code>, <code>FindLast</code>, <code>FindAll</code>, <code>FindIndex</code>, <code>FindLastIndex</code></td><td>Boolean, value, vector, or index</td></tr>
+<tr><td>Bulk mutation</td><td><code>Clear</code>, <code>Fill</code></td><td>Assigns <code>T{}</code> or a supplied value, over all or a range</td></tr>
+<tr><td>Projection/visit</td><td><code>ConvertAll</code>, <code>ForEach</code>, <code>TrueForAll</code></td><td>New vector, side effects, or Boolean</td></tr>
+<tr><td>Views/factories</td><td><code>AsReadOnly</code>, <code>Empty&lt;T&gt;</code></td><td>Const reference to the same vector, or a new empty vector</td></tr>
+</tbody></table></div>
+<p>Most families have whole-vector and signed <code>index</code>/<code>length</code> or <code>startIndex</code>/<code>count</code> overloads. Custom sort and binary-search comparisons use <code>std::function&lt;int(const T&amp;, const T&amp;)&gt;</code>; predicate and action families likewise accept typed <code>std::function</code> callables.</p>
+
+<h2>Sorting and default comparison</h2>
+<p><code>Sort(vector)</code> changes the vector in place. For ordinary non-floating types, the default path follows the element's relational operators. For <code>float</code> and <code>double</code>, Sharp Runtime's current comparison policy deliberately follows .NET default-comparer behavior: NaN orders before every numeric value, including negative infinity, and two NaNs occupy the same comparison class. The implementation moves NaNs to the front before sorting the remaining values so the comparator given to <code>std::sort</code> remains a strict weak ordering.</p>
+<p>A custom comparison is authoritative. It must return negative, zero, or positive and must define a consistent ordering; <code>Array</code> cannot repair a contradictory callback. <code>BinarySearch</code> assumes the searched range was ordered with the same comparison. It does not verify that precondition. When no match exists, it returns the bitwise complement of the insertion point, so recover the position with <code>~result</code>.</p>
+<pre><code class="language-cpp">#include &lt;System/Array.hpp&gt;
+
+std::vector&lt;int&gt; values{8, 3, 5, 1};
+System::Array::Sort(values);
+
+const auto found = System::Array::BinarySearch(values, 5);
+const auto missing = System::Array::BinarySearch(values, 4);
+const auto insertionPoint = ~missing;</code></pre>
+
+<h2>Equality and search results</h2>
+<p><code>IndexOf</code>, <code>LastIndexOf</code>, and the default binary search use the runtime's default equality/comparison policy. A NaN needle therefore finds a NaN element on equality-shaped surfaces. Other element types use their native equality and ordering operators.</p>
+<p><code>Find</code> and <code>FindLast</code> return <code>T{}</code> when nothing matches. That can be indistinguishable from a real default-valued element. Use <code>FindIndex</code>, which returns <code>-1</code> on a miss, when presence must remain explicit. <code>TrueForAll</code> is vacuously true for an empty vector, but it still validates that its predicate is non-empty before returning.</p>
+
+<h2>Range validation and exceptions</h2>
+<p>Signed range metadata is validated before iterator or pointer arithmetic. Negative indices, counts, lengths, and out-of-bounds ranges raise Sharp Runtime argument exceptions; the current helpers route these failures through <code>ArgumentOutOfRangeException</code>, a member of the argument-exception hierarchy. A forward search may start exactly at <code>size()</code>, producing an immediate miss. Backward searches preserve the special empty-array rule that accepts a start index of <code>-1</code> or <code>0</code> only with a zero count.</p>
+<p>Every public callable-taking overload rejects an empty <code>std::function</code> with <code>ArgumentNullException</code>, even when the vector is empty or a sort/search would otherwise perform no comparisons. For range-plus-callback overloads, validation order is observable: forward <code>FindIndex</code> validates its range before its predicate, while <code>FindLastIndex</code> validates the predicate first to match the reference behavior encoded by the current tests.</p>
+
+<h2>Copy behavior and raw buffers</h2>
+<p>Vector <code>Copy</code> writes into an already-sized destination; it never grows that destination. Copying within the same vector is overlap-safe in either direction. Elements are assigned, not copied as raw bytes, so resource-owning values such as <code>std::string</code> retain valid independent ownership.</p>
+<p>The raw-pointer overload also performs overlap-aware element assignment and rejects negative metadata. A null source or destination is rejected when <code>length &gt; 0</code>; two null pointers with zero length are accepted as the native empty-range idiom. Unlike a vector, a pointer carries no capacity, so the method cannot prove either raw buffer is long enough. That obligation stays with the caller.</p>
+<div class="callout callout--warning"><div class="callout-title">ConstrainedCopy has a reduced native contract</div><p><code>ConstrainedCopy</code> delegates directly to the vector <code>Copy</code> overload. Templates establish one element type at compile time, so there is no runtime array-type mismatch check. The name also does not add transactional staging if an element assignment itself throws; do not infer the complete CLR atomic-copy contract.</p></div>
+
+<h2>Mutation, ownership, and invalidation</h2>
+<p>The caller owns the vector. Passing it by value copies its elements; passing by reference shares the same object only for the duration guaranteed by the caller. <code>Resize</code> uses <code>std::vector::resize</code>: shrinking destroys removed elements, growing default-constructs new ones, and reallocation can invalidate every pointer, reference, iterator, <code>Span</code>, <code>Memory</code> view, or <code>ArraySegment</code> tied to the old buffer. Sort, Reverse, Clear, and Fill preserve capacity but mutate values visible through live aliases.</p>
+<p><code>AsReadOnly</code> returns a <code>const std::vector&lt;T&gt;&amp;</code> to the same vector. It is neither an owning wrapper nor a snapshot: mutations made through another non-const reference are visible, and destruction or invalidating reallocation of the owner leaves the reference unusable. <code>Empty&lt;T&gt;</code>, by contrast, returns a fresh empty vector each time rather than a shared singleton.</p>
+
+<h2>Practical example</h2>
+<pre><code class="language-cpp">#include &lt;System/Array.hpp&gt;
+
+std::vector&lt;int&gt; source{10, 20, 30, 40};
+std::vector&lt;int&gt; destination(4, -1);
+
+System::Array::Copy(source, 1, destination, 0, 3);
+// destination: 20, 30, 40, -1
+
+System::Array::Fill(destination, 0, 1, 2);
+// destination: 20, 0, 0, -1
+
+const auto even = System::Array::FindAll&lt;int&gt;(
+    source, [](const int&amp; value) { return value % 20 == 0; });</code></pre>
+<p>The destination is sized before copying. The predicate is a real callable, and <code>FindAll</code> returns an owning vector. No view into <code>source</code> survives the operation.</p>
+
+<h2>Differences from C# and .NET arrays</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Consequence</th></tr></thead><tbody>
+<tr><td><code>T[]</code> is a fixed-size managed reference object</td><td>The common representation is resizable, value-like <code>std::vector&lt;T&gt;</code></td><td>Assignment copies elements; resize and reallocation are possible</td></tr>
+<tr><td>Every index operation is bounds checked</td><td>Direct vector <code>operator[]</code> is unchecked; Array range methods validate their metadata</td><td>Use checked APIs or explicit validation at untrusted boundaries</td></tr>
+<tr><td>Arrays carry runtime element/rank metadata</td><td>Template type is known at compile time; this helper is one-dimensional and vector-oriented</td><td>No general CLR Array reflection or covariance</td></tr>
+<tr><td><code>Array.Empty&lt;T&gt;()</code> may reuse a singleton</td><td><code>Empty&lt;T&gt;()</code> returns a new empty vector value</td><td>Do not rely on identity</td></tr>
+<tr><td><code>Array.AsReadOnly</code> returns a collection wrapper</td><td><code>AsReadOnly</code> returns a const reference to the vector</td><td>No ownership extension or immutable snapshot</td></tr>
+<tr><td>Null array references are representable</td><td>A vector value is always present</td><td>Use an optional or pointer only when absence is part of the domain</td></tr>
+</tbody></table></div>
+
+<h2>Template and portability caveats</h2>
+<p>The header does not express every element requirement as a C++ concept. Operations instantiate only when <code>T</code> supplies the required construction, assignment, equality, ordering, hashing, stream, or callable behavior. A type usable with <code>Reverse</code> may still fail to instantiate with <code>Sort</code> or <code>Clear</code>. Allocation failures and exceptions thrown by element operations or user callbacks propagate as ordinary C++ exceptions.</p>

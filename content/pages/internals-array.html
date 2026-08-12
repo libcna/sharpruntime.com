@@ -1,0 +1,115 @@
+<h2>There is no single Sharp Runtime array representation</h2>
+<p>Different native representations solve different ownership problems. Most one-dimensional owned sequences use <code>std::vector&lt;T&gt;</code>. <code>System::Array</code> supplies static algorithms over vectors and selected raw buffers. <code>Span</code>, <code>ReadOnlySpan</code>, <code>Memory</code>, <code>ReadOnlyMemory</code>, and <code>ArraySegment</code> are borrowed contiguous views. Collection classes add resizing and higher-level contracts.</p>
+<div class="table-wrap"><table><thead><tr><th>Representation</th><th>Owns elements/storage?</th><th>Can resize?</th><th>Primary use</th></tr></thead><tbody>
+<tr><td>Native <code>T[N]</code> / <code>std::array&lt;T,N&gt;</code></td><td>Yes, inline</td><td>No</td><td>Compile-time fixed native shape</td></tr>
+<tr><td><code>std::vector&lt;T&gt;</code></td><td>Yes</td><td>Yes</td><td>Default owned one-dimensional sequence</td></tr>
+<tr><td><code>System::Array</code></td><td>No instance</td><td>Algorithms can resize a vector</td><td>Familiar sort/copy/search/clear behavior</td></tr>
+<tr><td><code>Span&lt;T&gt;</code></td><td>No</td><td>No</td><td>Mutable pointer-and-length borrow</td></tr>
+<tr><td><code>ReadOnlySpan&lt;T&gt;</code></td><td>No</td><td>No</td><td>Read-only contiguous borrow</td></tr>
+<tr><td><code>Memory&lt;T&gt;</code>/<code>ReadOnlyMemory&lt;T&gt;</code></td><td>No in this implementation</td><td>No</td><td>Borrowed vector region that can produce a span</td></tr>
+<tr><td><code>ArraySegment&lt;T&gt;</code></td><td>No</td><td>No</td><td>Offset/count view into a vector</td></tr>
+<tr><td><code>List&lt;T&gt;</code>-shaped collection</td><td>Yes</td><td>Yes</td><td>Collection API, versioning, enumerator behavior</td></tr>
+</tbody></table></div>
+
+<h2>Native C++ arrays</h2>
+<p>A built-in array or <code>std::array</code> owns a fixed number of inline elements. It is useful for stack or member storage whose extent is known at compile time. It does not automatically participate in <code>System::Array</code> vector overloads. Converting to a span is a natural way to pass a bounded view without copying.</p>
+<p>A raw pointer alone is not an array contract. It carries no capacity or ownership. Raw-pointer overloads in the runtime can validate signed indices and null where relevant, but they cannot prove that a caller supplied enough elements. Prefer a vector or span at new boundaries.</p>
+
+<h2>std::vector as the owned array</h2>
+<p><code>std::vector&lt;T&gt;</code> owns a contiguous sequence. Its size is the number of constructed elements; capacity is reserved storage and is not permission to index beyond size. Growing beyond capacity relocates the buffer. Erasing or inserting can move elements and invalidate references even without a capacity change.</p>
+<p>Element semantics come from <code>T</code>. A vector of values copies or moves values. A vector of <code>unique_ptr</code> is move-only and owns pointees exclusively. A vector of <code>shared_ptr</code> shares pointees. A vector of raw pointers owns nothing unless an external convention says otherwise.</p>
+
+<h2>System::Array is an algorithm class</h2>
+<p><code>System::Array</code> deletes construction. Its templates operate on <code>std::vector&lt;T&gt;</code> and, for copying, raw storage. It is not the common base type of vectors and does not provide runtime rank, covariance, or element-type metadata.</p>
+<h3>Ordering and search</h3>
+<p><code>Sort</code> covers whole vectors, subranges, and comparison functions. Default floating-point ordering deliberately moves NaN before other values to satisfy the current .NET-oriented comparer contract and avoid passing a non-strict NaN comparator to <code>std::sort</code>. <code>BinarySearch</code> assumes compatible ordering. <code>IndexOf</code>, <code>LastIndexOf</code>, <code>Find</code>, <code>FindLast</code>, <code>FindAll</code>, forward/backward predicate index searches, <code>Exists</code>, and <code>TrueForAll</code> cover linear discovery.</p>
+<h3>Mutation</h3>
+<p><code>Reverse</code>, <code>Clear</code>, <code>Fill</code>, and <code>Resize</code> mutate an owned vector. Clear assigns value-initialized elements; it does not necessarily change the vector size. Resize changes size and can relocate. <code>ConvertAll</code> creates a new vector. <code>ForEach</code> invokes a supplied action and rejects an empty callable.</p>
+<h3>Copying</h3>
+<p>Vector copy overloads require an already sized destination and validate source/destination ranges. Current copying is element-wise and overlap-aware. It preserves non-trivial element semantics, so copying <code>std::string</code> assigns strings instead of duplicating their internal bytes. <code>ConstrainedCopy</code> forwards to the same current vector behavior; there is no CLR transactional array type system behind it.</p>
+<p>Raw-pointer copy validates signed offsets/length and relevant null pointers, then performs overlap-aware element assignment. It cannot validate capacity. Forming a valid pointer does not prove that the pointed-to range exists.</p>
+
+<h2>Bounds and signed arithmetic</h2>
+<p>Sharp Runtime range APIs commonly use the 32-bit signed <code>intcs</code> compatibility type. Current remediation avoids checks of the form <code>start + length &lt;= size</code> where signed addition can overflow and bypass validation. It first validates the start against size, then compares length with <code>size - start</code> using unsigned-domain checks.</p>
+<p>Direct native <code>vector[i]</code> remains unchecked. <code>vector.at(i)</code>, Span indexers, and runtime helper methods provide checked alternatives with their own exception types. Do not assume a Sharp Runtime wrapper can protect an unchecked native access performed elsewhere.</p>
+
+<h2>Span and ReadOnlySpan</h2>
+<p>A span contains a pointer and an <code>intcs</code> element length. It can view a vector, raw contiguous storage, stack storage, or another slice. Indexing throws <code>IndexOutOfRangeException</code>; invalid slice ranges throw <code>ArgumentOutOfRangeException</code>. <code>ToArray</code> returns an owning vector.</p>
+<p><code>CopyTo</code> rejects a shorter destination. <code>TryCopyTo</code> returns false without writing when the destination is too short. Both handle overlapping ranges by choosing a safe direction. <code>Fill</code> and <code>Clear</code> mutate through a mutable span. A read-only span prevents mutation through that view, not mutation through another alias.</p>
+<p>Span equality compares pointer and length—the identity of the view. Use <code>SequenceEqual</code>-shaped behavior or an explicit algorithm for element equality.</p>
+
+<h2>Memory and ReadOnlyMemory are borrowed here</h2>
+<p>The implementation stores a pointer to a vector plus offset and length. A <code>Memory&lt;T&gt;</code> does not own that vector and does not retain it through a shared owner. This differs materially from managed <code>Memory&lt;T&gt;</code>, which is designed to survive async boundaries by retaining suitable backing storage.</p>
+<p><code>getSpanProperty()</code> computes a view over the vector’s current <code>data()</code>. If the vector is destroyed, moved-from in a way that changes storage, or reallocated, previously obtained pointers/spans and the Memory object’s assumptions become invalid. The Memory object retaining the address of the vector object does not freeze its buffer.</p>
+<p><code>Pin()</code> does exist despite a stale introductory comment in <code>Memory.hpp</code>. It returns a <code>MemoryHandle</code> exposing the current native pointer. With no GC, “pin” does not retain the vector or prevent reallocation. The handle is only as safe as the owner’s stability protocol.</p>
+
+<h2>ArraySegment</h2>
+<p>An <code>ArraySegment&lt;T&gt;</code> stores a pointer to a vector, an offset, and a count. Construction validates the range without signed overflow. Indexing, slicing, copying, containment, and conversion reject a default/null segment with <code>InvalidOperationException</code> before touching storage.</p>
+<p>There is one current deviation: <code>begin()</code> and <code>end()</code> remain <code>noexcept</code> and return null for a default segment, so a range-for performs zero iterations where the corresponding .NET enumerator would throw. This exception-specification change is unresolved at the selected pin.</p>
+<p><code>ArraySegment::CopyTo</code> can resize a shorter destination vector in the current adaptation. That differs from an already-sized .NET array boundary and should be tested rather than assumed.</p>
+
+<h2>Ownership, passing, and lifetime</h2>
+<div class="table-wrap"><table><thead><tr><th>Function intent</th><th>Recommended parameter</th><th>Contract</th></tr></thead><tbody>
+<tr><td>Consumes/copies an owned sequence</td><td><code>std::vector&lt;T&gt;</code> by value</td><td>Caller moves or copies ownership</td></tr>
+<tr><td>Mutates an existing owned vector</td><td><code>std::vector&lt;T&gt;&amp;</code></td><td>May resize/invalidate; document it</td></tr>
+<tr><td>Reads an existing vector</td><td><code>const std::vector&lt;T&gt;&amp;</code></td><td>Synchronous borrow</td></tr>
+<tr><td>Reads any contiguous storage</td><td><code>ReadOnlySpan&lt;T&gt;</code></td><td>Non-owning element range</td></tr>
+<tr><td>Mutates any contiguous storage</td><td><code>Span&lt;T&gt;</code></td><td>Non-owning writable range</td></tr>
+<tr><td>Retains across async work</td><td>Explicit shared/unique owner plus offsets</td><td>Do not rely on current Memory to retain storage</td></tr>
+</tbody></table></div>
+
+<h2>Invalidation matrix</h2>
+<div class="table-wrap"><table><thead><tr><th>Owner operation</th><th>References/iterators</th><th>Span</th><th>Memory/segment</th></tr></thead><tbody>
+<tr><td>Destroy vector</td><td>Invalid</td><td>Invalid</td><td>Invalid</td></tr>
+<tr><td>Reallocate vector</td><td>Invalid</td><td>Invalid</td><td>Object still points to vector, but existing spans/handles invalid; range must remain meaningful</td></tr>
+<tr><td>Erase/insert</td><td>Affected and later positions can invalidate</td><td>View contents/positions may no longer mean the same thing</td><td>Stored offset/count may describe different elements or exceed size</td></tr>
+<tr><td>Overwrite elements only</td><td>Usually structurally valid</td><td>Sees new values</td><td>Sees new values</td></tr>
+<tr><td>Move vector object</td><td>Depends on operation and allocator</td><td>Do not rely on old owner protocol</td><td>Pointer to original vector object can become semantically stale</td></tr>
+</tbody></table></div>
+
+<h2>Copying and overlap</h2>
+<p>Overlapping copies are easy to get wrong for non-trivial elements. A forward loop that copies a range one position to the right overwrites values it has not read yet. <code>memcpy</code> is invalid for overlap and unsafe for owning objects such as strings. Current Array, Span, Memory, and ArraySegment copy paths use a shared overlap-aware element operation.</p>
+<p>The destination’s element lifetime already exists for vector/span assignment. Raw uninitialized storage requires construction-aware native algorithms instead of these assignment APIs.</p>
+
+<h2>Multidimensional and jagged data</h2>
+<p>The current core does not expose a general CLR rectangular array with rank, lower bounds, runtime element type, and covariance. Choose a representation explicitly:</p>
+<ul>
+  <li><code>vector&lt;vector&lt;T&gt;&gt;</code> for jagged rows with independent allocation;</li>
+  <li>a flat <code>vector&lt;T&gt;</code> plus checked <code>row * width + column</code> for rectangular dense storage;</li>
+  <li>a numeric matrix type when algebraic operations are the real abstraction;</li>
+  <li>a domain object that validates dimensions and owns indexing policy.</li>
+</ul>
+<p>Check multiplication for overflow before allocating or indexing a flat matrix. Decide row-major versus column-major layout at the public boundary.</p>
+
+<h2>Comparison with C# arrays and std::vector</h2>
+<div class="table-wrap"><table><thead><tr><th>Property</th><th>C# array</th><th><code>std::vector</code> / Sharp Runtime</th></tr></thead><tbody>
+<tr><td>Length</td><td>Fixed after construction</td><td>Vector size can change; Array::Resize can relocate</td></tr>
+<tr><td>Runtime base</td><td>Derives from CLR <code>System.Array</code></td><td>No Array base object</td></tr>
+<tr><td>Bounds</td><td>Runtime checked</td><td><code>[]</code> unchecked; helpers/views can check</td></tr>
+<tr><td>Covariance</td><td>Reference arrays have runtime covariance checks</td><td>Template element types are invariant/distinct</td></tr>
+<tr><td>Ownership</td><td>GC reference retains array</td><td>Vector value owns; views do not retain it</td></tr>
+<tr><td>Multidimensional</td><td>Rectangular and jagged forms</td><td>Choose nested/flat/domain-specific representation</td></tr>
+<tr><td>Element copy</td><td>Value or reference semantics under CLR</td><td>Exact C++ copy/move/assignment of <code>T</code></td></tr>
+</tbody></table></div>
+
+<h2>When to use which representation</h2>
+<ul>
+  <li>Use <code>std::vector</code> for ordinary owned dynamic sequences.</li>
+  <li>Use <code>std::array</code> for fixed compile-time extents.</li>
+  <li>Use Span/ReadOnlySpan for synchronous generic contiguous access with explicit bounds.</li>
+  <li>Use Array helpers when their familiar validation, sorting, copying, or search contract helps a port.</li>
+  <li>Use List-shaped collections when enumerator/versioning and collection interfaces matter.</li>
+  <li>Use an explicit owner—not borrowed Memory—when work crosses a lifetime or async boundary.</li>
+  <li>Use a matrix/domain type for multidimensional invariants.</li>
+</ul>
+
+<h2>Porting checklist</h2>
+<ol>
+  <li>Identify whether the C# variable owns the array or only receives a view.</li>
+  <li>Choose the element ownership model before choosing the container.</li>
+  <li>Replace CLR bounds guarantees with checked helpers or explicit validation where needed.</li>
+  <li>Mark every operation that can resize or relocate.</li>
+  <li>Do not retain spans, segments, references, or pointers across those operations.</li>
+  <li>Test empty/default views, negative indices, extreme ranges, overlap, non-trivial elements, and owner destruction.</li>
+  <li>Document multidimensional layout and overflow policy.</li>
+</ol>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Use Timers Safely | Sharp Runtime</title>
+  <meta name="description" content="Choose Sharp Runtime threading or event timers and manage dedicated threads, callbacks, rescheduling, exceptions, and teardown hazards.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/timers.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Use Timers Safely | Sharp Runtime">
+  <meta property="og:description" content="Choose Sharp Runtime threading or event timers and manage dedicated threads, callbacks, rescheduling, exceptions, and teardown hazards.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/timers.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Use Timers Safely | Sharp Runtime">
+  <meta name="twitter:description" content="Choose Sharp Runtime threading or event timers and manage dedicated threads, callbacks, rescheduling, exceptions, and teardown hazards.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Use Timers Safely", "description": "Choose Sharp Runtime threading or event timers and manage dedicated threads, callbacks, rescheduling, exceptions, and teardown hazards.", "url": "https://sharpruntime.com/tutorials/timers.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Use Timers Safely", "item": "https://sharpruntime.com/tutorials/timers.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Use Timers Safely</span></nav><h1>Use Timers Safely</h1><p class="lead">Schedule native callbacks without mistaking stop or dispose for an in-flight completion barrier.</p><div class="page-meta"><span>Advanced</span><span>Threading + Timers</span><span>Source-checked</span></div>
+<h2 id="two-timer-families">Two timer families</h2>
+<p>Sharp Runtime has <code>System::Threading::Timer</code> in the <code>Threading</code> component and <code>System::Timers::Timer</code> in <code>Timers</code>. They are related but have different callback shapes and, crucially, different lifetime risks.</p>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>Model</th><th>Current implementation</th></tr></thead><tbody>
+<tr><td><code>Threading::Timer</code></td><td>Callback + opaque state</td><td>Dedicated thread with shared internal state; safe state lifetime after disposal.</td></tr>
+<tr><td><code>Timers::Timer</code></td><td>Configurable <code>Elapsed</code> event</td><td>Wraps the threading timer but its callback captures the outer <code>this</code>.</td></tr>
+</tbody></table></div>
+
+<h2 id="use-the-lower-level-timer">Use the lower-level timer</h2>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Threading)
+target_link_libraries(app PRIVATE SharpRuntime::Threading)</code></pre>
+<pre><code class="language-cpp">#include &lt;System/Threading/Timer.hpp&gt;
+#include &lt;atomic&gt;
+
+std::atomic&lt;int&gt; ticks{0};
+System::Threading::Timer timer(
+    [&amp;ticks](void*) { ticks.fetch_add(1, std::memory_order_relaxed); },
+    nullptr,
+    100,  // first callback after 100 ms
+    250); // then every 250 ms
+
+timer.Change(-1, 250); // pause; -1 means infinite due time
+timer.Change(0, 250);  // re-arm immediately
+timer.Dispose();</code></pre>
+<p>Each timer uses a dedicated native thread, not a shared thread pool. <code>Change</code> reschedules the next fire relative to the call. A non-positive period makes the timer single-shot after it fires. The callback must be non-empty; due time and period must be at least <code>-1</code>.</p>
+
+<h2 id="use-the-event-style-timer-carefully">Use the event-style timer carefully</h2>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Timers)
+target_link_libraries(app PRIVATE SharpRuntime::Timers)</code></pre>
+<pre><code class="language-cpp">#include &lt;System/Timers/Timer.hpp&gt;
+
+System::Timers::Timer timer(500.0);
+timer.setAutoResetProperty(false);
+timer.Elapsed += [](System::Object*, const System::Timers::ElapsedEventArgs&amp;) {
+    // Keep this bounded and report errors inside the handler.
+};
+timer.Start();</code></pre>
+<p><code>Elapsed</code> runs directly on a background thread. Handler exceptions are caught and discarded, so a failed handler is invisible unless it reports its own status. The current sender is <code>nullptr</code>, not the timer object.</p>
+<div class="callout callout--danger"><div class="callout-title">Stopping is not a callback-completion barrier</div><p><code>System::Timers::Timer</code> ultimately detaches its background thread and its callback captures <code>this</code>. <code>Stop</code>, <code>Close</code>, <code>Dispose</code>, or destruction does not prove an already-running callback has returned. Coordinate teardown externally and never destroy the timer from its own handler.</p></div>
+
+<h2 id="build-an-external-shutdown-protocol">Build an external shutdown protocol</h2>
+<ol>
+  <li>Keep callback data in an owner whose lifetime is longer than the timer.</li>
+  <li>Set an application stopping flag before disabling new ticks.</li>
+  <li>Count or latch in-flight callbacks in the application state.</li>
+  <li>Wait for that count to reach zero from a different thread.</li>
+  <li>Only then destroy the event-style timer and callback state.</li>
+</ol>
+<p>A callback must not wait for the thread that is waiting for it. Document lock ordering and avoid doing blocking I/O while holding the callback-state mutex.</p>
+
+<h2 id="c-comparison">C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Difference</th></tr></thead><tbody>
+<tr><td>Thread-pool timer queue</td><td>Dedicated thread per threading timer</td><td>Resource cost scales with timer count.</td></tr>
+<tr><td><code>DisposeAsync</code>/wait-handle disposal</td><td>Not reproduced</td><td>Application supplies completion coordination.</td></tr>
+<tr><td><code>Timers.Timer</code> sender is the timer</td><td>Sender currently <code>nullptr</code></td><td>Capture explicit stable state instead.</td></tr>
+<tr><td>Handler exception suppressed by Timers.Timer</td><td>Also suppressed</td><td>Report failures inside the callback.</td></tr>
+</tbody></table></div>
+
+<h2 id="test-time-without-flaky-sleeps">Test time without flaky sleeps</h2>
+<ul>
+  <li>Use generous upper deadlines and synchronization primitives rather than exact wall-clock equality.</li>
+  <li>Test pause, re-arm, single-shot, periodic, and <code>Change</code> during a callback.</li>
+  <li>Keep test timer counts small; this implementation creates native threads.</li>
+  <li>Test teardown under sanitizer builds, especially the event-style outer-object lifetime.</li>
+  <li>On single-threaded Emscripten, expect <code>PlatformNotSupportedException</code>.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="channels.html"><span class="next-label">Previous</span>Build a Channel Pipeline</a><a href="write-component-test.html"><span class="next-label">Next</span>Write a Component Test</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#two-timer-families">Two timer families</a><a class="toc-level-2" href="#use-the-lower-level-timer">Use the lower-level timer</a><a class="toc-level-2" href="#use-the-event-style-timer-carefully">Use the event-style timer carefully</a><a class="toc-level-2" href="#build-an-external-shutdown-protocol">Build an external shutdown protocol</a><a class="toc-level-2" href="#c-comparison">C# comparison</a><a class="toc-level-2" href="#test-time-without-flaky-sleeps">Test time without flaky sleeps</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

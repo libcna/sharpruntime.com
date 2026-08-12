@@ -16,6 +16,8 @@ BASE = "https://sharpruntime.com/"
 FACTS = json.loads((ROOT / "data" / "site-facts.json").read_text(encoding="utf-8"))
 SOURCE_SHA = FACTS["source_sha"]
 LASTMOD = FACTS["evidence_date"]
+API_INVENTORY = json.loads((ROOT / "data" / "api-inventory.json").read_text(encoding="utf-8"))
+COMPONENT_DOCS = json.loads((ROOT / "data" / "component-docs.json").read_text(encoding="utf-8"))
 
 
 @dataclass
@@ -28,6 +30,10 @@ class Page:
     tags: list[str] = field(default_factory=list)
     indexable: bool = True
     page_type: str = "TechArticle"
+    previous_path: str | None = None
+    previous_title: str | None = None
+    next_path: str | None = None
+    next_title: str | None = None
 
 
 def e(value: object) -> str:
@@ -95,6 +101,70 @@ def intro(title: str, lead: str, labels: list[str] | None = None) -> str:
     return f"<h1>{title}</h1><p class=\"lead\">{lead}</p>{meta}"
 
 
+def load_content_pages() -> list[Page]:
+    """Load long-form canonical content without duplicating the site shell."""
+    manifest_path = ROOT / "content" / "pages.json"
+    if not manifest_path.exists():
+        return []
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    pages: list[Page] = []
+    for item in manifest:
+        fragment_path = ROOT / item["body"]
+        fragment = fragment_path.read_text(encoding="utf-8").strip()
+        labels = item.get("labels", [item["category"], f"Source {SOURCE_SHA[:8]}"])
+        pages.append(Page(
+            item["path"], item["title"], item["description"], item["category"],
+            intro(item["title"], item["lead"], labels) + "\n" + fragment,
+            item.get("tags", []), item.get("indexable", True), item.get("page_type", "TechArticle"),
+        ))
+    return pages
+
+
+def ensure_heading_ids(body: str) -> str:
+    """Give long-form headings stable anchors while preserving explicit IDs."""
+    used = set(re.findall(r'\bid="([^"]+)"', body))
+
+    def add_id(match: re.Match[str]) -> str:
+        level, attributes, content = match.groups()
+        attributes = attributes or ""
+        if re.search(r'\bid="[^"]+"', attributes):
+            return match.group(0)
+        label = html.unescape(re.sub(r"<[^>]+>", "", content))
+        base = slug(label) or "section"
+        candidate = base
+        suffix = 2
+        while candidate in used:
+            candidate = f"{base}-{suffix}"
+            suffix += 1
+        used.add(candidate)
+        return f'<h{level}{attributes} id="{candidate}">{content}</h{level}>'
+
+    return re.sub(r"<h([23])(\s[^>]*)?>(.*?)</h\1>", add_id, body, flags=re.DOTALL | re.IGNORECASE)
+
+
+def apply_content_overrides(pages: list[Page]) -> list[Page]:
+    overrides = load_content_pages()
+    by_path = {page.path: page for page in overrides}
+    result = [by_path.pop(page.path, page) for page in pages]
+    result.extend(by_path.values())
+    return result
+
+
+def assign_page_navigation(pages: list[Page]) -> None:
+    by_category: dict[str, list[Page]] = {}
+    for page in pages:
+        if page.path != "index.html" and page.indexable:
+            by_category.setdefault(page.category, []).append(page)
+    for category_pages in by_category.values():
+        for index, page in enumerate(category_pages):
+            if index:
+                page.previous_path = category_pages[index - 1].path
+                page.previous_title = category_pages[index - 1].title
+            if index + 1 < len(category_pages):
+                page.next_path = category_pages[index + 1].path
+                page.next_title = category_pages[index + 1].title
+
+
 def home_body() -> str:
     return f"""
 <section class="hero"><div class="container hero-grid">
@@ -148,10 +218,10 @@ int main() {{
     ("Concurrency", "Threading & tasks", "Threads, synchronization, cancellation, thread pool, tasks, continuations, channels and timers using native C++ machinery.", "components/concurrency.html"),
     ("Computation", "Numerics & globalization", "Vectors, matrices, quaternion, BigInteger, numeric wrappers, culture data, parsing and formatting—with compiler caveats documented.", "components/numerics-globalization.html"),
   ])}
-  <div class="hero-actions"><a class="button button--primary" href="components/index.html">Browse all 41 components</a><a class="button" href="architecture.html">Understand the architecture</a></div>
+  <div class="hero-actions"><a class="button button--primary" href="components/index.html">Browse all {{{{physical_components}}}} components</a><a class="button" href="architecture.html">Understand the architecture</a></div>
 </div></section>
 <section class="section"><div class="container split">
-  <div><div class="eyebrow">Verification</div><h2>Evidence, not a vanity counter.</h2><p>The pinned source registers {{test_executables}} test executables and currently exposes {{current_test_cases}} GoogleTest cases. The last controlled full-gate record before the final TimeZone additions ran {{gate_cases}}: {{gate_passed}} passed, {{gate_skipped_words}} and {{gate_failed_words}} for two known network-related causes.</p><p>The repository also validates component boundaries, selective consumers, negative include/link fixtures, catalogue drift, integration behavior and Doxygen warning regressions.</p><a class="button" href="running-tests.html">Read the verification model</a></div>
+  <div><div class="eyebrow">Verification</div><h2>Evidence, not a vanity counter.</h2><p>The pinned source registers {{test_executables}} test executables and its latest measured full gate discovered and ran {{current_test_cases}} GoogleTest cases: {{gate_passed}} passed, {{gate_skipped_words}} and {{gate_failed_words}} for documented network-related causes.</p><p>The repository also validates component boundaries, selective consumers, negative include/link fixtures, catalogue drift, integration behavior and Doxygen warning regressions.</p><a class="button" href="running-tests.html">Read the verification model</a></div>
   <div class="status-list">
     <div class="status-row"><span class="badge badge--verified">Validated</span><span><strong>Component graph</strong><br>{{physical_components}} physical modules and {{production_edges}} declared direct production edges; no allow-list exceptions.</span></div>
     <div class="status-row"><span class="badge badge--verified">Measured</span><span><strong>Current suite shape</strong><br>{{component_test_executables}} component executables plus {{integration_test_executables_words}}.</span></div>
@@ -161,11 +231,11 @@ int main() {{
 <section class="section section--tint"><div class="container">
   <div class="section-heading"><div class="eyebrow">Portability</div><h2>Platform claims carry evidence labels.</h2><p>The current CI is Linux/Ubuntu. Other platforms have implementation and toolchain paths, but the website distinguishes source support, cross-compile evidence and runtime validation.</p></div>
   {table(["Platform", "Evidence label", "What that means"], [
-    ["Linux / GCC", '<span class="badge badge--verified">Primary native validation</span>', "Push/PR jobs target Ubuntu; the last controlled full gate is qualified below rather than described as green."],
-    ["Windows / MinGW", '<span class="badge badge--build">Cross-compile verified</span>', "Library-only All and Text.Json cross-build evidence exists; GoogleTest was not built or run."],
+    ["Linux / GCC", '<span class="badge badge--verified">Primary native validation</span>', "Push/PR jobs target Ubuntu; the measured full gate at this pin is qualified below rather than described as green."],
+    ["Windows / MinGW", '<span class="badge badge--build">Historical cross-build</span>', "Earlier library-only All and Text.Json evidence exists; the selected pin was not rebuilt and GoogleTest did not run."],
     ["Windows / MSVC", '<span class="badge badge--limited">Compiler-limited</span>', "Build logic exists, but native <code>__int128</code>-dependent numeric surfaces constrain current completeness."],
     ["macOS / Apple Clang", '<span class="badge badge--partial">Downstream build evidence</span>', "Xcode 15.4 downstream builds drove fixes; no standalone full-suite result or current macOS CI job exists."],
-    ["Emscripten / Web", '<span class="badge badge--partial">Cross-compile verified</span>', "Library-only cross-build evidence exists; DNS and several native facilities are unavailable or reduced, and no browser suite ran."],
+    ["Emscripten / Web", '<span class="badge badge--partial">Historical cross-build</span>', "Earlier library-only evidence exists; the selected pin was not rebuilt, DNS/native facilities are reduced, and no browser suite ran."],
     ["Android", '<span class="badge badge--partial">Integration path</span>', "Storage can consume parent-provided SDL3; this audit did not run a device suite."],
   ])}
   <a class="button" href="platform-layer.html">Platform matrix and caveats</a>
@@ -184,26 +254,37 @@ def build_pages(components: dict) -> list[Page]:
 
     pages.extend(core_pages())
     pages.extend(component_pages(components))
+    pages.extend(component_api_pages(components))
     pages.extend(tutorial_pages())
     pages.extend(reference_pages())
+    pages = replace_api_index(pages, components)
+    pages = apply_content_overrides(pages)
+    tutorial_count = sum(
+        page.path.startswith("tutorials/") and page.path != "tutorials/index.html"
+        for page in pages
+    )
     replacements = {
         "{{current_test_cases}}": f"{FACTS['current_test_cases']:,}",
         "{{test_executables}}": str(FACTS["test_executables"]),
         "{{component_test_executables}}": str(FACTS["component_test_executables"]),
         "{{integration_test_executables_words}}": "one integration executable",
-        "{{gate_cases}}": f"{FACTS['last_controlled_gate']['cases']:,}",
-        "{{gate_passed}}": f"{FACTS['last_controlled_gate']['passed']:,}",
-        "{{gate_skipped_words}}": "one skipped",
+        "{{gate_cases}}": f"{FACTS['latest_measured_gate']['cases']:,}",
+        "{{gate_passed}}": f"{FACTS['latest_measured_gate']['passed']:,}",
+        "{{gate_skipped_words}}": "two skipped",
         "{{gate_failed_words}}": "six failed",
-        "{{timezone_additions}}": str(FACTS["post_gate_timezone_additions"]),
         "{{physical_components}}": str(components["physical_count"]),
         "{{production_edges}}": str(components["direct_production_edges"]),
+        "{{public_headers}}": f"{FACTS['public_headers']:,}",
+        "{{production_sources}}": f"{FACTS['production_sources']:,}",
+        "{{tutorial_count}}": str(tutorial_count),
     }
     for page in pages:
         for placeholder, value in replacements.items():
             # Most page bodies are ordinary strings. The homepage is an f-string,
             # so its doubled braces are reduced once before this pass.
             page.body = page.body.replace(placeholder, value).replace(placeholder[1:-1], value)
+        page.body = ensure_heading_ids(page.body)
+    assign_page_navigation(pages)
     return pages
 
 
@@ -223,14 +304,14 @@ def core_pages() -> list[Page]:
 <h2 id="tests">Build the runtime tests</h2>""" + code("cmake -S sharp-runtime -B runtime-build \\\n  -DSHARP_RUNTIME_COMPONENTS=All \\\n  -DSHARP_RUNTIME_BUILD_TESTS=ON\ncmake --build runtime-build --target SharpRuntimeTests --parallel 2\nsharp-runtime/scripts/run_component_tests.sh runtime-build", "bash") + """
 <h2 id="next">Next steps</h2>""" + page_index([("Component selection", "Targets, closures and compatibility umbrellas.", "components/index.html"), ("Build reference", "Options, dependencies and consumer modes.", "build.html"), ("First consumer tutorial", "A more detailed project walkthrough.", "tutorials/first-consumer.html"), ("Port C#", "Translate managed concepts deliberately.", "guides/porting-csharp.html")])),
         Page("build.html", "Build and Consumer Integration", "Verified CMake options, targets, dependencies and selective build patterns for Sharp Runtime.", "Getting Started", intro("Build and consumer integration", "Sharp Runtime’s CMake graph can build the complete compatibility surface or a dependency-closed subset.", ["Reference", "CMake 3.20+", "C++23"]) + """
-<h2 id="options">Configuration options</h2>""" + table(["Option", "Default", "Purpose"], [["<code>SHARP_RUNTIME_COMPONENTS</code>", "<code>All</code> for standalone builds", "Semicolon-separated component names"], ["<code>SHARP_RUNTIME_BUILD_TESTS</code>", "<code>ON</code>", "Build requested component tests"], ["<code>SHARP_RUNTIME_BUILD_BENCHMARKS</code>", "<code>OFF</code>", "Build the standalone micro-benchmark"], ["<code>SHARP_RUNTIME_BUILD_I686_REGRESSION</code>", "<code>OFF</code>", "Build the special 32-bit MinGW boundary fixture"]]) + """
+<h2 id="options">Configuration options</h2>""" + table(["Option", "Default", "Purpose"], [["<code>SHARP_RUNTIME_COMPONENTS</code>", "<code>All</code> for standalone builds", "Semicolon-separated component names"], ["<code>SHARP_RUNTIME_BUILD_TESTS</code>", "<code>ON</code>", "Build requested component tests"], ["<code>SHARP_RUNTIME_BUILD_BENCHMARKS</code>", "<code>OFF</code>", "Build the standalone micro-benchmark"]]) + """
 <h2 id="complete">Complete build</h2>""" + code("git submodule update --init --recursive\ncmake -S . -B build \\\n  -DSHARP_RUNTIME_COMPONENTS=All\ncmake --build build --target SharpRuntimeTests --parallel 2", "bash") + """
 <h2 id="selective">Selective build</h2>""" + code("cmake -S . -B build-json \\\n  -DSHARP_RUNTIME_BUILD_TESTS=OFF \\\n  '-DSHARP_RUNTIME_COMPONENTS=Text.Json;Net.Http.Json'\ncmake --build build-json --parallel 2", "bash") + """
 <h2 id="targets">Target rules</h2>""" + bullets(["Use <code>SharpRuntime::&lt;Component&gt;</code> targets for new code.", "<code>SharpRuntime::All</code> aggregates every physical component.", "<code>SharpRuntime::Core</code> and <code>SharpRuntime::Collections</code> preserve older broad surfaces.", "<code>SharpRuntime::Xml.XPath</code> aliases the physical <code>Xml</code> archive.", "The raw legacy <code>SHARP_RUNTIME</code> target exists only when <code>All</code> is enabled."]) + """
-<h2 id="dependencies">External dependencies</h2>""" + table(["Selection", "Dependency", "Visibility"], [["<code>IO.Compression</code>", "ZLIB", "Private; found by CMake"], ["<code>IO.Compression.Zip</code>", "Vendored miniz", "Private"], ["<code>Xml</code>", "Vendored tinyxml2", "Public because public headers expose its types"], ["<code>Text.Json</code> / HTTP JSON", "Vendored nlohmann JSON headers", "Header surface"], ["<code>Storage</code> on Android", "Parent-provided SDL3 target", "Private"], ["Tests", "Vendored GoogleTest submodule", "Test-only"]]) + callout("Compiler capability", "<p>The build probes native <code>__int128</code> and publishes <code>SHARP_RUNTIME_HAS_NATIVE_INT128</code>. Some numeric surfaces are limited on compilers without it, notably current MSVC configurations.</p>", "warning")),
+<h2 id="dependencies">External dependencies</h2>""" + table(["Selection", "Dependency", "Visibility"], [["<code>IO.Compression</code>", "ZLIB", "Private; found by CMake"], ["<code>IO.Compression.Zip</code>", "Vendored miniz", "Private"], ["<code>Xml</code>", "Vendored tinyxml2", "Public because public headers expose its types"], ["<code>Text.Json</code> / HTTP JSON", "Vendored nlohmann JSON headers", "Header surface"], ["<code>Storage</code> on Android", "Parent-provided SDL3 target", "Private"], ["Tests", "Vendored GoogleTest submodule", "Test-only"]]) + callout("Compiler capability", "<p>At this source pin there is no CMake capability probe or fallback for native <code>__int128</code>. Affected Decimal and wide-integer surfaces therefore constrain toolchains such as current MSVC. The develop-only i686 guard is not part of this selected remediation branch.</p>", "warning")),
         Page("running-tests.html", "Testing and Verification", "How Sharp Runtime validates tests, components, boundaries, negative consumers, documentation and CI.", "Getting Started", intro("Testing and verification", "The project uses layered checks: behavior tests, component isolation, negative consumers, integration tests and documentation drift detection.", ["{{test_executables}} executables", "{{current_test_cases}} current cases", "Evidence-qualified"]) + """
 <h2 id="topology">Test topology</h2><p>There are {{component_test_executables}} component test executables and {{integration_test_executables_words}}. <code>SharpRuntimeTests</code> is an aggregate build target, not one giant test binary. CTest discovers individual GoogleTest cases.</p>""" + table(["Layer", "What it proves"], [["Component executables", "Behavior owned by one physical component"], ["Integration executable", "Genuinely cross-component behavior in an <code>All</code> build"], ["Selective consumer fixtures", "Requested targets configure, build and expose only declared surfaces"], ["Negative fixtures", "Private or sibling headers do not leak to consumers"], ["Boundary validator", "Unique ownership, declared edges, correct visibility and an acyclic production graph"], ["Catalogue check", "Generated component documentation matches CMake registration"], ["Doxygen ceiling", "Documentation warnings do not exceed the pinned baseline"]]) + """
-<h2 id="baseline">Current baseline, honestly stated</h2><p>At source SHA <code>""" + SOURCE_SHA + """</code>, current built executables discover <strong>{{current_test_cases}}</strong> test cases. The latest controlled full-gate record before {{timezone_additions}} final TimeZone additions ran {{gate_cases}} cases: {{gate_passed}} passed, {{gate_skipped_words}} and {{gate_failed_words}}. Five Ping failures were triggered by the host’s ping-group configuration but expose a real missing raw-ICMP receive fallback; one socket test depended on a missing IPv6 interface file.</p>""" + callout("Why the homepage does not say “16,000+ passing”", "<p>The current suite shape and the latest recorded full outcome refer to adjacent revisions. This site publishes them separately rather than inferring an unrecorded all-green result.</p>", "warning") + """
+<h2 id="baseline">Current baseline, honestly stated</h2><p>At source SHA <code>""" + SOURCE_SHA + """</code>, the latest recorded complete gate discovered and ran <strong>{{gate_cases}}</strong> tests: {{gate_passed}} passed, {{gate_skipped_words}} and {{gate_failed_words}}. Five Ping failures were triggered by the host’s ping-group configuration but expose a real missing raw-ICMP receive fallback; one socket test depended on missing IPv6 host state.</p>""" + callout("Measured does not mean green", "<p>The source pin and measured gate are the same revision. The site preserves all six failures and their scope instead of converting a large pass count into an all-green claim.</p>", "warning") + """
 <h2 id="commands">Commands</h2>""" + code("# Build all test executables\ncmake -S . -B build -DSHARP_RUNTIME_COMPONENTS=All\ncmake --build build --target SharpRuntimeTests --parallel 2\n\n# Run the component-aware sequence\nscripts/run_component_tests.sh build\n\n# Full local integrity gate\nscripts/local_ci_check.sh build\n\n# Selective consumer matrix\nscripts/check_selective_components.sh", "bash") + """
 <h2 id="ci">Current GitHub Actions</h2><p>The pinned workflow runs on pushes and pull requests. It has nine Ubuntu selective-component jobs, one Ubuntu full local gate and a Doxygen 1.9.8 warning-baseline job on Ubuntu 24.04. It does not currently run a Windows, macOS, Android or Emscripten matrix.</p>"""),
         Page("architecture.html", "Architecture", "Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.", "Overview", intro("Architecture", "A native C++ compatibility layer organized into independently selectable, boundary-validated CMake components.", ["{{physical_components}} physical components", "{{production_edges}} direct edges", "No dependency allow-list"]) + """
@@ -245,7 +326,7 @@ def core_pages() -> list[Page]:
 <h2 id="exclusions">Intentional exclusions</h2>""" + table(["Managed facility", "Sharp Runtime boundary"], [["CLR / JIT / assemblies", "No managed execution or arbitrary assembly loading"], ["Garbage collection", "RAII and explicit native ownership"], ["General reflection", "Basic type identity only; no metadata universe or member enumeration"], ["Dynamic invocation", "<code>Delegate::DynamicInvoke</code> is deliberately unsupported"], ["P/Invoke / remoting", "No general managed interop or AppDomain/remoting infrastructure"], ["Serialization infrastructure", "No BinaryFormatter-style general object serialization"], ["TLS / certificates", "No TLS transport, certificate stack or <code>SslStream</code>"], ["C# async syntax", "Task types do not add language-level <code>async</code>/<code>await</code> to C++"]]) + """
 <h2 id="reductions">Important representation reductions</h2>""" + bullets(["Strings are UTF-8 <code>std::string</code>-based; some indices and lengths are storage bytes rather than .NET UTF-16 code units.", "Delegates use typed C++ callables; late-bound invocation is absent.", "Reflection is type-identification oriented rather than metadata driven.", "Task scheduling and continuation behavior are implemented with native synchronization and threads, not a CLR scheduler."]) + callout("Evaluate by surface", "<p>Use the component family pages and Known Limitations as the public contract. They separate implemented behavior, reductions, platform limits and non-goals.</p>")),
         Page("platform-layer.html", "Platforms and Portability", "Evidence-driven platform matrix for Linux, Windows, macOS, Emscripten and Android in Sharp Runtime.", "Guides", intro("Platforms and portability", "Platform status is reported as validation depth—not a binary supported/unsupported badge.", ["Pinned 2026-08-12", "CI inspected", "Conservative labels"]) + """
-<h2 id="matrix">Evidence matrix</h2>""" + table(["Platform/toolchain", "Evidence", "Important limits"], [["Linux / GCC", '<span class="badge badge--verified">Primary native validation</span>', "Only full native build/runtime-test baseline. The last controlled gate has the qualified failures documented on the Testing page."], ["Linux / Clang", '<span class="badge badge--partial">Source-supported</span>', "Compiler branches exist; no pinned Clang CI job in the current workflow."], ["Windows / MinGW-w64", '<span class="badge badge--build">Cross-compile verified</span>', "Library-only All and Text.Json cross-builds; tests were not compiled or run."], ["Windows / i686 MinGW", '<span class="badge badge--build">Compile/link boundary</span>', "Dedicated target excludes native-128 surfaces and disables tests."], ["Windows / MSVC", '<span class="badge badge--limited">Compiler-limited</span>', "CMake warning policy and platform links exist; lack of native <code>__int128</code> limits numeric surface completeness; no current CI/runtime result."], ["macOS / Apple Clang", '<span class="badge badge--partial">Downstream build evidence</span>', "Xcode 15.4 downstream builds drove fixes; no standalone full gate or current hosted job."], ["Emscripten", '<span class="badge badge--partial">Cross-compile verified</span>', "Library-only All and Text.Json cross-builds; no browser tests. DNS and several native facilities are unavailable."], ["Android", '<span class="badge badge--partial">Storage integration path</span>', "Storage paths can use a parent-provided SDL3 target; no whole-project Android build or device-suite result was produced."]]) + """
+<h2 id="matrix">Evidence matrix</h2>""" + table(["Platform/toolchain", "Evidence", "Important limits"], [["Linux / GCC", '<span class="badge badge--verified">Primary native validation</span>', "Only full native build/runtime-test baseline. The measured gate has the qualified failures documented on the Testing page."], ["Linux / Clang", '<span class="badge badge--partial">Source-supported</span>', "Compiler branches exist; no pinned Clang CI job in the current workflow."], ["Windows / MinGW-w64", '<span class="badge badge--build">Historical cross-build</span>', "Earlier library-only All and Text.Json builds were not repeated at this pin; tests did not run. The selected branch also lacks develop's i686 guard."], ["Windows / MSVC", '<span class="badge badge--limited">Compiler-limited</span>', "CMake warning policy and platform links exist; lack of native <code>__int128</code> limits numeric surface completeness; no current CI/runtime result."], ["macOS / Apple Clang", '<span class="badge badge--partial">Downstream build evidence</span>', "Xcode 15.4 downstream builds drove fixes; no standalone full gate or current hosted job."], ["Emscripten", '<span class="badge badge--partial">Historical cross-build</span>', "Earlier library-only All and Text.Json builds were not repeated at this pin; no browser tests, and several native facilities are unavailable."], ["Android", '<span class="badge badge--partial">Storage integration path</span>', "Storage paths can use a parent-provided SDL3 target; no whole-project Android build or device-suite result was produced."]]) + """
 <h2 id="meanings">Evidence labels</h2>""" + table(["Label", "Meaning"], [["Primary native validation", "The repository’s only full native build/runtime-test baseline; read its exact outcome"], ["Cross-compile verified", "Library compilation completed for a recorded toolchain; runtime tests did not run"], ["Downstream build evidence", "A consumer build drove fixes, without a standalone runtime gate"], ["Source-supported", "Implementation branches exist; this audit did not prove a complete gate"], ["Platform-limited", "Some APIs intentionally throw, reduce behavior or depend on unavailable host facilities"], ["Compiler-limited", "A compiler capability prevents part of the intended surface"]]) + """
 <h2 id="api-caveats">Cross-platform caveats</h2>""" + bullets(["Console cursor/color behavior uses ANSI sequences and is not a uniform terminal abstraction.", "Ping and interface enumeration depend on host permissions and files; distinguish environment failures from library defects.", "Emscripten DNS methods explicitly throw <code>PlatformNotSupportedException</code>.", "Android storage’s SDL dependency must be provided by the parent build.", "Operating-system version helpers largely report compile-time platform identity; version comparison is reduced."]) + callout("No overclaim", "<p>A source path or a successful cross-compile is not described as full runtime support. Add platform CI before strengthening these labels.</p>", "warning")),
         Page("memory-management.html", "Memory and Ownership", "How Sharp Runtime maps managed object lifetime to C++ RAII, values, smart pointers and non-owning references.", "Guides", intro("Memory and ownership", "There is no garbage collector. Native lifetime is part of the program’s correctness model.", ["Core concept", "C# porting"]) + """
@@ -268,13 +349,224 @@ def component_rows(components: dict) -> list[list[str]]:
         deps_html = "—" if not deps else '<span class="dependency-list">' + "".join(f"<code>{e(x)}</code>" for x in deps) + "</span>"
         external = e(item["external_dependency"] or "—")
         rows.append([
-            f'<a class="component-anchor" id="component-{slug(item["name"])}" href="#component-{slug(item["name"])}"><code>{e(item["name"])}</code></a>',
+            f'<a class="component-anchor" id="component-{slug(item["name"])}" href="../api/components/{slug(item["name"])}.html"><code>{e(item["name"])}</code></a>',
             f'<span class="badge badge--kind">{e(item["kind"])}</span>',
             f'<code>{e(item["header"])}</code>',
             deps_html,
             external,
         ])
     return rows
+
+
+def component_family_path(name: str) -> str:
+    if name in {"Core.Base", "Console", "Uri", "TimeZone", "Buffers", "Collections.Core", "Collections.Blocking", "Collections.Async", "Collections.ObjectModel", "ComponentModel"}:
+        return "components/core.html"
+    if name in {"Text", "Text.Json", "Text.RegularExpressions", "Xml", "Xml.Linq"}:
+        return "components/text-data.html"
+    if name in {"IO", "IO.Compression", "IO.Compression.Zip", "IO.Hashing", "Storage", "IO.IsolatedStorage"}:
+        return "components/io-storage.html"
+    if name.startswith("Net"):
+        return "components/networking.html"
+    if name in {"Threading", "Threading.Tasks", "Threading.Channels", "Timers"}:
+        return "components/concurrency.html"
+    return "components/numerics-globalization.html"
+
+
+def component_related_docs(name: str) -> list[tuple[str, str]]:
+    related: list[tuple[str, str]] = [("Family overview", component_family_path(name))]
+    if name in {"Core.Base", "Buffers"}:
+        related.extend([("Type system", "type-system.html"), ("Arrays and memory", "arrays.html")])
+    elif name.startswith("Collections"):
+        related.extend([("Collections tutorial", "tutorials/use-collections.html"), ("Porting collections", "development/porting-csharp-code.html")])
+    elif name in {"Text", "Text.RegularExpressions"}:
+        related.extend([("String internals", "internals/string-internals.html"), ("Strings tutorial", "tutorials/strings-and-builder.html")])
+    elif name == "Text.Json":
+        related.extend([("JSON tutorial", "tutorials/json.html"), ("Text and data", "components/text-data.html")])
+    elif name.startswith("Xml"):
+        related.extend([("XML tutorial", "tutorials/xml-linq.html"), ("Text and data", "components/text-data.html")])
+    elif name == "IO":
+        related.extend([("I/O model", "io.html"), ("Files tutorial", "tutorials/work-with-files.html")])
+    elif name.startswith("IO.") or name == "Storage":
+        related.extend([("I/O model", "io.html"), ("I/O family", "components/io-storage.html")])
+    elif name.startswith("Net"):
+        related.extend([("Networking family", "components/networking.html"), ("HTTP tutorial", "tutorials/http.html")])
+    elif name.startswith("Threading") or name == "Timers":
+        related.extend([("Threading model", "threading.html"), ("Tasks tutorial", "tutorials/tasks-cancellation.html")])
+    elif name == "Globalization":
+        related.extend([("String model", "strings.html"), ("Platform matrix", "platform-layer.html")])
+    elif name == "Numerics":
+        related.extend([("Type system", "type-system.html"), ("Platform matrix", "platform-layer.html")])
+    else:
+        related.extend([("Runtime overview", "runtime-overview.html"), ("Known limitations", "development/known-limitations.html")])
+    return related
+
+
+def component_api_pages(components: dict) -> list[Page]:
+    inventory_by_name = {item["name"]: item for item in API_INVENTORY["components"]}
+    component_by_name = {item["name"]: item for item in components["physical_components"]}
+    pages = []
+    for name in [item["name"] for item in components["physical_components"]]:
+        component = component_by_name[name]
+        inventory = inventory_by_name[name]
+        guidance = COMPONENT_DOCS[name]
+        path = f"api/components/{slug(name)}.html"
+        namespaces: dict[str, list[dict]] = {}
+        for header in inventory["headers"]:
+            namespaces.setdefault(header["namespace"], []).append(header)
+
+        header_sections = []
+        for namespace, headers in sorted(namespaces.items()):
+            links = []
+            for header in headers:
+                source_url = f"https://github.com/openeggbert/sharp-runtime/blob/{SOURCE_SHA}/{component['owner']}/include/{header['header']}"
+                links.append(f'<li><a href="{source_url}"><code>{e(header["header"])}</code></a></li>')
+            support = "detail" in namespace.split("::")
+            support_label = " · internal/support path" if support else ""
+            support_class = " api-group--support" if support else ""
+            header_sections.append(
+                f'<details class="api-group{support_class}"><summary><code>{e(namespace)}</code><span>{len(headers)} public header{"s" if len(headers) != 1 else ""}{support_label}</span></summary><ul class="api-header-list">{"".join(links)}</ul></details>'
+            )
+
+        production_dependencies = component["public_dependencies"] + [
+            f"{dependency} (private)" for dependency in component["private_dependencies"]
+        ]
+        dependency_rows = [
+            ["Physical owner", f'<code>{e(component["owner"])}</code>'],
+            ["CMake target", f'<code>SharpRuntime::{e(name)}</code>'],
+            ["Component kind", f'<span class="badge badge--kind">{e(component["kind"])}</span>'],
+            ["Direct production dependencies", ", ".join(f'<code>{e(value)}</code>' for value in production_dependencies) or "None"],
+            ["External dependency", e(component["external_dependency"] or "None")],
+            ["Public headers", str(inventory["public_header_count"])],
+            ["Production sources", str(inventory["production_source_count"])],
+        ]
+        if inventory["test_source_count"]:
+            test_sources = inventory["test_source_count"]
+            noun = "source" if test_sources == 1 else "sources"
+            test_note = f"The owning module contains {test_sources} C++ test {noun} and participates in a physical component test executable. Source-file count is not a discovered-test count."
+        else:
+            test_note = "The owning module has no dedicated C++ test source at this pin. That is evidence about test topology, not a maturity score; behavior may still be exercised transitively or in integration tests."
+
+        cmake_example = f"""set(SHARP_RUNTIME_COMPONENTS {name})
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL \"\" FORCE)
+add_subdirectory(sharp-runtime)
+
+target_link_libraries(app PRIVATE SharpRuntime::{name})"""
+        related_docs = []
+        seen_destinations: set[str] = set()
+        for title, destination in component_related_docs(name):
+            if destination in seen_destinations:
+                continue
+            seen_destinations.add(destination)
+            related_docs.append((title, destination))
+        related_links = [
+            (title, "Conceptual behavior, examples, and compatibility boundaries.", relative(path, destination))
+            for title, destination in related_docs
+        ]
+        body = intro(
+            f"{name} API inventory",
+            guidance["purpose"],
+            ["Generated public inventory", f"{inventory['public_header_count']} headers", f"Source {SOURCE_SHA[:8]}"],
+        )
+        body += "<h2 id=\"ownership\">Ownership and selection</h2>" + table(["Fact", "Pinned value"], dependency_rows)
+        body += "<h2 id=\"cmake\">Select the component</h2>" + code(cmake_example, "cmake")
+        body += f'<h2 id="compatibility">Compatibility and platform notes</h2><p>{e(guidance["platform"])}</p>'
+        body += f'<h2 id="verification">Implementation-status evidence</h2><p>{e(test_note)}</p><p>This page deliberately reports source and test topology instead of a hand-authored Done/Partial maturity badge. Consult limitations and subsystem documentation for material behavioral reductions.</p>'
+        body += f'<h2 id="public-inventory">Public header and entry inventory</h2><p>This complete list is derived from <code>{e(component["owner"])}/include</code>. Each filename is a public discovery entry; it may declare more than one type, and it does not imply method-level .NET parity.</p>' + "".join(header_sections)
+        body += "<h2 id=\"related\">Related documentation</h2>" + page_index(related_links)
+        pages.append(Page(
+            path,
+            f"{name} API Inventory",
+            f"Generated public-header inventory, CMake ownership, dependencies, compatibility notes and related guides for the Sharp Runtime {name} component.",
+            "API",
+            body,
+            ["api", "component", name.lower()] + sorted({header["namespace"].lower() for header in inventory["headers"]}),
+        ))
+    return pages
+
+
+def replace_api_index(pages: list[Page], components: dict) -> list[Page]:
+    component_by_name = {item["name"]: item for item in API_INVENTORY["components"]}
+    component_rows_data = []
+    for component in components["physical_components"]:
+        inventory = component_by_name[component["name"]]
+        namespaces = sorted({
+            header["namespace"] for header in inventory["headers"]
+            if "detail" not in header["namespace"].split("::")
+        })
+        purpose = COMPONENT_DOCS[component["name"]]["purpose"]
+        component_rows_data.append([
+            f'<a href="components/{slug(component["name"])}.html"><code>{e(component["name"])}</code></a>',
+            e(component["owner"]),
+            str(inventory["public_header_count"]),
+            ", ".join(f"<code>{e(value)}</code>" for value in namespaces[:4]) + (" …" if len(namespaces) > 4 else ""),
+            e(purpose),
+        ])
+
+    public_namespaces = [
+        namespace for namespace in API_INVENTORY["namespaces"]
+        if "detail" not in namespace["name"].split("::")
+    ]
+    support_namespaces = [
+        namespace for namespace in API_INVENTORY["namespaces"]
+        if "detail" in namespace["name"].split("::")
+    ]
+    namespace_rows = []
+    for namespace in public_namespaces:
+        entries = ", ".join(f"<code>{e(value)}</code>" for value in namespace["entries"][:8])
+        if len(namespace["entries"]) > 8:
+            entries += " …"
+        component_links = ", ".join(
+            f'<a href="components/{slug(name)}.html"><code>{e(name)}</code></a>'
+            for name in namespace["components"]
+        )
+        namespace_rows.append([
+            f'<code>{e(namespace["name"])}</code>',
+            str(namespace["header_count"]),
+            component_links,
+            entries,
+        ])
+
+    body = intro(
+        "API discovery",
+        "Move from a namespace or concept to the owning physical component, exact public headers, compatibility boundaries, tutorials, and source at the pinned revision.",
+        [f"{API_INVENTORY['public_header_count']} public headers", f"{components['physical_count']} components", f"{len(public_namespaces)} curated namespace paths"],
+    )
+    body += """
+<h2 id="layers">A layered reference, not a guessed method dump</h2>
+<p>The generated layer below answers <em>where does this public entry live?</em> The curated class, concept, subsystem, and tutorial layers answer <em>how does it behave, how does it differ from .NET, and how should I own it?</em> Exact method signatures remain linked to the pinned headers so the website does not invent overloads.</p>
+<div class="callout"><div class="callout-title">What a header entry proves</div><p>It proves that a public include exists in one registered component at the selected SHA. It does not prove full .NET parity, universal platform behavior, or one-class-per-file.</p></div>
+<h2 id="curated">Curated starting points</h2>""" + page_index([
+        ("Foundational classes", "String, Array, Object, Nullable, Exception, and EventHandler.", "../classes/index.html"),
+        ("Type system", "Native values, object participation, Type, spans, nullable, casts, and reflection limits.", "../type-system.html"),
+        ("I/O", "Streams, readers/writers, filesystems, and FileSystemWatcher.", "../io.html"),
+        ("C# porting guide", "Before/after transformations with ownership consequences.", "../development/porting-csharp-code.html"),
+        ("All tutorials", "Buildable paths organized by task.", "../tutorials/index.html"),
+        ("Known limitations", "Current reductions, platform constraints, and unresolved defects.", "../development/known-limitations.html"),
+    ])
+    body += "<h2 id=\"components\">Browse by owning component</h2>" + table(
+        ["Component", "Physical owner", "Headers", "Main namespace paths", "Purpose"],
+        component_rows_data,
+        "api-component-table",
+    )
+    body += f"<h2 id=\"namespaces\">Browse by namespace path</h2><p>Namespace paths are derived from public include directories. This curated table shows {len(public_namespaces)} consumer-facing paths. The {len(support_namespaces)} <code>detail</code> paths are intentionally omitted here because they are implementation/support boundaries, but remain visibly labelled in each component's complete generated header inventory.</p>" + table(
+        ["Namespace path", "Headers", "Owning components", "Representative entries"],
+        namespace_rows,
+        "api-namespace-table",
+    )
+    body += """
+<h2 id="status">How implementation status is communicated</h2>
+<p>Sharp Runtime does not maintain a reliable method-level Done/Partial score. The website therefore reports concrete evidence: owning source, dependency edges, dedicated tests, measured gates, platform implementation paths, and specific limitations. A familiar name is a discovery aid, not a promise of CLR semantics or source compatibility.</p>
+<h2 id="regenerate">Regeneration and drift control</h2>
+<p><code>tools/sync_api_inventory.py --runtime /explicit/checkout</code> walks only registered component owners at the explicit pinned HEAD. Check mode compares the generated inventory byte-for-byte, while site validation verifies the SHA and component sets before publishing.</p>"""
+    replacement = Page(
+        "api/index.html",
+        "API Discovery",
+        "Generated namespace, component and public-header discovery with curated compatibility and conceptual documentation for Sharp Runtime.",
+        "API",
+        body,
+        ["api", "namespaces", "types", "headers", "components", "reference"],
+    )
+    return [replacement if page.path == "api/index.html" else page for page in pages]
 
 
 def component_pages(components: dict) -> list[Page]:
@@ -315,7 +607,7 @@ def component_pages(components: dict) -> list[Page]:
 <h2 id="timers">Timers</h2><p><code>Timers</code> owns elapsed-event timer behavior and privately depends on <code>Threading</code>. A timer callback can outlive the initiating scope unless ownership and shutdown are coordinated.</p>""" + callout("Callback lifetime", "<p>A continuation, event or timer that captures a raw object pointer can become unsafe after destruction. Prefer an explicit owner, cancellation and join/teardown protocol.</p>", "warning")),
         ("components/numerics-globalization.html", "Numerics, Globalization and Runtime Utilities", "Cultures, numeric types, vectors, matrices, diagnostics and runtime helper components.", ["Globalization", "Numerics", "Diagnostics", "Runtime", "Security", "Security.Cryptography", "Security.Cryptography.Random"], """
 <h2 id="globalization">Globalization</h2><p>The component provides culture, calendar, Unicode category, number parsing and formatting surfaces. Locale data and collation/grapheme behavior are curated and platform-sensitive; broad culture parity is not implied.</p>
-<h2 id="numerics">Numerics</h2><p>Vectors, matrices, quaternion, Complex, BigInteger, Decimal and wide numeric wrappers are available across the implemented subset. Current code probes native <code>__int128</code>; platforms without it have reduced wide-integer capability.</p>
+<h2 id="numerics">Numerics</h2><p>Vectors, matrices, quaternion, Complex, BigInteger, Decimal and wide numeric wrappers are available across the implemented subset. Several affected surfaces directly require native <code>__int128</code>; this selected branch has no CMake capability guard or fallback for toolchains without it.</p>
 <h2 id="diagnostics">Diagnostics and runtime</h2><p><code>Diagnostics</code> contains diagnostic/code-analysis and process-oriented surfaces. <code>Runtime</code> owns selected <code>System.Runtime</code> contracts—without CLR services, assembly metadata or managed interop.</p>
 <h2 id="security">Security and cryptography</h2><p><code>Security</code> is a marker/exception surface. <code>Security.Cryptography</code> includes curated hashing, HMAC and PBKDF2-related behavior, while secure random is isolated in <code>Security.Cryptography.Random</code>. Windows random generation attaches bcrypt privately.</p>""" + callout("Cryptographic boundary", "<p>Hashing, HMAC, PBKDF2 and secure random do not amount to a complete crypto/TLS platform. Encryption algorithms, certificates, TLS and <code>SslStream</code> are outside the current public promise.</p>", "warning")),
     ]
@@ -603,8 +895,8 @@ def reference_pages() -> list[Page]:
 <h2 id="verify">5. Verify reductions</h2>""" + table(["Risk", "Verification"], [["String indices", "Non-ASCII and malformed UTF-8 cases"], ["Numeric behavior", "Overflow, NaN, infinity, signed zero and compiler capabilities"], ["Collections", "Mutation/enumerator invalidation and comparer policy"], ["I/O", "Short operations, lifecycle, permissions and platform paths"], ["Concurrency", "Cancellation, teardown, exception observation and races"], ["Networking", "DNS/connect/protocol distinctions and TLS boundary"]]) + """
 <h2 id="choose-native">6. Prefer idiomatic C++ when compatibility adds no value</h2><p>Sharp Runtime is a tool for practical ports, not a requirement to preserve every managed design. A native value, standard range or explicit factory is often clearer than emulating a managed-only mechanism.</p>"""),
         ("project-structure.html", "Project Structure", "Current Sharp Runtime module layout, CMake registration, tests, vendor dependencies and audit material.", "Development", """
-<h2 id="layout">Repository map</h2>""" + table(["Path", "Purpose"], [["<code>modules/&lt;module&gt;/include</code>", "Public header ownership"], ["<code>modules/&lt;module&gt;/src</code>", "Compiled implementation for static components"], ["<code>modules/&lt;module&gt;/tests</code>", "Owning component’s GoogleTest sources"], ["<code>cmake/SharpRuntimeModules.cmake</code>", "Physical module enumeration"], ["<code>cmake/SharpRuntimeComponents.cmake</code>", "Registration and enablement engine"], ["<code>tests/integration</code>", "Cross-component test scenarios"], ["<code>test/consumers</code>", "Positive and negative consumer fixtures"], ["<code>scripts/</code>", "Catalogue, boundary and local-CI tooling"], ["<code>docs/</code>", "Generated catalogue plus engineering decisions/reviews"], ["<code>audit/</code>", "Historical/current audit evidence—not automatically public truth"], ["<code>vendor/</code>", "Vendored libraries and the GoogleTest submodule"]]) + """
-<h2 id="inventory">Pinned tracked inventory</h2><p>The current tree has 1,032 public module headers, 217 production translation units, 477 component test sources and nine integration test sources. These are audit facts, not a promise to keep mutable counts in every page.</p>"""),
+<h2 id="layout">Repository map</h2>""" + table(["Path", "Purpose"], [["<code>modules/&lt;module&gt;/include</code>", "Public header ownership"], ["<code>modules/&lt;module&gt;/src</code>", "Compiled implementation for static components"], ["<code>modules/&lt;module&gt;/tests</code>", "Owning component’s GoogleTest sources"], ["<code>cmake/SharpRuntimeModules.cmake</code>", "Physical module enumeration"], ["<code>cmake/SharpRuntimeComponents.cmake</code>", "Registration and enablement engine"], ["<code>tests/integration</code>", "Cross-component test scenarios"], ["<code>test/consumer</code>", "Positive and negative consumer fixtures"], ["<code>scripts/</code>", "Catalogue, boundary and local-CI tooling"], ["<code>docs/</code>", "Generated catalogue plus engineering decisions/reviews"], ["<code>audit/</code>", "Historical/current audit evidence—not automatically public truth"], ["<code>vendor/</code>", "Vendored libraries and the GoogleTest submodule"]]) + """
+<h2 id="inventory">Pinned tracked inventory</h2><p>The pinned tree contains {{public_headers}} public module headers and {{production_sources}} production translation units. CMake registers {{physical_components}} physical components, {{production_edges}} direct production dependency edges and {{test_executables}} test executables. These volatile values come from the canonical site facts and are checked against an explicitly supplied runtime checkout.</p>"""),
         ("api/index.html", "API Discovery", "Curated Sharp Runtime API navigation by concepts, components and low-level source reference.", "API", """
 <h2 id="strategy">Layered reference strategy</h2>""" + table(["Layer", "Use it for"], [["Concept guides", "Ownership, compatibility and subsystem behavior"], ["Component family pages", "Targets, dependencies and capability boundaries"], ["Class pages", "High-value foundational types"], ["Source/Doxygen", "Exact signatures and member-level details at the pinned revision"]]) + """
 <h2 id="browse">Browse curated reference</h2>""" + page_index([("Components", "All {{physical_components}} physical targets.", "../components/index.html"), ("Core classes", "Object, String, Array, Nullable and exceptions.", "../classes/index.html"), ("Type system", "Values and runtime identity.", "../type-system.html"), ("I/O", "Streams and filesystem.", "../io.html"), ("Networking", "HTTP, sockets and transport limits.", "../components/networking.html"), ("Concurrency", "Threads, tasks, channels and timers.", "../threading.html")]) + """
@@ -615,7 +907,7 @@ def reference_pages() -> list[Page]:
         ("modules/text.html", "Text Module Family", "Compatibility URL for Text, Regex, JSON and XML documentation.", "Components", "<p>Text, regular expressions and JSON are distinct current components; XML is documented alongside them as a data/text family.</p>" + page_index([("Current text/data page", "Targets and boundaries.", "../components/text-data.html"), ("Strings", "UTF-8 semantics.", "../strings.html"), ("JSON tutorial", "Curated serialization scope.", "../tutorials/json.html")])) ,
         ("modules/net.html", "Networking Module Family", "Compatibility URL for current Net, sockets, HTTP, MIME, network information and WebSockets components.", "Components", "<p>The current architecture has nine networking components rather than one blanket Net module.</p>" + page_index([("Current networking page", "All networking targets and caveats.", "../components/networking.html"), ("HTTP tutorial", "Transport boundaries.", "../tutorials/http.html"), ("Platforms", "Evidence labels.", "../platform-layer.html")])) ,
         ("modules/globalization.html", "Globalization Module", "Culture, parsing, formatting and portability boundaries in Sharp Runtime.", "Components", "<p>Globalization provides a curated culture/calendar/Unicode/number surface. Locale data, collation and grapheme behavior must be evaluated per API and platform.</p>" + page_index([("Numerics/globalization family", "Targets and current boundaries.", "../components/numerics-globalization.html"), ("Platforms", "Platform validation depth.", "../platform-layer.html")])) ,
-        ("modules/numerics.html", "Numerics Module", "Vectors, matrices, quaternion, BigInteger, Decimal and compiler capability boundaries.", "Components", "<p>Numerics includes vector/matrix/quaternion types plus BigInteger, Decimal and wide wrappers. Native <code>__int128</code> is probed at configure time; compiler limits are public behavior.</p>" + page_index([("Current family page", "Numerics, globalization and crypto.", "../components/numerics-globalization.html"), ("Known limitations", "Current numeric/compiler caveats.", "../development/known-limitations.html")])) ,
+        ("modules/numerics.html", "Numerics Module", "Vectors, matrices, quaternion, BigInteger, Decimal and compiler capability boundaries.", "Components", "<p>Numerics includes vector/matrix/quaternion types plus BigInteger, Decimal and wide wrappers. Affected surfaces directly require native <code>__int128</code>; this pin has no configure-time fallback for toolchains without it.</p>" + page_index([("Current family page", "Numerics, globalization and crypto.", "../components/numerics-globalization.html"), ("Known limitations", "Current numeric/compiler caveats.", "../development/known-limitations.html")])) ,
         ("modules/diagnostics.html", "Diagnostics Module", "Sharp Runtime diagnostic/code-analysis and process-oriented surfaces.", "Components", "<p>Diagnostics contains diagnostic and code-analysis-related types plus selected process behavior. Platform facilities vary; the namespace is not a managed diagnostics runtime.</p>" + page_index([("Current family page", "Diagnostics and Runtime targets.", "../components/numerics-globalization.html"), ("Platforms", "Evidence matrix.", "../platform-layer.html")])) ,
         ("classes/index.html", "Core Class Reference", "Curated reference for important foundational Sharp Runtime types.", "API", page_index([("Object", "Native base identity.", "object.html"), ("String", "UTF-8 helpers.", "string.html"), ("Array", "Owned sequence helpers.", "array.html"), ("Nullable", "Optional value patterns.", "nullable.html"), ("Exception", "Error hierarchy.", "exception.html"), ("EventHandler", "Typed events.", "eventhandler.html")]) + "<h2 id=\"more\">More APIs</h2><p>Use the <a href=\"../components/index.html\">component catalogue</a> to locate a representative public header, then consult the pinned source for exact overloads.</p>"),
         ("classes/object.html", "System::Object", "Native base identity and object-model boundaries.", "API", "<p><code>System::Object</code> anchors familiar identity/type behavior for the implemented subset. It is not backed by a CLR object header, garbage collector or universal reflection metadata.</p><h2 id=\"lifetime\">Lifetime</h2><p>Derived instances follow ordinary C++ construction, virtual destruction, copy/move and ownership rules.</p>"),
@@ -630,8 +922,8 @@ def reference_pages() -> list[Page]:
 <h2 id="partial">Important partial or reduced surfaces</h2>""" + table(["Area", "Current boundary"], [["Text", "UTF-8 storage means some indices/lengths differ from .NET UTF-16; StringInfo lacks general grapheme segmentation"], ["Reflection", "Basic type identity, not member metadata or dynamic invocation"], ["OperatingSystem", "Platform identity is available; real OS version detection/comparison is reduced"], ["TimeZoneInfo", "Serialized-string round trip is not implemented"], ["Networking", "Some base virtuals intentionally throw; Emscripten DNS unavailable; WebProxy default lookup follows platform-limited behavior"], ["WebSockets", "<code>ws://</code> only; <code>wss://</code> throws"], ["XML/XPath", "Curated XPath subset; variables/custom functions/extension context absent"], ["LocalDataStoreSlot", "Thread-local per-slot semantics remain a stub"], ["Guid", "Rare X/Open and Microsoft variant normalization is not implemented"]]) + """
 <h2 id="security">Security boundary</h2><p>Implemented hashing, HMAC, PBKDF2 and secure random are not a complete cryptographic platform. Encryption algorithms, certificates, TLS, HTTPS, WSS and <code>SslStream</code> are not part of the current public promise.</p>
 <h2 id="platform">Platform/compiler limits</h2>""" + bullets(["Current hosted CI validates Ubuntu only.", "MSVC lacks the native <code>__int128</code> capability used by some numeric surfaces.", "Emscripten cannot provide several native DNS/network/process/filesystem facilities.", "Android storage expects SDL3 from the parent build.", "Console cursor/color behavior is ANSI-terminal oriented."]) + """
-<h2 id="high-impact">High-impact current limitations</h2>""" + bullets(["<strong>Network transport:</strong> HTTP is buffered plain HTTP/1.1 over TCP; no redirects or TLS. WebSockets support <code>ws://</code>, not <code>wss://</code>.", "<strong>Async lifetime:</strong> several socket, HTTP and WebSocket task wrappers capture raw owners or caller buffers; keep them alive until completion.", "<strong>Text/globalization:</strong> Unicode normalization is effectively ASCII/no-op beyond the reduced surface; several encoding indices count UTF-8 bytes; culture, collation, casing and grapheme behavior are limited.", "<strong>Time zones:</strong> Windows/POSIX paths exist, but the model largely uses fixed current offsets with no transition rules, ambiguity/invalid-time model or serialized form.", "<strong>Storage:</strong> isolated storage is organizational, not a security sandbox. Use trusted relative paths; absolute paths, <code>..</code> and symlink confinement are not comprehensively contained.", "<strong>Platform APIs:</strong> FileSystemWatcher and NetworkInterface are Linux-specific; Process is POSIX-only; Emscripten threading requires pthreads and whole-program/browser configuration.", "<strong>Compiler boundary:</strong> Decimal/Int128/UInt128 surfaces require native <code>__int128</code>, limiting current MSVC/i686 coverage."]) + """
-<h2 id="known-tests">Known full-gate conditions</h2><p>The latest controlled recorded full gate had {{gate_failed_words}}: five Ping cases were triggered by <code>ping_group_range</code> and expose a real missing raw-ICMP receive fallback; one socket/interface case depended on a missing <code>/proc/net/if_inet6</code>. The current pinned source adds {{timezone_additions}} passing TimeZone cases after that record; no post-merge controlled full-gate result is claimed.</p>""" + callout("A limitation page, not an audit-ticket dump", "<p>Internal audit findings are translated into user-facing behavior here. Fixed findings and project-management identifiers are not published as if they were current defects.</p>")),
+<h2 id="high-impact">High-impact current limitations</h2>""" + bullets(["<strong>Network transport:</strong> HTTP is buffered plain HTTP/1.1 over TCP; no redirects or TLS. WebSockets support <code>ws://</code>, not <code>wss://</code>.", "<strong>Async lifetime:</strong> several socket, HTTP and WebSocket task wrappers capture raw owners or caller buffers; keep them alive until completion.", "<strong>Text/globalization:</strong> Unicode normalization is effectively ASCII/no-op beyond the reduced surface; several encoding indices count UTF-8 bytes; culture, collation, casing and grapheme behavior are limited.", "<strong>Time zones:</strong> Windows/POSIX data paths and DST rules exist, but serialized-string round trip and full platform-data parity remain outside the current promise.", "<strong>Storage:</strong> the confinement resolver rejects absolute/traversal and checked symlink escapes, but it is not an OS sandbox; TOCTOU and separately constructed stream paths remain relevant.", "<strong>Platform APIs:</strong> FileSystemWatcher and NetworkInterface are Linux-specific; Process is POSIX-only; Emscripten threading requires pthreads and whole-program/browser configuration.", "<strong>Compiler boundary:</strong> Decimal/Int128/UInt128 surfaces require native <code>__int128</code>, limiting toolchains such as current MSVC."]) + """
+<h2 id="known-tests">Known full-gate conditions</h2><p>The complete gate measured at this exact source pin had {{gate_failed_words}}: five Ping cases were triggered by <code>ping_group_range</code> and expose a real missing raw-ICMP receive fallback; one socket/interface case depended on missing IPv6 host state. The other {{gate_passed}} cases passed and {{gate_skipped_words}}.</p>""" + callout("A limitation page, not an audit-ticket dump", "<p>Internal audit findings are translated into user-facing behavior here. Fixed findings and project-management identifiers are not published as if they were current defects.</p>")),
         ("development/adding-runtime-features.html", "Adding Runtime Features", "Implement a Sharp Runtime API with evidence, ownership, tests and component boundaries.", "Development", """
 <h2 id="evidence">1. Establish the contract</h2><p>Read the current implementation, headers, upstream reference source where applicable and existing tests. Treat project prose and audit tickets as evidence to corroborate—not automatic truth.</p>
 <h2 id="owner">2. Choose the owner</h2><p>Place the header/source/test under one physical module. Declare PUBLIC edges for headers, PRIVATE edges for implementation and TEST edges only for the test binary.</p>
@@ -708,7 +1000,7 @@ SIDEBAR = [
     ("Get started", [("Getting Started", "getting-started.html"), ("Build & integration", "build.html"), ("Testing & verification", "running-tests.html")]),
     ("Guides", [("Port C# to C++", "guides/porting-csharp.html"), ("Memory & ownership", "memory-management.html"), ("Exceptions", "exceptions.html"), ("CNA integration", "cna-integration.html"), ("Known limitations", "development/known-limitations.html")]),
     ("Components", [("Complete catalogue", "components/index.html"), ("Core & collections", "components/core.html"), ("Text, JSON & XML", "components/text-data.html"), ("I/O & storage", "components/io-storage.html"), ("Networking", "components/networking.html"), ("Concurrency", "components/concurrency.html"), ("Numerics & globalization", "components/numerics-globalization.html")]),
-    ("Concepts", [("Type system", "type-system.html"), ("Strings", "strings.html"), ("Arrays & memory", "arrays.html"), ("Delegates & events", "delegates.html"), ("Reflection", "reflection.html"), ("I/O", "io.html"), ("Threading & tasks", "threading.html")]),
+    ("Concepts", [("Type system", "type-system.html"), ("Strings", "strings.html"), ("Arrays & memory", "arrays.html"), ("Delegates & events", "delegates.html"), ("Reflection", "reflection.html"), ("I/O overview", "io.html"), ("Streams & readers", "docs/io/streams.html"), ("Filesystem", "docs/io/filesystem.html"), ("FileSystemWatcher", "docs/io/filesystem-watcher.html"), ("Threading & tasks", "threading.html")]),
     ("Develop", [("Development guide", "development/index.html"), ("Project structure", "project-structure.html"), ("Adding features", "development/adding-runtime-features.html"), ("Debugging", "development/debugging.html"), ("Internals", "internals/index.html")]),
 ]
 
@@ -800,13 +1092,41 @@ def footer(page: Page) -> str:
 </div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>{SOURCE_SHA[:12]}</code>.</div></footer>"""
 
 
+def in_page_toc(page: Page) -> str:
+    headings = []
+    for level, anchor, content in re.findall(r'<h([23])[^>]*\bid="([^"]+)"[^>]*>(.*?)</h\1>', page.body, re.DOTALL | re.IGNORECASE):
+        label = html.unescape(re.sub(r"<[^>]+>", "", content)).strip()
+        if label:
+            headings.append((level, anchor, label))
+    if len(headings) < 4:
+        return ""
+    links = "".join(
+        f'<a class="toc-level-{level}" href="#{e(anchor)}">{e(label)}</a>'
+        for level, anchor, label in headings
+    )
+    return f'<aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav>{links}</nav></aside>'
+
+
+def page_navigation(page: Page) -> str:
+    links = []
+    if page.previous_path and page.previous_title:
+        links.append(f'<a href="{relative(page.path, page.previous_path)}"><span class="next-label">Previous</span>{e(page.previous_title)}</a>')
+    else:
+        links.append('<span></span>')
+    if page.next_path and page.next_title:
+        links.append(f'<a href="{relative(page.path, page.next_path)}"><span class="next-label">Next</span>{e(page.next_title)}</a>')
+    return '<nav class="next-links" aria-label="Previous and next pages">' + "".join(links) + "</nav>"
+
+
 def render(page: Page) -> str:
     if page.path == "index.html":
         main = f'<main id="main-content">{page.body}</main>'
     else:
         category = f'<span>/</span><span>{e(page.category)}</span>' if page.category != page.title else ""
         trail = f'<a href="{relative(page.path, "index.html")}">Home</a>{category}<span>/</span><span aria-current="page">{e(page.title)}</span>'
-        main = f'<main id="main-content"><div class="docs-shell">{sidebar(page)}<article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb">{trail}</nav>{page.body}</article></div></main>'
+        toc = in_page_toc(page)
+        shell_class = "docs-shell docs-shell--with-toc" if toc else "docs-shell"
+        main = f'<main id="main-content"><div class="{shell_class}">{sidebar(page)}<article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb">{trail}</nav>{page.body}{page_navigation(page)}</article>{toc}</div></main>'
     return head(page) + f"\n<body>\n{nav(page)}\n{main}\n{footer(page)}\n<script src=\"{relative(page.path, 'assets/script.js')}\"></script>\n</body>\n</html>\n"
 
 
@@ -842,12 +1162,16 @@ def write_search_js() -> None:
     var title = page.title.toLowerCase();
     var tags = page.tags.join(' ').toLowerCase();
     var description = page.description.toLowerCase();
+    var headings = (page.headings || []).join(' ').toLowerCase();
+    var content = (page.content || '').toLowerCase();
     var total = 0;
     for (var i = 0; i < terms.length; i += 1) {
       if (title.indexOf(terms[i]) !== -1) total += 8;
       if (tags.indexOf(terms[i]) !== -1) total += 4;
       if (description.indexOf(terms[i]) !== -1) total += 2;
-      if (!title.includes(terms[i]) && !tags.includes(terms[i]) && !description.includes(terms[i])) return -1;
+      if (headings.indexOf(terms[i]) !== -1) total += 3;
+      if (content.indexOf(terms[i]) !== -1) total += 1;
+      if (!title.includes(terms[i]) && !tags.includes(terms[i]) && !description.includes(terms[i]) && !headings.includes(terms[i]) && !content.includes(terms[i])) return -1;
     }
     return total;
   }
@@ -894,10 +1218,24 @@ def write_site_files(pages: list[Page]) -> None:
     (ROOT / "404.html").write_text(render_404(), encoding="utf-8")
     write_search_js()
 
-    search_index = [
-        {"title": page.title, "url": "/" if page.path == "index.html" else "/" + page.path, "description": page.description, "tags": sorted(set(page.tags + [page.category.lower()])), "category": page.category}
-        for page in pages if page.indexable
-    ]
+    search_index = []
+    for page in pages:
+        if not page.indexable:
+            continue
+        headings = [
+            html.unescape(re.sub(r"<[^>]+>", "", value)).strip()
+            for value in re.findall(r"<h[23][^>]*>(.*?)</h[23]>", page.body, re.DOTALL | re.IGNORECASE)
+        ]
+        content = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page.body))).strip()
+        search_index.append({
+            "title": page.title,
+            "url": "/" if page.path == "index.html" else "/" + page.path,
+            "description": page.description,
+            "tags": sorted(set(page.tags + [page.category.lower()])),
+            "category": page.category,
+            "headings": headings,
+            "content": content,
+        })
     (ROOT / "search-index.json").write_text(json.dumps(search_index, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     sitemap = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']

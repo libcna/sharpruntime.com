@@ -1,17 +1,46 @@
 {
-  "schema": 1,
-  "source_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "schema": 2,
+  "source_repository": "https://github.com/openeggbert/sharp-runtime",
+  "source_sha": "6d429559ce265daa21866f0d6e82c5642e2ba0ec",
+  "source_ref": "refs/heads/claude/core-audit-findings-triage-02tydm",
+  "source_commit_time": "2026-08-12T12:08:37Z",
   "evidence_date": "2026-08-12",
-  "current_test_cases": 16341,
-  "test_executables": 37,
-  "component_test_executables": 36,
+  "previous_website_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "checkout_head_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "local_develop_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "origin_develop_sha": "f827a6c5349234d5ac938886788ed8eca8fe1c10",
+  "origin_next_sha": "6c7632657116fdbe64c91b0f2250f6b8ac755b48",
+  "merge_base_with_previous": "a284b6e4d5f8d41e055fccf7a55feb47b0446f28",
+  "physical_components": 41,
+  "direct_production_edges": 92,
+  "public_headers": 1036,
+  "production_sources": 218,
+  "current_test_cases": 17131,
+  "test_executables": 38,
+  "component_test_executables": 37,
   "integration_test_executables": 1,
-  "last_controlled_gate": {
-    "cases": 16310,
-    "passed": 16303,
-    "skipped": 1,
-    "failed": 6
+  "latest_measured_gate": {
+    "source_sha": "6d429559ce265daa21866f0d6e82c5642e2ba0ec",
+    "measured_at": "2026-08-12",
+    "cases": 17131,
+    "passed": 17123,
+    "skipped": 2,
+    "failed": 6,
+    "evidence": "CLAUDE.md full-gate chain through #2347"
   },
-  "post_gate_timezone_additions": 31,
-  "timezone_current_cases": 145
+  "local_verification": {
+    "configured": true,
+    "cmake_version": "3.31.6",
+    "compiler": "GNU 14.2.0",
+    "selection": "All with tests",
+    "build_result": "full All/tests build interrupted at approximately 20 percent to preserve RAM on the shared host; SharpRuntimeTests_IO then built successfully with one compiler job",
+    "targeted_test": {
+      "executable": "SharpRuntimeTests_IO",
+      "filter": "WatcherReconfigurationFixture.*:FileSystemWatcherTests.*",
+      "run": 42,
+      "passed": 42,
+      "skipped": 0,
+      "failed": 0
+    }
+  }
 }

@@ -3,27 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Arrays, Spans and Memory | Sharp Runtime</title>
-  <meta name="description" content="Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.">
+  <title>Arrays, Spans, and Memory | Sharp Runtime</title>
+  <meta name="description" content="Choose Sharp Runtime owned sequences, Array algorithms, Span, Memory, ArraySegment, and collection representations with explicit lifetime rules.">
   <link rel="canonical" href="https://sharpruntime.com/arrays.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
-  <meta property="og:title" content="Arrays, Spans and Memory | Sharp Runtime">
-  <meta property="og:description" content="Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.">
+  <meta property="og:title" content="Arrays, Spans, and Memory | Sharp Runtime">
+  <meta property="og:description" content="Choose Sharp Runtime owned sequences, Array algorithms, Span, Memory, ArraySegment, and collection representations with explicit lifetime rules.">
   <meta property="og:url" content="https://sharpruntime.com/arrays.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Arrays, Spans and Memory | Sharp Runtime">
-  <meta name="twitter:description" content="Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.">
+  <meta name="twitter:title" content="Arrays, Spans, and Memory | Sharp Runtime">
+  <meta name="twitter:description" content="Choose Sharp Runtime owned sequences, Array algorithms, Span, Memory, ArraySegment, and collection representations with explicit lifetime rules.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Arrays, Spans and Memory", "description": "Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.", "url": "https://sharpruntime.com/arrays.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Arrays, Spans and Memory", "item": "https://sharpruntime.com/arrays.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Arrays, Spans, and Memory", "description": "Choose Sharp Runtime owned sequences, Array algorithms, Span, Memory, ArraySegment, and collection representations with explicit lifetime rules.", "url": "https://sharpruntime.com/arrays.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Concepts"}, {"@type": "ListItem", "position": 3, "name": "Arrays, Spans, and Memory", "item": "https://sharpruntime.com/arrays.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,16 +33,54 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html" aria-current="page">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Arrays, Spans and Memory</span></nav><h1>Arrays, Spans and Memory</h1><p class="lead">Owned arrays, borrowed spans, memory views and lifetime rules in Sharp Runtime.</p><div class="page-meta"><span>Concepts</span><span>Source f827a6c5</span></div>
-<h2 id="owned">Owned sequences</h2><p>Array/vector-shaped types own or contain native values according to their declared C++ element type. Copy and move are native operations, not managed-reference assignments.</p>
-<h2 id="views">Borrowed views</h2><p>Span- and memory-shaped APIs can reference existing storage. A span must not outlive or be invalidated by its owner; resizing a backing container is a common invalidation boundary.</p>
-<h2 id="bounds">Bounds and units</h2><p>Use the API’s documented unit. For text-backed memory, bytes, Unicode scalar values and user-perceived characters are not interchangeable.</p><div class="callout callout--warning"><div class="callout-title">Lifetime cannot be checked by a GC</div><p>Returning a span into a temporary or retaining it after owner destruction is an ordinary C++ lifetime bug.</p></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html" aria-current="page">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O overview</a><a href="docs/io/streams.html">Streams & readers</a><a href="docs/io/filesystem.html">Filesystem</a><a href="docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Concepts</span><span>/</span><span aria-current="page">Arrays, Spans, and Memory</span></nav><h1>Arrays, Spans, and Memory</h1><p class="lead">Separate ownership, algorithms, and borrowed contiguous views before translating C# array code.</p><div class="page-meta"><span>Core.Base</span><span>Owned + borrowed</span><span>Porting guide</span></div>
+<h2 id="owned-sequences-algorithms-and-views">Owned sequences, algorithms, and views</h2>
+<p>Sharp Runtime maps most C# one-dimensional array work to an owned <code>std::vector&lt;T&gt;</code>, familiar <code>System::Array</code> algorithms, and explicit borrowed views. Those pieces are intentionally separate: an algorithm class should not pretend to own a vector, and a view should not pretend to retain its owner.</p>
+
+<h2 id="selection-guide">Selection guide</h2>
+<div class="table-wrap"><table><thead><tr><th>If you need…</th><th>Use…</th><th>Remember…</th></tr></thead><tbody>
+<tr><td>Owned resizable contiguous elements</td><td><code>std::vector&lt;T&gt;</code></td><td>Growth can relocate storage</td></tr>
+<tr><td>Familiar sort/copy/search/clear helpers</td><td><code>System::Array</code></td><td>Static algorithms over vectors/raw buffers</td></tr>
+<tr><td>Synchronous writable borrow</td><td><code>Span&lt;T&gt;</code></td><td>Owner must outlive it</td></tr>
+<tr><td>Synchronous read-only borrow</td><td><code>ReadOnlySpan&lt;T&gt;</code></td><td>Read-only through this alias only</td></tr>
+<tr><td>Offset/count vector view</td><td><code>ArraySegment&lt;T&gt;</code></td><td>Default segment and mutation have edge cases</td></tr>
+<tr><td>Managed-style Memory name</td><td><code>Memory&lt;T&gt;</code></td><td>Still non-owning in this implementation</td></tr>
+<tr><td>Collection interfaces/versioned enumeration</td><td>List-shaped collection</td><td>Element ownership remains a C++ choice</td></tr>
+</tbody></table></div>
+
+<h2 id="key-differences-from-c">Key differences from C#</h2>
+<ul>
+  <li>There is no universal CLR <code>System.Array</code> base object or runtime covariance.</li>
+  <li>Native <code>vector[]</code> is unchecked; Span and runtime helpers add explicit checks.</li>
+  <li>A vector can resize, so views and references can become invalid.</li>
+  <li>Copying follows the exact C++ element type, including smart-pointer or move-only semantics.</li>
+  <li>Current Memory and ArraySegment types borrow their vector instead of retaining managed storage.</li>
+  <li>Rectangular multidimensional arrays need a deliberate nested, flat, matrix, or domain representation.</li>
+</ul>
+
+<h2 id="core-component">Core component</h2>
+<p>Array, Span, Memory, and ArraySegment are public entries in <code>Core.Base</code>. Select it directly for a narrow consumer:</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Core.Base)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+target_link_libraries(app PRIVATE SharpRuntime::Core.Base)</code></pre>
+
+<h2 id="detailed-documentation">Detailed documentation</h2>
+<div class="page-index">
+  <a href="classes/array.html">System::Array reference<small>Sort, copy, resize, search, clear, fill, conversion, and predicate families.</small></a>
+  <a href="internals/array-internals.html">Array internals<small>Ownership, bounds, overlap, views, invalidation, multidimensional choices, and porting.</small></a>
+  <a href="tutorials/use-collections.html">Collections tutorial<small>Choose sequence and element ownership together.</small></a>
+  <a href="type-system.html">Type system<small>Value, reference, nullable, Object, and view relationships.</small></a>
+</div>
+
+<h2 id="safety-invariant">Safety invariant</h2>
+<div class="callout callout--warning"><div class="callout-title">A view is never the owner</div><p>Do not retain Span, Memory, ArraySegment, iterators, references, or raw pointers after owner destruction or vector relocation. Current <code>Memory::Pin</code> exposes a pointer; it does not retain or immobilize native storage.</p></div><nav class="next-links" aria-label="Previous and next pages"><a href="strings.html"><span class="next-label">Previous</span>Strings and Text</a><a href="delegates.html"><span class="next-label">Next</span>Delegates, Events and Callables</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#owned-sequences-algorithms-and-views">Owned sequences, algorithms, and views</a><a class="toc-level-2" href="#selection-guide">Selection guide</a><a class="toc-level-2" href="#key-differences-from-c">Key differences from C#</a><a class="toc-level-2" href="#core-component">Core component</a><a class="toc-level-2" href="#detailed-documentation">Detailed documentation</a><a class="toc-level-2" href="#safety-invariant">Safety invariant</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

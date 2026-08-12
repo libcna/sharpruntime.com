@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Round-trip Data with MemoryStream | Sharp Runtime</title>
+  <meta name="description" content="Write and read a binary record through Sharp Runtime MemoryStream with explicit position, encoding, and leave-open ownership.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/memory-stream.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Round-trip Data with MemoryStream | Sharp Runtime">
+  <meta property="og:description" content="Write and read a binary record through Sharp Runtime MemoryStream with explicit position, encoding, and leave-open ownership.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/memory-stream.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Round-trip Data with MemoryStream | Sharp Runtime">
+  <meta name="twitter:description" content="Write and read a binary record through Sharp Runtime MemoryStream with explicit position, encoding, and leave-open ownership.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Round-trip Data with MemoryStream", "description": "Write and read a binary record through Sharp Runtime MemoryStream with explicit position, encoding, and leave-open ownership.", "url": "https://sharpruntime.com/tutorials/memory-stream.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Round-trip Data with MemoryStream", "item": "https://sharpruntime.com/tutorials/memory-stream.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Round-trip Data with MemoryStream</span></nav><h1>Round-trip Data with MemoryStream</h1><p class="lead">Build a small in-memory binary protocol while preserving stream and wrapper lifetimes.</p><div class="page-meta"><span>Intermediate</span><span>IO</span><span>Built and run</span></div>
+<h2 id="goal-and-component">Goal and component</h2>
+<p>Write a small binary record into an owned memory buffer, rewind it, read it back, and preserve the stream through reader/writer teardown. Select <code>IO</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS IO)
+target_link_libraries(app PRIVATE SharpRuntime::IO)</code></pre>
+
+<h2 id="write-rewind-and-read">Write, rewind, and read</h2>
+<pre><code class="language-cpp">#include &lt;System/IO/BinaryReader.hpp&gt;
+#include &lt;System/IO/BinaryWriter.hpp&gt;
+#include &lt;System/IO/MemoryStream.hpp&gt;
+
+System::IO::MemoryStream stream;
+
+{
+    System::IO::BinaryWriter writer(&amp;stream, true);
+    writer.Write(static_cast&lt;SharpRuntime::intcs&gt;(42));
+    writer.Write(std::string("sharp"));
+    writer.Flush();
+    writer.Close();
+}
+
+stream.setPositionProperty(0);
+
+System::IO::BinaryReader reader(&amp;stream, true);
+const auto number = reader.ReadInt32();
+const auto text = reader.ReadString();
+</code></pre>
+<p><code>true</code> is <code>leaveOpen</code>. It gives the writer and reader a borrowed stream rather than ownership of closure. The enclosing <code>MemoryStream</code> remains the owner.</p>
+
+<h2 id="understand-the-binary-protocol">Understand the binary protocol</h2>
+<p>Numeric primitives are little-endian. Strings are UTF-8 bytes prefixed by a 7-bit encoded byte length. <code>ReadString</code> validates the length and, on a seekable stream, refuses a declared length larger than the remaining bytes before attempting a huge allocation.</p>
+
+<h2 id="toarray-versus-getbuffer">ToArray versus GetBuffer</h2>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Result</th><th>Lifetime</th></tr></thead><tbody>
+<tr><td><code>ToArray()</code></td><td>Independent vector copy</td><td>Unaffected by later stream writes or destruction</td></tr>
+<tr><td><code>GetBuffer()</code></td><td>Const reference to live internal vector</td><td>Writes can reallocate and invalidate references into it</td></tr>
+</tbody></table></div>
+<p>Both remain callable after <code>MemoryStream::Close</code>. Reads, writes, seeking, length, and position access then reject the disposed stream. <code>CanWrite</code> intentionally continues to report its original writability while <code>CanRead</code> and <code>CanSeek</code> become false, matching the documented source contract.</p>
+
+<h2 id="start-with-existing-bytes">Start with existing bytes</h2>
+<p>The buffer constructor copies <code>size</code> bytes and is writable by default. A null pointer is accepted only for a zero-length source; negative lengths are rejected before any read. Because it copies, the source array can be released immediately after construction.</p>
+
+<h2 id="test-protocol-failures">Test protocol failures</h2>
+<ul>
+  <li>Truncated primitive and string payloads.</li>
+  <li>Malformed or overlong 7-bit encoded lengths.</li>
+  <li>Invalid UTF-8 character operations where used.</li>
+  <li>Close with <code>leaveOpen</code> true and false.</li>
+  <li>Position beyond current length followed by write/resize.</li>
+</ul><nav class="next-links" aria-label="Previous and next pages"><a href="arrays-spans.html"><span class="next-label">Previous</span>Work with Arrays and Spans</a><a href="readers-writers.html"><span class="next-label">Next</span>Use Readers and Writers</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#goal-and-component">Goal and component</a><a class="toc-level-2" href="#write-rewind-and-read">Write, rewind, and read</a><a class="toc-level-2" href="#understand-the-binary-protocol">Understand the binary protocol</a><a class="toc-level-2" href="#toarray-versus-getbuffer">ToArray versus GetBuffer</a><a class="toc-level-2" href="#start-with-existing-bytes">Start with existing bytes</a><a class="toc-level-2" href="#test-protocol-failures">Test protocol failures</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

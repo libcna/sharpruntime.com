@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Write a Component Test | Sharp Runtime</title>
+  <meta name="description" content="Add a Sharp Runtime GoogleTest to the owning component, cover behavioral boundaries, build it serially, and distinguish discovery from execution.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/write-component-test.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Write a Component Test | Sharp Runtime">
+  <meta property="og:description" content="Add a Sharp Runtime GoogleTest to the owning component, cover behavioral boundaries, build it serially, and distinguish discovery from execution.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/write-component-test.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Write a Component Test | Sharp Runtime">
+  <meta name="twitter:description" content="Add a Sharp Runtime GoogleTest to the owning component, cover behavioral boundaries, build it serially, and distinguish discovery from execution.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Write a Component Test", "description": "Add a Sharp Runtime GoogleTest to the owning component, cover behavioral boundaries, build it serially, and distinguish discovery from execution.", "url": "https://sharpruntime.com/tutorials/write-component-test.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Write a Component Test", "item": "https://sharpruntime.com/tutorials/write-component-test.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Write a Component Test</span></nav><h1>Write a Component Test</h1><p class="lead">Turn one public compatibility claim into focused, discoverable, source-owned evidence.</p><div class="page-meta"><span>Contributor</span><span>GoogleTest</span><span>Serial commands</span></div>
+<h2 id="locate-the-owning-test-tree">Locate the owning test tree</h2>
+<p>Every physical component declares its production sources and any test sources through current CMake registration. Place behavior tests under the owning module’s <code>tests/</code> tree and include public headers the same way a consumer does.</p>
+<pre><code class="language-text">modules/io-hashing/
+├── include/System/IO/Hashing/...
+├── CMakeLists.txt
+└── tests/System/IO/HashingTests.cpp</code></pre>
+<p>Do not add a source to a central hand-maintained test list. The component registration collects its test tree and gives it the owning target plus declared test dependencies.</p>
+
+<h2 id="write-one-observable-contract">Write one observable contract</h2>
+<pre><code class="language-cpp">#include &lt;gtest/gtest.h&gt;
+#include &lt;cstdint&gt;
+#include &lt;vector&gt;
+
+#include "System/IO/Hashing/Crc32.hpp"
+
+TEST(HashingDocumentationExample, StandardVector) {
+    const std::vector&lt;std::uint8_t&gt; input{
+        '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    EXPECT_EQ(
+        System::IO::Hashing::Crc32::HashToUInt32(
+            input.data(), static_cast&lt;std::int32_t&gt;(input.size())),
+        0xCBF43926u);
+}</code></pre>
+<p>Name the behavior rather than the implementation strategy. The standard vector proves a public result; a test named <code>UsesPolynomialTable</code> would unnecessarily freeze a private technique.</p>
+
+<h2 id="cover-boundary-and-failure-behavior">Cover boundary and failure behavior</h2>
+<p>A useful compatibility slice normally needs more than a happy path:</p>
+<ul>
+  <li>empty, one-element, minimum, and maximum valid input;</li>
+  <li>invalid values and the exact public exception family/parameter name when contractual;</li>
+  <li>copy, move, close/dispose, repeated-call, and post-failure state;</li>
+  <li>overlap, aliasing, mutation, and invalidation for contiguous storage;</li>
+  <li>callback reentrancy, removal, exceptions, and concurrent use for event/threaded APIs;</li>
+  <li>platform-specific branches with honest skips rather than unconditional green assertions.</li>
+</ul>
+
+<h2 id="configure-the-narrow-component">Configure the narrow component</h2>
+<pre><code class="language-bash">cmake -S /path/to/sharp-runtime -B build-io-hashing \
+  -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DSHARP_RUNTIME_COMPONENTS=IO.Hashing \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON</code></pre>
+<p>Use the selected pinned checkout, not whichever branch happens to be current elsewhere. A component build tests its declared closure and catches dependency leaks earlier than an <code>All</code> build.</p>
+
+<h2 id="build-and-run-serially-when-memory-is-constrained">Build and run serially when memory is constrained</h2>
+<pre><code class="language-bash">cmake --build build-io-hashing \
+  --target SharpRuntimeTests_IO_Hashing \
+  --parallel 1
+
+./build-io-hashing/SharpRuntimeTests_IO_Hashing \
+  --gtest_filter=HashingDocumentationExample.StandardVector
+
+ctest --test-dir build-io-hashing \
+  --output-on-failure \
+  -R '^IO\.Hashing::HashingDocumentationExample\.StandardVector$'</code></pre>
+<p>CMake converts dots in a physical component name to underscores for the executable target. GoogleTest discovery prefixes CTest names with the original dotted component. Use <code>ctest -N</code> to inspect actual discovery rather than guessing a count from <code>TEST</code> macros.</p>
+
+<h2 id="distinguish-discovery-from-execution">Distinguish discovery from execution</h2>
+<div class="table-wrap"><table><thead><tr><th>Evidence</th><th>Claim it supports</th></tr></thead><tbody>
+<tr><td><code>ctest -N</code> after built discovery</td><td>Cases currently discovered in that build tree.</td></tr>
+<tr><td>Focused executable/filter result</td><td>One suite/case actually ran in this environment.</td></tr>
+<tr><td>Complete CTest gate result</td><td>All discovered cases were attempted, with measured pass/skip/fail totals.</td></tr>
+<tr><td>Source test file exists</td><td>Only that source coverage was authored—not that discovery or execution succeeded.</td></tr>
+</tbody></table></div>
+
+<h2 id="add-special-fixtures-where-positive-tests-cannot-prove-the-rule">Add special fixtures where positive tests cannot prove the rule</h2>
+<p>A normal unit test cannot prove that a private header is unreachable, a forbidden conversion fails, or a template constraint rejects a type. Use a negative consumer fixture for those compile-time contracts. Use the module-boundary validator for dependency visibility. Use an integration test only when the behavior genuinely crosses component boundaries.</p>
+
+<h2 id="finish-the-contributor-loop">Finish the contributor loop</h2>
+<ol>
+  <li>Run the focused test and its neighboring suite.</li>
+  <li>Run the owning component target from a clean enough build to exercise discovery.</li>
+  <li>Run boundary and catalogue validation.</li>
+  <li>Run the full gate when the environment and resource budget allow it.</li>
+  <li>Update API deviations, limitations, tutorials, and generated catalogue inputs when public behavior changed.</li>
+  <li>Record measured results with SHA, toolchain, platform, date, and exact terminology.</li>
+</ol><nav class="next-links" aria-label="Previous and next pages"><a href="timers.html"><span class="next-label">Previous</span>Use Timers Safely</a><a href="negative-consumer-fixture.html"><span class="next-label">Next</span>Add a Negative Consumer Fixture</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#locate-the-owning-test-tree">Locate the owning test tree</a><a class="toc-level-2" href="#write-one-observable-contract">Write one observable contract</a><a class="toc-level-2" href="#cover-boundary-and-failure-behavior">Cover boundary and failure behavior</a><a class="toc-level-2" href="#configure-the-narrow-component">Configure the narrow component</a><a class="toc-level-2" href="#build-and-run-serially-when-memory-is-constrained">Build and run serially when memory is constrained</a><a class="toc-level-2" href="#distinguish-discovery-from-execution">Distinguish discovery from execution</a><a class="toc-level-2" href="#add-special-fixtures-where-positive-tests-cannot-prove-the-rule">Add special fixtures where positive tests cannot prove the rule</a><a class="toc-level-2" href="#finish-the-contributor-loop">Finish the contributor loop</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<h2>Locate the owning test tree</h2>
+<p>Every physical component declares its production sources and any test sources through current CMake registration. Place behavior tests under the owning module’s <code>tests/</code> tree and include public headers the same way a consumer does.</p>
+<pre><code class="language-text">modules/io-hashing/
+├── include/System/IO/Hashing/...
+├── CMakeLists.txt
+└── tests/System/IO/HashingTests.cpp</code></pre>
+<p>Do not add a source to a central hand-maintained test list. The component registration collects its test tree and gives it the owning target plus declared test dependencies.</p>
+
+<h2>Write one observable contract</h2>
+<pre><code class="language-cpp">#include &lt;gtest/gtest.h&gt;
+#include &lt;cstdint&gt;
+#include &lt;vector&gt;
+
+#include "System/IO/Hashing/Crc32.hpp"
+
+TEST(HashingDocumentationExample, StandardVector) {
+    const std::vector&lt;std::uint8_t&gt; input{
+        '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    EXPECT_EQ(
+        System::IO::Hashing::Crc32::HashToUInt32(
+            input.data(), static_cast&lt;std::int32_t&gt;(input.size())),
+        0xCBF43926u);
+}</code></pre>
+<p>Name the behavior rather than the implementation strategy. The standard vector proves a public result; a test named <code>UsesPolynomialTable</code> would unnecessarily freeze a private technique.</p>
+
+<h2>Cover boundary and failure behavior</h2>
+<p>A useful compatibility slice normally needs more than a happy path:</p>
+<ul>
+  <li>empty, one-element, minimum, and maximum valid input;</li>
+  <li>invalid values and the exact public exception family/parameter name when contractual;</li>
+  <li>copy, move, close/dispose, repeated-call, and post-failure state;</li>
+  <li>overlap, aliasing, mutation, and invalidation for contiguous storage;</li>
+  <li>callback reentrancy, removal, exceptions, and concurrent use for event/threaded APIs;</li>
+  <li>platform-specific branches with honest skips rather than unconditional green assertions.</li>
+</ul>
+
+<h2>Configure the narrow component</h2>
+<pre><code class="language-bash">cmake -S /path/to/sharp-runtime -B build-io-hashing \
+  -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DSHARP_RUNTIME_COMPONENTS=IO.Hashing \
+  -DSHARP_RUNTIME_BUILD_TESTS=ON</code></pre>
+<p>Use the selected pinned checkout, not whichever branch happens to be current elsewhere. A component build tests its declared closure and catches dependency leaks earlier than an <code>All</code> build.</p>
+
+<h2>Build and run serially when memory is constrained</h2>
+<pre><code class="language-bash">cmake --build build-io-hashing \
+  --target SharpRuntimeTests_IO_Hashing \
+  --parallel 1
+
+./build-io-hashing/SharpRuntimeTests_IO_Hashing \
+  --gtest_filter=HashingDocumentationExample.StandardVector
+
+ctest --test-dir build-io-hashing \
+  --output-on-failure \
+  -R '^IO\.Hashing::HashingDocumentationExample\.StandardVector$'</code></pre>
+<p>CMake converts dots in a physical component name to underscores for the executable target. GoogleTest discovery prefixes CTest names with the original dotted component. Use <code>ctest -N</code> to inspect actual discovery rather than guessing a count from <code>TEST</code> macros.</p>
+
+<h2>Distinguish discovery from execution</h2>
+<div class="table-wrap"><table><thead><tr><th>Evidence</th><th>Claim it supports</th></tr></thead><tbody>
+<tr><td><code>ctest -N</code> after built discovery</td><td>Cases currently discovered in that build tree.</td></tr>
+<tr><td>Focused executable/filter result</td><td>One suite/case actually ran in this environment.</td></tr>
+<tr><td>Complete CTest gate result</td><td>All discovered cases were attempted, with measured pass/skip/fail totals.</td></tr>
+<tr><td>Source test file exists</td><td>Only that source coverage was authored—not that discovery or execution succeeded.</td></tr>
+</tbody></table></div>
+
+<h2>Add special fixtures where positive tests cannot prove the rule</h2>
+<p>A normal unit test cannot prove that a private header is unreachable, a forbidden conversion fails, or a template constraint rejects a type. Use a negative consumer fixture for those compile-time contracts. Use the module-boundary validator for dependency visibility. Use an integration test only when the behavior genuinely crosses component boundaries.</p>
+
+<h2>Finish the contributor loop</h2>
+<ol>
+  <li>Run the focused test and its neighboring suite.</li>
+  <li>Run the owning component target from a clean enough build to exercise discovery.</li>
+  <li>Run boundary and catalogue validation.</li>
+  <li>Run the full gate when the environment and resource budget allow it.</li>
+  <li>Update API deviations, limitations, tutorials, and generated catalogue inputs when public behavior changed.</li>
+  <li>Record measured results with SHA, toolchain, platform, date, and exact terminology.</li>
+</ol>

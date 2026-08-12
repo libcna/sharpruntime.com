@@ -1,0 +1,87 @@
+<h2>Role and storage</h2>
+<p><code>System::Nullable&lt;T&gt;</code> represents either no value or one value of <code>T</code>. It is an ordinary header-only C++ template backed by a private <code>std::optional&lt;T&gt;</code>; it is not a boxed object, does not derive from <code>System::Object</code>, and does not introduce CLR nullable metadata.</p>
+<p>The type lives in <code>System/Nullable.hpp</code> and belongs to <code>Core.Base</code>. A default-constructed instance is absent. Constructors from <code>const T&amp;</code> and <code>T&amp;&amp;</code> are intentionally implicit, mirroring the convenient C# conversion from <code>T</code> to <code>T?</code>.</p>
+<pre><code class="language-cpp">#include &lt;System/Nullable.hpp&gt;
+
+System::Nullable&lt;int&gt; missing;
+System::Nullable&lt;int&gt; answer = 42;
+
+if (answer.getHasValueProperty()) {
+    const int value = answer.getValueProperty();
+    (void)value;
+}</code></pre>
+
+<h2>Public surface</h2>
+<div class="table-wrap"><table><thead><tr><th>Member</th><th>Behavior</th><th>Important detail</th></tr></thead><tbody>
+<tr><td><code>getHasValueProperty()</code></td><td>Reports presence</td><td><code>noexcept</code>; equivalent to the backing optional's <code>has_value()</code></td></tr>
+<tr><td><code>getValueProperty()</code></td><td>Returns the contained value</td><td>Returns <code>const T&amp;</code>; throws when absent</td></tr>
+<tr><td><code>GetValueOrDefault()</code></td><td>Returns the value or <code>T{}</code></td><td>Returns by value</td></tr>
+<tr><td><code>GetValueOrDefault(defaultValue)</code></td><td>Returns the value or a supplied fallback</td><td>Returns by value; the fallback is passed as <code>const T&amp;</code></td></tr>
+<tr><td><code>Equals</code> / <code>GetHashCode</code></td><td>Default-equality and matching hash contract</td><td>Different from lifted <code>operator==</code> for floating NaN</td></tr>
+<tr><td><code>ToString</code></td><td>Empty text when absent; formatted contained value when present</td><td>Prefers <code>T::ToString()</code>, otherwise stream insertion</td></tr>
+<tr><td><code>explicit operator bool</code></td><td>Tests presence</td><td>A C++ convenience, not nullable-Boolean value conversion</td></tr>
+<tr><td><code>explicit operator T</code></td><td>Extracts the value</td><td>Uses the same throwing access as <code>Value</code></td></tr>
+<tr><td><code>operator==</code> / <code>operator!=</code></td><td>Compares two nullable values, or presence against <code>std::nullopt</code></td><td>Uses the backing optional's lifted underlying operator</td></tr>
+</tbody></table></div>
+
+<h2>Value access and exceptions</h2>
+<p><code>getValueProperty()</code> throws <code>System::InvalidOperationException</code> with the message “Nullable object must have a value.” when absent. Explicit conversion to <code>T</code> delegates to that accessor and throws the same exception. The returned property reference remains valid only while the <code>Nullable</code> object exists and is not assigned a replacement value.</p>
+<p><code>GetValueOrDefault()</code> never throws merely because the nullable is absent. The parameterless overload value-initializes <code>T</code>; that means zero for arithmetic values, but it is not necessarily the correct domain fallback. Prefer the explicit-default overload when zero, an empty string, or a default-constructed object would hide missing input.</p>
+<pre><code class="language-cpp">System::Nullable&lt;int&gt; port;
+
+const int conventional = port.GetValueOrDefault();    // 0
+const int configured = port.GetValueOrDefault(8080);  // 8080
+
+if (!port) {
+    // Presence test only; no value was extracted.
+}</code></pre>
+
+<h2>Equality, ordering, and floating-point behavior</h2>
+<p><code>Equals</code> treats two absent values as equal, an absent and present value as unequal, and two present values through Sharp Runtime's default equality policy. For floating types that policy follows .NET's <code>Single.Equals</code>/<code>Double.Equals</code> shape: two NaNs compare equal and signed zero values compare equal.</p>
+<p><code>operator==</code> deliberately has a different floating behavior. It models lifted C# <code>==</code> by using the underlying equality operator through <code>std::optional</code>. Two present NaNs therefore compare false, just as two nullable NaNs do under lifted <code>==</code> in C#. This is not an inconsistency to “fix”; it represents two distinct public equality surfaces.</p>
+<div class="table-wrap"><table><thead><tr><th>Operands</th><th><code>Equals</code></th><th><code>operator==</code></th></tr></thead><tbody>
+<tr><td>absent, absent</td><td>true</td><td>true</td></tr>
+<tr><td>absent, present</td><td>false</td><td>false</td></tr>
+<tr><td>equal ordinary values</td><td>true</td><td>true</td></tr>
+<tr><td>NaN, NaN</td><td>true</td><td>false</td></tr>
+<tr><td>+0.0, -0.0</td><td>true</td><td>true</td></tr>
+</tbody></table></div>
+<p><code>NullableHelper::Compare</code> orders absence before presence and compares two present values with the runtime's default comparison policy; floating NaN consequently orders before every present numeric value. <code>NullableHelper::Equals</code> delegates to the <code>Equals</code> surface. The helper has a different name because C++ cannot define a non-template <code>Nullable</code> beside <code>Nullable&lt;T&gt;</code> in the same namespace.</p>
+
+<h2>Hashing</h2>
+<p>An absent nullable hashes to zero. A present value uses the runtime's default hash policy. For floating values, NaN payloads are canonicalized so values considered equal by <code>Equals</code> receive the same hash; positive and negative zero also share a hash. Zero is a valid hash for a present value, so a collision with the absent state does not imply equality.</p>
+<p><code>GetHashCode()</code> returns the project-wide 32-bit <code>intcs</code> hash shape. It is suitable only where the consuming comparer uses the matching equality contract. Do not persist it, treat it as identity, or assume it equals a .NET process's hash.</p>
+
+<h2>Text conversion</h2>
+<p><code>ToString()</code> returns an empty <code>std::string</code> for an absent value, matching the intended nullable display shape rather than claiming that absence and empty text are generally equivalent. For a present <code>T</code>, compile-time detection prefers a const <code>T::ToString()</code> convertible to <code>std::string</code>. Otherwise the implementation uses <code>operator&lt;&lt;</code> on a classic-locale <code>std::ostringstream</code>.</p>
+<p>There is no format-provider overload, nullable format string, or reflection-based conversion. A type with neither a suitable member nor stream insertion can still be stored, but calling <code>ToString()</code> for that instantiation will not compile.</p>
+
+<h2>Ownership and template requirements</h2>
+<p>The contained value is stored inline according to <code>std::optional</code>'s object model. Copying or moving a <code>Nullable&lt;T&gt;</code> copies or moves <code>T</code>; destroying it destroys a present <code>T</code>. It does not allocate merely to represent presence and does not extend the lifetime of an external object unless <code>T</code> itself is an owning smart pointer.</p>
+<p>The template does not restrict <code>T</code> to CLR-style value types. That flexibility does not make every member available for every C++ type. The value-or-default and explicit-value operations return by value and therefore require the corresponding construction. Equality, hashing, and text conversion require the relevant operators or customization. The current equality and hash members are declared <code>noexcept</code>; a user-defined equality or hash that throws is not a safe instantiation for those calls.</p>
+<div class="callout callout--warning"><div class="callout-title">Nullable is not an ownership policy</div><p>Use <code>Nullable&lt;T&gt;</code> for optional value semantics. Use <code>unique_ptr</code>, <code>shared_ptr</code>, <code>weak_ptr</code>, or a documented raw pointer when the problem is object ownership, shared lifetime, expiry, or borrowing. Wrapping a pointer in Nullable usually adds a second absence mechanism rather than clarity.</p></div>
+
+<h2>C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime / C++</th><th>Porting consequence</th></tr></thead><tbody>
+<tr><td><code>T?</code> language syntax</td><td><code>System::Nullable&lt;T&gt;</code></td><td>Include the header and name the template explicitly</td></tr>
+<tr><td><code>.HasValue</code> / <code>.Value</code></td><td><code>getHasValueProperty()</code> / <code>getValueProperty()</code></td><td>Property syntax becomes accessor calls</td></tr>
+<tr><td>Nullable value returned by <code>Value</code></td><td>Const reference returned by the property accessor</td><td>Do not retain the reference beyond the nullable object's lifetime</td></tr>
+<tr><td>Compiler lifts many operators over <code>T?</code></td><td>Only the documented equality/presence operators are supplied here</td><td>Write explicit presence logic for arithmetic, relational, and custom operators</td></tr>
+<tr><td>Boxing and <code>Nullable.GetUnderlyingType</code></td><td>No boxing service or CLR metadata</td><td>Use templates and explicit registries/type traits</td></tr>
+<tr><td><code>null</code> literal</td><td>Default construction; comparisons with <code>std::nullopt</code></td><td>There is no general managed-null conversion</td></tr>
+</tbody></table></div>
+
+<h2>Usage pattern</h2>
+<pre><code class="language-cpp">#include &lt;System/Nullable.hpp&gt;
+
+System::Nullable&lt;int&gt; parsePort(const std::string&amp; text)
+{
+    if (text.empty()) return {};
+    return std::stoi(text);
+}
+
+const auto port = parsePort("443");
+if (port.getHasValueProperty()) {
+    connectTo(port.getValueProperty());
+}</code></pre>
+<p>This example uses absence for empty input and extracts only after testing presence. <code>std::stoi</code> still has native exception behavior; <code>Nullable</code> does not translate parsing failures automatically.</p>

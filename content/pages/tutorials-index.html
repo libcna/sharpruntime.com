@@ -1,0 +1,63 @@
+<h2>Choose a learning path</h2>
+<p>Tutorials are organized by the task you need to complete, not by the size of a namespace. Every page names its direct CMake component, calls out native ownership, and distinguishes a source-checked example from an environment-dependent network or filesystem scenario.</p>
+
+<h2>Beginner: build and core values</h2>
+<div class="page-index">
+  <a href="first-consumer.html">Build a first consumer<small>Beginner · Console · Configure and run one native executable.</small></a>
+  <a href="select-components.html">Select components<small>Beginner · CMake · Understand direct targets and dependency closure.</small></a>
+  <a href="strings-and-builder.html">Strings and StringBuilder<small>Beginner · Core.Base + Text · Work safely with UTF-8 byte units.</small></a>
+  <a href="nullable-values.html">Nullable values<small>Beginner · Core.Base · Preserve absent values without heap ownership.</small></a>
+  <a href="arrays-spans.html">Arrays and spans<small>Beginner · Core.Base · Separate owned vectors from borrowed views.</small></a>
+  <a href="use-collections.html">Use collections<small>Beginner · Collections.Core · Choose containers and element ownership.</small></a>
+  <a href="json.html">Read and write JSON<small>Intermediate · Text.Json · Serialize explicit native shapes.</small></a>
+</div>
+
+<h2>Porting C# patterns</h2>
+<div class="page-index">
+  <a href="port-csharp-class.html">Port a C# class<small>Intermediate · Values, properties, ownership, and exceptions.</small></a>
+  <a href="use-events.html">Delegates and events<small>Intermediate · Core.Base · Subscription tokens and capture lifetime.</small></a>
+  <a href="tasks-cancellation.html">Tasks and cancellation<small>Intermediate · Threading.Tasks · Native continuations and cooperative cancellation.</small></a>
+  <a href="work-with-files.html">Filesystem workflow<small>Intermediate · IO · Paths, files, errors, and scoped resources.</small></a>
+  <a href="http.html">HTTP boundaries<small>Intermediate · Net.Http · Requests without assuming TLS.</small></a>
+  <a href="xml-linq.html">XML LINQ<small>Intermediate · Xml.Linq · Names, elements, documents, and strictness.</small></a>
+</div>
+
+<h2>I/O and storage</h2>
+<div class="page-index">
+  <a href="memory-stream.html">MemoryStream round trip<small>Intermediate · IO · Binary values, positions, and leave-open ownership.</small></a>
+  <a href="readers-writers.html">Readers and writers<small>Intermediate · IO · Binary protocol versus reduced text decoding.</small></a>
+  <a href="filesystem-watcher.html">Watch a directory<small>Advanced · IO · Linux/inotify callbacks, self-stop, and reconciliation.</small></a>
+  <a href="compression-hashing.html">Compression and hashing<small>Intermediate · IO.Compression + IO.Hashing · Distinct jobs and boundaries.</small></a>
+</div>
+
+<h2>Networking</h2>
+<div class="page-index">
+  <a href="dns-tcp-udp.html">DNS, TCP, and UDP<small>Advanced · Net + Net.Sockets · Resolution, owned sockets, and host evidence.</small></a>
+  <a href="http.html">HTTP client<small>Intermediate · Net.Http · Plain HTTP/1.1 and content lifetime.</small></a>
+  <a href="websockets.html">WebSockets<small>Advanced · Net.WebSockets · ws:// framing, tasks, and buffer lifetime.</small></a>
+</div>
+
+<h2>Concurrency</h2>
+<div class="page-index">
+  <a href="locks-threadpool.html">Locks and ThreadPool<small>Advanced · Threading · RAII locks, Monitor semantics, and detached work.</small></a>
+  <a href="tasks-cancellation.html">Tasks and cancellation<small>Intermediate · Threading.Tasks · Completion, faults, and ownership.</small></a>
+  <a href="channels.html">Channels<small>Advanced · Threading.Channels · Backpressure, completion, and reader/writer lifetime.</small></a>
+  <a href="timers.html">Timers<small>Advanced · Timers · Background callbacks and teardown hazards.</small></a>
+</div>
+
+<h2>Contributor path</h2>
+<div class="page-index">
+  <a href="write-component-test.html">Write a component test<small>Contributor · GoogleTest · Behavior, boundaries, discovery, and focused execution.</small></a>
+  <a href="negative-consumer-fixture.html">Add a negative consumer fixture<small>Contributor · CMake · Prove forbidden headers and constraints stay forbidden.</small></a>
+  <a href="add-component.html">Add a component<small>Contributor · Registration, ownership, edges, and catalogue regeneration.</small></a>
+  <a href="debug-components.html">Debug component selection<small>Contributor · Diagnose unknown targets, leaked includes, and link visibility.</small></a>
+</div>
+
+<h2>Verification labels</h2>
+<div class="table-wrap"><table><thead><tr><th>Label in a tutorial</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Compile-checked</td><td>The published translation unit compiled against public headers at the pinned SHA.</td></tr>
+<tr><td>Built and run</td><td>The example linked and executed with its stated result in the audit environment.</td></tr>
+<tr><td>Source-checked</td><td>Names, signatures, and semantics were checked in implementation/tests, but the scenario needs external state or a long build.</td></tr>
+<tr><td>Environment-dependent</td><td>Network, watcher, permission, or platform state prevents a universal runtime result.</td></tr>
+</tbody></table></div>
+<p>Code that intentionally illustrates a design without being directly compilable is labelled pseudocode. No tutorial treats plausible syntax as tested behavior.</p>

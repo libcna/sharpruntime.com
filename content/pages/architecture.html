@@ -1,0 +1,133 @@
+<h2>Goals and architectural boundaries</h2>
+<p>Sharp Runtime is a native C++23 compatibility library for source ports that benefit from familiar <code>System.*</code> names and behavior. It makes common transformations less disruptive: a port can keep concepts such as <code>Stream</code>, <code>Nullable</code>, <code>Task</code>, <code>HttpClient</code>, or <code>XElement</code> while replacing the managed execution model with ordinary C++ compilation and ownership.</p>
+<p>The architecture optimizes for four things: selective consumption, one physical owner for every public header and production source, visible dependency closure, and behavior verified at the boundary where it is implemented. It does not optimize for binary compatibility with .NET, managed assembly execution, or a universal emulation layer.</p>
+<div class="callout callout--warning"><div class="callout-title">Compatibility is behavioral and selective</div><p>A namespace or type name is a porting landmark. It is not proof of every overload, CLR object layout, reflection metadata, garbage-collector behavior, or platform guarantee. The component, API, and limitations pages add that evidence.</p></div>
+
+<h2>The native execution model</h2>
+<div class="architecture-flow" role="img" aria-label="A consumer compiles against public Sharp Runtime headers, links selected physical CMake components, and reaches native standard-library, operating-system, and external-library facilities.">
+  <div><strong>Consumer source</strong><span>C++23 application or framework</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Public compatibility surface</strong><span><code>System::*</code> and project helpers</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Physical components</strong><span>header-only or static CMake targets</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Native facilities</strong><span>STL, OS APIs, and scoped external libraries</span></div>
+</div>
+<p>There is no intermediate language, JIT, managed heap, or CLR host in this path. Headers are compiled into the consumer; static components are linked into a native executable or library. Templates and inline algorithms therefore follow normal C++ rebuild and ABI rules. Exceptions unwind C++ stack frames, destructors perform cleanup, and threads are native threads or native abstractions built over them.</p>
+
+<h2>Namespace organization versus physical ownership</h2>
+<p>Logical organization and build ownership are related but not identical. Public APIs primarily use familiar nested namespaces such as <code>System::Collections::Generic</code>, <code>System::IO</code>, <code>System::Net::Http</code>, and <code>System::Threading::Tasks</code>. Physical CMake components use concise dotted names such as <code>Collections.Core</code>, <code>IO</code>, <code>Net.Http</code>, and <code>Threading.Tasks</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Concept</th><th>Example</th><th>What it controls</th></tr></thead><tbody>
+<tr><td>Namespace</td><td><code>System::Net::Http::Headers</code></td><td>Source-level discovery and naming</td></tr>
+<tr><td>Physical owner</td><td><code>modules/net-http-headers</code></td><td>One include tree, tests, and any implementation sources</td></tr>
+<tr><td>Selectable component</td><td><code>Net.Http.Headers</code></td><td>CMake closure and production boundary</td></tr>
+<tr><td>Imported target</td><td><code>SharpRuntime::Net.Http.Headers</code></td><td>Consumer include and link requirements</td></tr>
+<tr><td>Compatibility target</td><td><code>SharpRuntime::Core</code></td><td>Legacy umbrella, not another physical owner</td></tr>
+</tbody></table></div>
+<p>The generated <a href="api/index.html">API inventory</a> maps every public header path back to exactly one of the {{physical_components}} physical components at the pinned revision. Namespace breadth is therefore discoverable without pretending one namespace equals one archive.</p>
+
+<h2>Physical components and compatibility targets</h2>
+<p>The selected source registers {{physical_components}} physical components. A physical component is either <strong>STATIC</strong>, with production translation units and a static archive, or <strong>INTERFACE</strong>, whose public implementation is header-only. Each has one target, one include directory, declared dependencies, and optional tests. CMake rejects duplicate registration, a static component without sources, an interface component with sources, and an interface component with private dependencies.</p>
+<p>Four broader names exist for compatibility or aggregation:</p>
+<ul>
+  <li><code>Core</code> aggregates <code>Core.Base</code>, <code>Console</code>, <code>TimeZone</code>, and <code>Uri</code>.</li>
+  <li><code>Collections</code> aggregates the four physical collection components.</li>
+  <li><code>Xml.XPath</code> aliases the physical <code>Xml</code> archive because the implementation is not a distinct ownership boundary.</li>
+  <li><code>All</code> enables all physical components; only this complete selection provides the raw legacy <code>SHARP_RUNTIME</code> forwarding target.</li>
+</ul>
+<p><code>SharpRuntime::Headers</code> is a common support target that supplies shared include and C++23 requirements. It is not a user-selectable API component.</p>
+
+<h2>CMake ownership and dependency closure</h2>
+<p>The root project requires CMake 3.20 and exact C++23 mode with compiler extensions disabled. A standalone checkout defaults to <code>All</code>; an embedding consumer should set <code>SHARP_RUNTIME_COMPONENTS</code> before <code>add_subdirectory</code>. The enablement engine recursively resolves dependencies, removes duplicates, and materializes only the requested closure.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS
+    Net.Http.Json
+    IO.Hashing
+)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+
+target_link_libraries(app PRIVATE
+    SharpRuntime::Net.Http.Json
+    SharpRuntime::IO.Hashing
+)</code></pre>
+<p>The consumer names its direct needs. It does not manually repeat <code>Core.Base</code>, <code>Text.Json</code>, <code>Threading.Tasks</code>, or other transitive requirements. At this pin the component catalogue contains {{production_edges}} direct production edges.</p>
+
+<h3>Public, private, and test-only edges</h3>
+<div class="table-wrap"><table><thead><tr><th>Edge</th><th>Use it when</th><th>Consumer effect</th></tr></thead><tbody>
+<tr><td><code>PUBLIC_DEPENDENCIES</code></td><td>A public header exposes or includes the dependency</td><td>Propagates through the imported target</td></tr>
+<tr><td><code>PRIVATE_DEPENDENCIES</code></td><td>Only production implementation needs it</td><td>Links the owner without exposing its include surface</td></tr>
+<tr><td><code>TEST_DEPENDENCIES</code></td><td>Only the owning test executable needs it</td><td>Never becomes a production edge</td></tr>
+</tbody></table></div>
+<p>This separation matters. A passing component test may use helpers from another module without licensing that dependency to production. Conversely, a public header that leaks a sibling include needs a public edge or a redesign; a global include path is not an acceptable fix.</p>
+
+<h2>Public and private boundaries</h2>
+<p>Every module owns an <code>include/</code> tree, optional <code>src/</code>, and optional <code>tests/</code>. Public consumers see the selected targets’ include directories. Implementation headers beneath <code>src/</code>, sibling module internals, test helpers, and vendor implementation details are not part of that surface.</p>
+<p>The boundary validator checks unique ownership, declared includes and links, visibility, cycles, registered source coverage, and other graph invariants. Positive selective consumers prove that a narrow target can be configured and linked. Negative fixtures prove that private or unrelated headers remain unavailable. Those tests are architectural tests: a behavior unit test cannot detect an accidentally global include directory.</p>
+
+<h2>External dependencies stay scoped</h2>
+<div class="table-wrap"><table><thead><tr><th>Owner</th><th>External facility</th><th>Visibility</th></tr></thead><tbody>
+<tr><td><code>IO.Compression</code></td><td>ZLIB</td><td>Private</td></tr>
+<tr><td><code>IO.Compression.Zip</code></td><td>Vendored miniz</td><td>Private</td></tr>
+<tr><td><code>Xml</code></td><td>Vendored tinyxml2</td><td>Public, because public headers expose its types</td></tr>
+<tr><td><code>Text.Json</code></td><td>Vendored nlohmann JSON headers</td><td>Header surface</td></tr>
+<tr><td><code>Net</code> on Windows</td><td><code>ws2_32</code></td><td>Private</td></tr>
+<tr><td><code>Security.Cryptography.Random</code> on Windows</td><td>BCrypt</td><td>Private</td></tr>
+<tr><td><code>Storage</code> on Android</td><td>Parent-provided SDL3 target</td><td>Private</td></tr>
+</tbody></table></div>
+<p>External libraries do not become an undifferentiated global dependency set. Their owner and visibility are recorded in the generated catalogue so a selective consumer can understand why a package is required.</p>
+
+<h2>Native object and value model</h2>
+<p>Sharp Runtime does not impose one representation on all familiar .NET concepts. Primitive aliases, strings, vectors, nullable values, and many wrappers are ordinary C++ values. Some polymorphic hierarchies opt into <code>System::Object</code>. Interfaces are native abstract base classes. Callbacks are typed C++ callables. This mixed model is intentional.</p>
+<p><code>Object</code> is abstract and provides virtual destruction, default identity equality, address-derived hashing, <code>ToString</code>, RTTI-backed <code>GetType</code>, and a project-specific stable <code>GetTypeName</code> hook. It is <em>not</em> the base of every non-primitive C++ type. <code>Type</code> wraps <code>std::type_info</code>; its names may be mangled, <code>Name</code> and <code>FullName</code> collapse, and its classification predicates are fixed compatibility stubs. See the <a href="type-system.html">type-system guide</a> before porting reflection-driven code.</p>
+
+<h2>Resource ownership and lifetime</h2>
+<p>RAII is the baseline. Values and smart pointers carry ownership; references, raw pointers, spans, memory views, event subscriptions, and callbacks borrow according to an explicit lifetime contract. Compatibility-shaped <code>Close</code> and <code>Dispose</code> operations may define observable state, but they do not replace deterministic C++ destruction.</p>
+<div class="table-wrap"><table><thead><tr><th>Representation</th><th>Typical role</th><th>Main hazard</th></tr></thead><tbody>
+<tr><td>Direct value/member</td><td>Required value with enclosing lifetime</td><td>Copy or move semantics may differ from managed identity</td></tr>
+<tr><td><code>std::unique_ptr</code></td><td>Exclusive dynamic owner</td><td>Borrowed callbacks must not outlive it</td></tr>
+<tr><td><code>std::shared_ptr</code>/<code>weak_ptr</code></td><td>Genuine shared lifetime and observer</td><td>Cycles or accidental lifetime extension</td></tr>
+<tr><td>Reference/raw pointer</td><td>Non-owning synchronous access</td><td>Dangling access after owner destruction</td></tr>
+<tr><td><code>Span</code>/<code>Memory</code></td><td>Contiguous non-owning range</td><td>Owner destruction or vector relocation invalidates the view</td></tr>
+</tbody></table></div>
+
+<h2>Platform abstraction is local, not magical</h2>
+<p>Platform branches live near the facility they implement: socket code selects Windows or POSIX APIs; random generation attaches the appropriate entropy source; time-zone discovery has Windows and POSIX paths; storage can attach SDL3 on Android. Unsupported operations should either be excluded by a documented build decision or throw a specific <code>PlatformNotSupportedException</code>. A silent no-op is not a platform abstraction.</p>
+<p>Some components remain platform-specific. At the selected revision FileSystemWatcher uses Linux <code>inotify</code>, NetworkInterface enumeration is Linux-specific, and process behavior is POSIX-oriented. Emscripten has explicit reductions for DNS and native facilities. The <a href="platform-layer.html">platform matrix</a> separates implementation branches from configure, build, runtime, and test evidence.</p>
+
+<h2>Threading and callback implications</h2>
+<p>Threads, tasks, timers, event handlers, watchers, sockets, and HTTP wrappers all execute under native lifetime and synchronization rules. Capturing <code>this</code> does not keep an object alive. Closing an owner does not automatically cancel every detached operation. A callback may run concurrently with reconfiguration unless the API documents serialization.</p>
+<p>The FileSystemWatcher remediation at this pin demonstrates the intended architecture: callback-thread identity is recorded, self-disable uses deferred teardown instead of joining the current thread, reconfiguration from inside a handler is rejected atomically where unsafe, handler exceptions flow through the Error event, and an Error handler’s exception is contained. This is a targeted lifecycle contract, not a general promise that every callback-bearing type is reentrant or thread-safe.</p>
+
+<h2>Exception model</h2>
+<p>The runtime supplies a native C++ exception hierarchy with familiar names, messages, selected <code>HResult</code> values, and causal exception pointers where implemented. Throwing and catching use C++ syntax; stack unwinding runs destructors. Catch exceptions by reference. There is no CLR exception object header, managed stack, universal exception filter, or semantic guarantee that a matching name behaves identically in every edge case.</p>
+<p>Component owners translate low-level errors at their boundary: filesystem <code>errno</code>, socket status, parser failures, and platform-not-supported cases should become the most specific established public exception. Contributor tests check precedence as well as type—for example, whether invalid arguments are rejected before state mutation or native I/O.</p>
+
+<h2>Build and test architecture</h2>
+<p>With tests enabled, each physical module that owns test sources receives a separate GoogleTest executable. The <code>SharpRuntimeTests</code> name is an aggregate build target, not one monolithic binary. A complete <code>All</code> configuration also builds one integration executable for genuinely cross-component scenarios. At the selected pin this produces {{component_test_executables}} component executables plus {{integration_test_executables_words}}.</p>
+<p>CTest discovers individual typed, parameterized, and ordinary GoogleTest cases from the built executables. That is why source macro counts are not used as a headline. The measured full gate at the exact selected SHA discovered and ran {{gate_cases}} cases; its {{gate_failed_words}} remain documented rather than converted into a green status.</p>
+<p>Behavior tests are only one layer. The local gate also includes selective consumers, negative include/link fixtures, graph validation, generated-catalogue drift checks, integration behavior, formatting/build checks, and a Doxygen warning ceiling.</p>
+
+<h2>Generated metadata and documentation</h2>
+<p><code>cmake/SharpRuntimeModules.cmake</code> and each module registration are the build authority. The runtime’s component-catalogue generator derives physical names, kinds, owners, edges, headers, and external attachments. This website pins that catalogue to a SHA in <code>data/components.json</code>, derives a complete public-header inventory into <code>data/api-inventory.json</code>, and centralizes volatile gate facts in <code>data/site-facts.json</code>.</p>
+<p>Validation compares these committed facts against an explicitly supplied checkout. It never silently reads whichever branch happens to be active. Search, canonical metadata, sitemap entries, heading anchors, and this page shell are regenerated deterministically from the canonical content sources.</p>
+
+<h2>Deliberate non-goals</h2>
+<ul>
+  <li>No CLR, JIT, managed assembly loader, or garbage collector.</li>
+  <li>No claim of source compatibility: C# language constructs still require translation.</li>
+  <li>No universal <code>Object</code> inheritance or managed object layout.</li>
+  <li>No complete metadata reflection, dynamic invocation, P/Invoke, remoting, or BinaryFormatter model.</li>
+  <li>No requirement that a compatibility type reproduce unsupported .NET internals when an explicit native contract is safer.</li>
+  <li>No platform label derived merely from the existence of a preprocessor branch.</li>
+</ul>
+
+<h2>Architectural checklist for a change</h2>
+<ol>
+  <li>Identify the observable contract and the deliberate reductions.</li>
+  <li>Select one physical owner and verify its public/private dependency direction.</li>
+  <li>Choose value, unique, shared, weak, or borrowed lifetime explicitly.</li>
+  <li>Keep platform code local and make unsupported behavior visible.</li>
+  <li>Add normal, invalid, boundary, lifetime, concurrency, and platform tests as applicable.</li>
+  <li>Add a selective or negative consumer fixture when the public boundary changes.</li>
+  <li>Regenerate the catalogue and API inventory, run the graph validator, and update limitations or conceptual documentation.</li>
+</ol>

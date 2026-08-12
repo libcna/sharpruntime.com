@@ -1,0 +1,78 @@
+<h2>Goal and components</h2>
+<p>Resolve a host deliberately, then choose TCP or UDP with a clear ownership and address-family policy. Name and address primitives belong to <code>Net</code>; socket clients belong to <code>Net.Sockets</code>.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS Net.Sockets)
+target_link_libraries(app PRIVATE SharpRuntime::Net.Sockets)</code></pre>
+<p>The socket component brings its declared <code>Net</code> dependency. Do not select the <code>All</code> aggregate merely to reach these headers.</p>
+
+<h2>Resolve without hiding the family</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Dns.hpp&gt;
+#include &lt;System/Net/Sockets/AddressFamily.hpp&gt;
+
+using System::Net::Dns;
+using System::Net::Sockets::AddressFamily;
+
+const auto addresses =
+    Dns::GetHostAddresses("localhost", AddressFamily::InterNetwork);
+
+for (const auto&amp; address : addresses) {
+    const std::string text = address.ToString();
+    (void)text;
+}</code></pre>
+<p><code>Dns</code> supports synchronous IPv4 and IPv6 resolution on POSIX and Windows. Passing <code>InterNetwork</code>, <code>InterNetworkV6</code>, or <code>Unspecified</code> changes the resolver hint. Results preserve resolver order while removing exact binary duplicates. Emscripten throws <code>PlatformNotSupportedException</code>.</p>
+
+<h2>Open a TCP client</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Sockets/TcpClient.hpp&gt;
+
+System::Net::Sockets::TcpClient client;
+client.Connect("127.0.0.1", 8080);
+auto stream = client.GetStream();
+
+// Use Stream operations while both client and stream remain in scope.
+client.Close();</code></pre>
+<p><code>TcpClient</code> owns a native descriptor and is neither copyable nor implicitly shareable. <code>GetStream()</code> returns the same cached <code>shared_ptr&lt;NetworkStream&gt;</code> on repeated calls. Port validation must treat the client, cached stream, shutdown policy, and outstanding operations as one lifetime design.</p>
+<div class="callout callout--warning"><div class="callout-title">The convenience clients are IPv4-only</div><p><code>TcpClient</code>, <code>TcpListener</code>, and <code>UdpClient</code> currently build <code>AF_INET</code>/<code>sockaddr_in</code> paths. An IPv6 endpoint is rejected rather than silently narrowed. The lower-level <code>Socket</code> surface has broader address-family support, so select it when IPv6 is a requirement and verify the exact operations you need.</p></div>
+
+<h2>Send and receive a UDP datagram</h2>
+<pre><code class="language-cpp">#include &lt;System/Net/Sockets/UdpClient.hpp&gt;
+
+using System::Net::IPEndPoint;
+using System::Net::Sockets::UdpClient;
+
+UdpClient sender;
+sender.Connect("127.0.0.1", 9000);
+const std::vector&lt;SharpRuntime::bytecs&gt; payload{0x53, 0x52};
+const auto sent = sender.Send(payload,
+    static_cast&lt;SharpRuntime::intcs&gt;(payload.size()));
+(void)sent;
+
+// A receiver normally binds its local port in the constructor.
+// Receive blocks and replaces remote with the sender endpoint.
+IPEndPoint remote{System::Net::IPAddress::Any, 0};
+// std::vector&lt;SharpRuntime::bytecs&gt; reply = receiver.Receive(remote);</code></pre>
+<p>The final line is intentionally commented because a complete runnable example needs a cooperating peer and a timeout policy. <code>UdpClient::Receive</code> blocks; cancellation is not part of this synchronous convenience API. Validate datagram length and preserve message boundaries instead of treating UDP as a stream.</p>
+
+<h2>Map failures at the boundary</h2>
+<div class="table-wrap"><table><thead><tr><th>Operation</th><th>Representative failure</th><th>Application decision</th></tr></thead><tbody>
+<tr><td>Resolve name</td><td><code>SocketException(HostNotFound)</code></td><td>Retry another configured host, report configuration, or stop.</td></tr>
+<tr><td>Validate port</td><td><code>ArgumentOutOfRangeException</code></td><td>Reject input before network work.</td></tr>
+<tr><td>Connect TCP</td><td><code>SocketException</code></td><td>Classify refusal, routing, timeout, and cancellation policy outside the type.</td></tr>
+<tr><td>Use unsupported platform</td><td><code>PlatformNotSupportedException</code></td><td>Choose an alternate backend at configure time.</td></tr>
+</tbody></table></div>
+<p>Do not turn every socket error into an empty result. C# ports often rely on exception type, socket error code, and retry scope as observable behavior.</p>
+
+<h2>C# comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>C# / .NET</th><th>Sharp Runtime</th><th>Important difference</th></tr></thead><tbody>
+<tr><td><code>await Dns.GetHostAddressesAsync</code></td><td><code>Dns::GetHostAddresses</code></td><td>The current DNS surface is synchronous.</td></tr>
+<tr><td><code>using TcpClient</code></td><td>Automatic destructor or explicit <code>Close</code></td><td>Native lifetime is lexical; copies are deleted.</td></tr>
+<tr><td>IPv4/IPv6 convenience clients</td><td>Convenience clients currently IPv4-only</td><td>Use lower-level Socket for an audited IPv6 path.</td></tr>
+<tr><td>GC keeps referenced arrays alive</td><td>Caller-owned native buffers</td><td>Async lower-level operations need explicit shared lifetime.</td></tr>
+</tbody></table></div>
+
+<h2>Verification checklist</h2>
+<ul>
+  <li>Compile the consumer against <code>SharpRuntime::Net.Sockets</code>, not accidental transitive targets.</li>
+  <li>Test numeric literals separately from resolver-backed names.</li>
+  <li>Exercise refusal, invalid port, early peer close, partial TCP reads/writes, and UDP truncation policy.</li>
+  <li>Run integration tests on the actual OS and network namespace used in deployment.</li>
+  <li>For internet protocols, add framing, deadlines, authentication, and transport security above these primitives.</li>
+</ul>

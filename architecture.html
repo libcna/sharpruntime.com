@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Architecture | Sharp Runtime</title>
-  <meta name="description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <meta name="description" content="Deep Sharp Runtime architecture: native execution, namespaces, physical components, CMake ownership, dependency closure, resources, platforms, exceptions, and tests.">
   <link rel="canonical" href="https://sharpruntime.com/architecture.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Sharp Runtime">
   <meta property="og:title" content="Architecture | Sharp Runtime">
-  <meta property="og:description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <meta property="og:description" content="Deep Sharp Runtime architecture: native execution, namespaces, physical components, CMake ownership, dependency closure, resources, platforms, exceptions, and tests.">
   <meta property="og:url" content="https://sharpruntime.com/architecture.html">
   <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta property="og:image:width" content="1200">
@@ -17,13 +17,13 @@
   <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Architecture | Sharp Runtime">
-  <meta name="twitter:description" content="Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.">
+  <meta name="twitter:description" content="Deep Sharp Runtime architecture: native execution, namespaces, physical components, CMake ownership, dependency closure, resources, platforms, exceptions, and tests.">
   <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
   <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Architecture", "description": "Sharp Runtime architecture: component ownership, native types, compatibility boundaries and external dependency isolation.", "url": "https://sharpruntime.com/architecture.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Overview"}, {"@type": "ListItem", "position": 3, "name": "Architecture", "item": "https://sharpruntime.com/architecture.html"}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Architecture", "description": "Deep Sharp Runtime architecture: native execution, namespaces, physical components, CMake ownership, dependency closure, resources, platforms, exceptions, and tests.", "url": "https://sharpruntime.com/architecture.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Overview"}, {"@type": "ListItem", "position": 3, "name": "Architecture", "item": "https://sharpruntime.com/architecture.html"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,18 +33,146 @@
   <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
 </div></nav>
-<main id="main-content"><div class="docs-shell"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html" aria-current="page">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Overview</span><span>/</span><span aria-current="page">Architecture</span></nav><h1>Architecture</h1><p class="lead">A native C++ compatibility layer organized into independently selectable, boundary-validated CMake components.</p><div class="page-meta"><span>41 physical components</span><span>92 direct edges</span><span>No dependency allow-list</span></div>
-<h2 id="layers">Conceptual layers</h2><div class="table-wrap"><table class=""><thead><tr><th scope="col">Layer</th><th scope="col">Role</th></tr></thead><tbody><tr><td>Consumer code</td><td>Native application or source port using familiar <code>System::*</code> names</td></tr><tr><td>Curated compatibility API</td><td>Headers and behavior for the practical implemented subset</td></tr><tr><td>Physical components</td><td>Ownership units for headers, implementation, tests and dependencies</td></tr><tr><td>Native/platform layer</td><td>C++ standard library, OS facilities and narrowly attached vendor dependencies</td></tr></tbody></table></div>
-<h2 id="components">Component ownership</h2><p>Each module directory owns <code>include/</code>, optional <code>src/</code>, tests and one CMake registration. A component is either a static library or an interface/header-only target. Public, private and test dependencies are distinct.</p><div class="table-wrap"><table class=""><thead><tr><th scope="col">Edge kind</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>Public</td><td>A public header uses the dependency; include/link requirements reach consumers</td></tr><tr><td>Private</td><td>Only implementation sources use the dependency; static-link needs remain correct without leaking include roots</td></tr><tr><td>Test-only</td><td>Available to the owning test binary, not production consumers</td></tr></tbody></table></div>
-<h2 id="validation">Boundary enforcement</h2><p>The independent validator parses the registered graph and source includes. It rejects duplicate ownership, orphan production files, undeclared or stale edges, visibility mismatches and cycles. The current allow-list is empty.</p>
-<h2 id="native-model">Native object model</h2><p>Sharp Runtime uses ordinary C++ objects, values, templates, RAII and smart pointers. There is no tracing collector. Compatibility wrappers and macros help port familiar shapes, but C++ lifetime, copy/move and aliasing rules remain in force.</p>
-<h2 id="external">External dependency isolation</h2><p>ZLIB, miniz, tinyxml2, platform socket/crypto libraries and Android SDL integration attach to their narrow owners. This is what makes a <code>Text.Json</code>-only configuration meaningfully smaller than <code>All</code>.</p><div class="page-index"><a href="components/index.html">Components<small>Explore every target and dependency.</small></a><a href="memory-management.html">Memory and ownership<small>Managed concepts in native C++.</small></a><a href="internals/index.html">Internals<small>Ownership and validation details.</small></a><a href="tutorials/add-component.html">Adding a component<small>Contributor workflow.</small></a></div></article></div></main>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="overview.html">What is Sharp Runtime?</a><a href="architecture.html" aria-current="page">Architecture</a><a href="runtime-overview.html">Runtime model</a><a href="compatibility.html">Compatibility</a><a href="platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="getting-started.html">Getting Started</a><a href="build.html">Build & integration</a><a href="running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="guides/porting-csharp.html">Port C# to C++</a><a href="memory-management.html">Memory & ownership</a><a href="exceptions.html">Exceptions</a><a href="cna-integration.html">CNA integration</a><a href="development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="components/index.html">Complete catalogue</a><a href="components/core.html">Core & collections</a><a href="components/text-data.html">Text, JSON & XML</a><a href="components/io-storage.html">I/O & storage</a><a href="components/networking.html">Networking</a><a href="components/concurrency.html">Concurrency</a><a href="components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="type-system.html">Type system</a><a href="strings.html">Strings</a><a href="arrays.html">Arrays & memory</a><a href="delegates.html">Delegates & events</a><a href="reflection.html">Reflection</a><a href="io.html">I/O overview</a><a href="docs/io/streams.html">Streams & readers</a><a href="docs/io/filesystem.html">Filesystem</a><a href="docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="development/index.html">Development guide</a><a href="project-structure.html">Project structure</a><a href="development/adding-runtime-features.html">Adding features</a><a href="development/debugging.html">Debugging</a><a href="internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Overview</span><span>/</span><span aria-current="page">Architecture</span></nav><h1>Architecture</h1><p class="lead">How a familiar System.* surface becomes a selective, boundary-validated set of native C++23 components.</p><div class="page-meta"><span>Architecture</span><span>41 physical components</span><span>92 direct production edges</span></div>
+<h2 id="goals-and-architectural-boundaries">Goals and architectural boundaries</h2>
+<p>Sharp Runtime is a native C++23 compatibility library for source ports that benefit from familiar <code>System.*</code> names and behavior. It makes common transformations less disruptive: a port can keep concepts such as <code>Stream</code>, <code>Nullable</code>, <code>Task</code>, <code>HttpClient</code>, or <code>XElement</code> while replacing the managed execution model with ordinary C++ compilation and ownership.</p>
+<p>The architecture optimizes for four things: selective consumption, one physical owner for every public header and production source, visible dependency closure, and behavior verified at the boundary where it is implemented. It does not optimize for binary compatibility with .NET, managed assembly execution, or a universal emulation layer.</p>
+<div class="callout callout--warning"><div class="callout-title">Compatibility is behavioral and selective</div><p>A namespace or type name is a porting landmark. It is not proof of every overload, CLR object layout, reflection metadata, garbage-collector behavior, or platform guarantee. The component, API, and limitations pages add that evidence.</p></div>
+
+<h2 id="the-native-execution-model">The native execution model</h2>
+<div class="architecture-flow" role="img" aria-label="A consumer compiles against public Sharp Runtime headers, links selected physical CMake components, and reaches native standard-library, operating-system, and external-library facilities.">
+  <div><strong>Consumer source</strong><span>C++23 application or framework</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Public compatibility surface</strong><span><code>System::*</code> and project helpers</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Physical components</strong><span>header-only or static CMake targets</span></div>
+  <b aria-hidden="true">→</b>
+  <div><strong>Native facilities</strong><span>STL, OS APIs, and scoped external libraries</span></div>
+</div>
+<p>There is no intermediate language, JIT, managed heap, or CLR host in this path. Headers are compiled into the consumer; static components are linked into a native executable or library. Templates and inline algorithms therefore follow normal C++ rebuild and ABI rules. Exceptions unwind C++ stack frames, destructors perform cleanup, and threads are native threads or native abstractions built over them.</p>
+
+<h2 id="namespace-organization-versus-physical-ownership">Namespace organization versus physical ownership</h2>
+<p>Logical organization and build ownership are related but not identical. Public APIs primarily use familiar nested namespaces such as <code>System::Collections::Generic</code>, <code>System::IO</code>, <code>System::Net::Http</code>, and <code>System::Threading::Tasks</code>. Physical CMake components use concise dotted names such as <code>Collections.Core</code>, <code>IO</code>, <code>Net.Http</code>, and <code>Threading.Tasks</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Concept</th><th>Example</th><th>What it controls</th></tr></thead><tbody>
+<tr><td>Namespace</td><td><code>System::Net::Http::Headers</code></td><td>Source-level discovery and naming</td></tr>
+<tr><td>Physical owner</td><td><code>modules/net-http-headers</code></td><td>One include tree, tests, and any implementation sources</td></tr>
+<tr><td>Selectable component</td><td><code>Net.Http.Headers</code></td><td>CMake closure and production boundary</td></tr>
+<tr><td>Imported target</td><td><code>SharpRuntime::Net.Http.Headers</code></td><td>Consumer include and link requirements</td></tr>
+<tr><td>Compatibility target</td><td><code>SharpRuntime::Core</code></td><td>Legacy umbrella, not another physical owner</td></tr>
+</tbody></table></div>
+<p>The generated <a href="api/index.html">API inventory</a> maps every public header path back to exactly one of the 41 physical components at the pinned revision. Namespace breadth is therefore discoverable without pretending one namespace equals one archive.</p>
+
+<h2 id="physical-components-and-compatibility-targets">Physical components and compatibility targets</h2>
+<p>The selected source registers 41 physical components. A physical component is either <strong>STATIC</strong>, with production translation units and a static archive, or <strong>INTERFACE</strong>, whose public implementation is header-only. Each has one target, one include directory, declared dependencies, and optional tests. CMake rejects duplicate registration, a static component without sources, an interface component with sources, and an interface component with private dependencies.</p>
+<p>Four broader names exist for compatibility or aggregation:</p>
+<ul>
+  <li><code>Core</code> aggregates <code>Core.Base</code>, <code>Console</code>, <code>TimeZone</code>, and <code>Uri</code>.</li>
+  <li><code>Collections</code> aggregates the four physical collection components.</li>
+  <li><code>Xml.XPath</code> aliases the physical <code>Xml</code> archive because the implementation is not a distinct ownership boundary.</li>
+  <li><code>All</code> enables all physical components; only this complete selection provides the raw legacy <code>SHARP_RUNTIME</code> forwarding target.</li>
+</ul>
+<p><code>SharpRuntime::Headers</code> is a common support target that supplies shared include and C++23 requirements. It is not a user-selectable API component.</p>
+
+<h2 id="cmake-ownership-and-dependency-closure">CMake ownership and dependency closure</h2>
+<p>The root project requires CMake 3.20 and exact C++23 mode with compiler extensions disabled. A standalone checkout defaults to <code>All</code>; an embedding consumer should set <code>SHARP_RUNTIME_COMPONENTS</code> before <code>add_subdirectory</code>. The enablement engine recursively resolves dependencies, removes duplicates, and materializes only the requested closure.</p>
+<pre><code class="language-cmake">set(SHARP_RUNTIME_COMPONENTS
+    Net.Http.Json
+    IO.Hashing
+)
+set(SHARP_RUNTIME_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(sharp-runtime)
+
+target_link_libraries(app PRIVATE
+    SharpRuntime::Net.Http.Json
+    SharpRuntime::IO.Hashing
+)</code></pre>
+<p>The consumer names its direct needs. It does not manually repeat <code>Core.Base</code>, <code>Text.Json</code>, <code>Threading.Tasks</code>, or other transitive requirements. At this pin the component catalogue contains 92 direct production edges.</p>
+
+<h3 id="public-private-and-test-only-edges">Public, private, and test-only edges</h3>
+<div class="table-wrap"><table><thead><tr><th>Edge</th><th>Use it when</th><th>Consumer effect</th></tr></thead><tbody>
+<tr><td><code>PUBLIC_DEPENDENCIES</code></td><td>A public header exposes or includes the dependency</td><td>Propagates through the imported target</td></tr>
+<tr><td><code>PRIVATE_DEPENDENCIES</code></td><td>Only production implementation needs it</td><td>Links the owner without exposing its include surface</td></tr>
+<tr><td><code>TEST_DEPENDENCIES</code></td><td>Only the owning test executable needs it</td><td>Never becomes a production edge</td></tr>
+</tbody></table></div>
+<p>This separation matters. A passing component test may use helpers from another module without licensing that dependency to production. Conversely, a public header that leaks a sibling include needs a public edge or a redesign; a global include path is not an acceptable fix.</p>
+
+<h2 id="public-and-private-boundaries">Public and private boundaries</h2>
+<p>Every module owns an <code>include/</code> tree, optional <code>src/</code>, and optional <code>tests/</code>. Public consumers see the selected targets’ include directories. Implementation headers beneath <code>src/</code>, sibling module internals, test helpers, and vendor implementation details are not part of that surface.</p>
+<p>The boundary validator checks unique ownership, declared includes and links, visibility, cycles, registered source coverage, and other graph invariants. Positive selective consumers prove that a narrow target can be configured and linked. Negative fixtures prove that private or unrelated headers remain unavailable. Those tests are architectural tests: a behavior unit test cannot detect an accidentally global include directory.</p>
+
+<h2 id="external-dependencies-stay-scoped">External dependencies stay scoped</h2>
+<div class="table-wrap"><table><thead><tr><th>Owner</th><th>External facility</th><th>Visibility</th></tr></thead><tbody>
+<tr><td><code>IO.Compression</code></td><td>ZLIB</td><td>Private</td></tr>
+<tr><td><code>IO.Compression.Zip</code></td><td>Vendored miniz</td><td>Private</td></tr>
+<tr><td><code>Xml</code></td><td>Vendored tinyxml2</td><td>Public, because public headers expose its types</td></tr>
+<tr><td><code>Text.Json</code></td><td>Vendored nlohmann JSON headers</td><td>Header surface</td></tr>
+<tr><td><code>Net</code> on Windows</td><td><code>ws2_32</code></td><td>Private</td></tr>
+<tr><td><code>Security.Cryptography.Random</code> on Windows</td><td>BCrypt</td><td>Private</td></tr>
+<tr><td><code>Storage</code> on Android</td><td>Parent-provided SDL3 target</td><td>Private</td></tr>
+</tbody></table></div>
+<p>External libraries do not become an undifferentiated global dependency set. Their owner and visibility are recorded in the generated catalogue so a selective consumer can understand why a package is required.</p>
+
+<h2 id="native-object-and-value-model">Native object and value model</h2>
+<p>Sharp Runtime does not impose one representation on all familiar .NET concepts. Primitive aliases, strings, vectors, nullable values, and many wrappers are ordinary C++ values. Some polymorphic hierarchies opt into <code>System::Object</code>. Interfaces are native abstract base classes. Callbacks are typed C++ callables. This mixed model is intentional.</p>
+<p><code>Object</code> is abstract and provides virtual destruction, default identity equality, address-derived hashing, <code>ToString</code>, RTTI-backed <code>GetType</code>, and a project-specific stable <code>GetTypeName</code> hook. It is <em>not</em> the base of every non-primitive C++ type. <code>Type</code> wraps <code>std::type_info</code>; its names may be mangled, <code>Name</code> and <code>FullName</code> collapse, and its classification predicates are fixed compatibility stubs. See the <a href="type-system.html">type-system guide</a> before porting reflection-driven code.</p>
+
+<h2 id="resource-ownership-and-lifetime">Resource ownership and lifetime</h2>
+<p>RAII is the baseline. Values and smart pointers carry ownership; references, raw pointers, spans, memory views, event subscriptions, and callbacks borrow according to an explicit lifetime contract. Compatibility-shaped <code>Close</code> and <code>Dispose</code> operations may define observable state, but they do not replace deterministic C++ destruction.</p>
+<div class="table-wrap"><table><thead><tr><th>Representation</th><th>Typical role</th><th>Main hazard</th></tr></thead><tbody>
+<tr><td>Direct value/member</td><td>Required value with enclosing lifetime</td><td>Copy or move semantics may differ from managed identity</td></tr>
+<tr><td><code>std::unique_ptr</code></td><td>Exclusive dynamic owner</td><td>Borrowed callbacks must not outlive it</td></tr>
+<tr><td><code>std::shared_ptr</code>/<code>weak_ptr</code></td><td>Genuine shared lifetime and observer</td><td>Cycles or accidental lifetime extension</td></tr>
+<tr><td>Reference/raw pointer</td><td>Non-owning synchronous access</td><td>Dangling access after owner destruction</td></tr>
+<tr><td><code>Span</code>/<code>Memory</code></td><td>Contiguous non-owning range</td><td>Owner destruction or vector relocation invalidates the view</td></tr>
+</tbody></table></div>
+
+<h2 id="platform-abstraction-is-local-not-magical">Platform abstraction is local, not magical</h2>
+<p>Platform branches live near the facility they implement: socket code selects Windows or POSIX APIs; random generation attaches the appropriate entropy source; time-zone discovery has Windows and POSIX paths; storage can attach SDL3 on Android. Unsupported operations should either be excluded by a documented build decision or throw a specific <code>PlatformNotSupportedException</code>. A silent no-op is not a platform abstraction.</p>
+<p>Some components remain platform-specific. At the selected revision FileSystemWatcher uses Linux <code>inotify</code>, NetworkInterface enumeration is Linux-specific, and process behavior is POSIX-oriented. Emscripten has explicit reductions for DNS and native facilities. The <a href="platform-layer.html">platform matrix</a> separates implementation branches from configure, build, runtime, and test evidence.</p>
+
+<h2 id="threading-and-callback-implications">Threading and callback implications</h2>
+<p>Threads, tasks, timers, event handlers, watchers, sockets, and HTTP wrappers all execute under native lifetime and synchronization rules. Capturing <code>this</code> does not keep an object alive. Closing an owner does not automatically cancel every detached operation. A callback may run concurrently with reconfiguration unless the API documents serialization.</p>
+<p>The FileSystemWatcher remediation at this pin demonstrates the intended architecture: callback-thread identity is recorded, self-disable uses deferred teardown instead of joining the current thread, reconfiguration from inside a handler is rejected atomically where unsafe, handler exceptions flow through the Error event, and an Error handler’s exception is contained. This is a targeted lifecycle contract, not a general promise that every callback-bearing type is reentrant or thread-safe.</p>
+
+<h2 id="exception-model">Exception model</h2>
+<p>The runtime supplies a native C++ exception hierarchy with familiar names, messages, selected <code>HResult</code> values, and causal exception pointers where implemented. Throwing and catching use C++ syntax; stack unwinding runs destructors. Catch exceptions by reference. There is no CLR exception object header, managed stack, universal exception filter, or semantic guarantee that a matching name behaves identically in every edge case.</p>
+<p>Component owners translate low-level errors at their boundary: filesystem <code>errno</code>, socket status, parser failures, and platform-not-supported cases should become the most specific established public exception. Contributor tests check precedence as well as type—for example, whether invalid arguments are rejected before state mutation or native I/O.</p>
+
+<h2 id="build-and-test-architecture">Build and test architecture</h2>
+<p>With tests enabled, each physical module that owns test sources receives a separate GoogleTest executable. The <code>SharpRuntimeTests</code> name is an aggregate build target, not one monolithic binary. A complete <code>All</code> configuration also builds one integration executable for genuinely cross-component scenarios. At the selected pin this produces 37 component executables plus one integration executable.</p>
+<p>CTest discovers individual typed, parameterized, and ordinary GoogleTest cases from the built executables. That is why source macro counts are not used as a headline. The measured full gate at the exact selected SHA discovered and ran 17,131 cases; its six failed remain documented rather than converted into a green status.</p>
+<p>Behavior tests are only one layer. The local gate also includes selective consumers, negative include/link fixtures, graph validation, generated-catalogue drift checks, integration behavior, formatting/build checks, and a Doxygen warning ceiling.</p>
+
+<h2 id="generated-metadata-and-documentation">Generated metadata and documentation</h2>
+<p><code>cmake/SharpRuntimeModules.cmake</code> and each module registration are the build authority. The runtime’s component-catalogue generator derives physical names, kinds, owners, edges, headers, and external attachments. This website pins that catalogue to a SHA in <code>data/components.json</code>, derives a complete public-header inventory into <code>data/api-inventory.json</code>, and centralizes volatile gate facts in <code>data/site-facts.json</code>.</p>
+<p>Validation compares these committed facts against an explicitly supplied checkout. It never silently reads whichever branch happens to be active. Search, canonical metadata, sitemap entries, heading anchors, and this page shell are regenerated deterministically from the canonical content sources.</p>
+
+<h2 id="deliberate-non-goals">Deliberate non-goals</h2>
+<ul>
+  <li>No CLR, JIT, managed assembly loader, or garbage collector.</li>
+  <li>No claim of source compatibility: C# language constructs still require translation.</li>
+  <li>No universal <code>Object</code> inheritance or managed object layout.</li>
+  <li>No complete metadata reflection, dynamic invocation, P/Invoke, remoting, or BinaryFormatter model.</li>
+  <li>No requirement that a compatibility type reproduce unsupported .NET internals when an explicit native contract is safer.</li>
+  <li>No platform label derived merely from the existence of a preprocessor branch.</li>
+</ul>
+
+<h2 id="architectural-checklist-for-a-change">Architectural checklist for a change</h2>
+<ol>
+  <li>Identify the observable contract and the deliberate reductions.</li>
+  <li>Select one physical owner and verify its public/private dependency direction.</li>
+  <li>Choose value, unique, shared, weak, or borrowed lifetime explicitly.</li>
+  <li>Keep platform code local and make unsupported behavior visible.</li>
+  <li>Add normal, invalid, boundary, lifetime, concurrency, and platform tests as applicable.</li>
+  <li>Add a selective or negative consumer fixture when the public boundary changes.</li>
+  <li>Regenerate the catalogue and API inventory, run the graph validator, and update limitations or conceptual documentation.</li>
+</ol><nav class="next-links" aria-label="Previous and next pages"><a href="overview.html"><span class="next-label">Previous</span>What is Sharp Runtime?</a><a href="runtime-overview.html"><span class="next-label">Next</span>Runtime Overview</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#goals-and-architectural-boundaries">Goals and architectural boundaries</a><a class="toc-level-2" href="#the-native-execution-model">The native execution model</a><a class="toc-level-2" href="#namespace-organization-versus-physical-ownership">Namespace organization versus physical ownership</a><a class="toc-level-2" href="#physical-components-and-compatibility-targets">Physical components and compatibility targets</a><a class="toc-level-2" href="#cmake-ownership-and-dependency-closure">CMake ownership and dependency closure</a><a class="toc-level-3" href="#public-private-and-test-only-edges">Public, private, and test-only edges</a><a class="toc-level-2" href="#public-and-private-boundaries">Public and private boundaries</a><a class="toc-level-2" href="#external-dependencies-stay-scoped">External dependencies stay scoped</a><a class="toc-level-2" href="#native-object-and-value-model">Native object and value model</a><a class="toc-level-2" href="#resource-ownership-and-lifetime">Resource ownership and lifetime</a><a class="toc-level-2" href="#platform-abstraction-is-local-not-magical">Platform abstraction is local, not magical</a><a class="toc-level-2" href="#threading-and-callback-implications">Threading and callback implications</a><a class="toc-level-2" href="#exception-model">Exception model</a><a class="toc-level-2" href="#build-and-test-architecture">Build and test architecture</a><a class="toc-level-2" href="#generated-metadata-and-documentation">Generated metadata and documentation</a><a class="toc-level-2" href="#deliberate-non-goals">Deliberate non-goals</a><a class="toc-level-2" href="#architectural-checklist-for-a-change">Architectural checklist for a change</a></nav></aside></div></main>
 <footer class="site-footer"><div class="container footer-grid">
 <div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
 <div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="getting-started.html">Getting Started</a></li><li><a href="components/index.html">Components</a></li><li><a href="api/index.html">API discovery</a></li><li><a href="tutorials/index.html">Tutorials</a></li></ul></div>
 <div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="architecture.html">Architecture</a></li><li><a href="platform-layer.html">Platforms</a></li><li><a href="running-tests.html">Testing</a></li><li><a href="development/known-limitations.html">Known limitations</a></li></ul></div>
 <div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
-</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>f827a6c53492</code>.</div></footer>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
 <script src="assets/script.js"></script>
 </body>
 </html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" data-search-url="../search.html">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add a Negative Consumer Fixture | Sharp Runtime</title>
+  <meta name="description" content="Prove forbidden Sharp Runtime consumer code remains rejected using clean baselines, isolated negative sites, diagnostic fragments, and component-derived includes.">
+  <link rel="canonical" href="https://sharpruntime.com/tutorials/negative-consumer-fixture.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Sharp Runtime">
+  <meta property="og:title" content="Add a Negative Consumer Fixture | Sharp Runtime">
+  <meta property="og:description" content="Prove forbidden Sharp Runtime consumer code remains rejected using clean baselines, isolated negative sites, diagnostic fragments, and component-derived includes.">
+  <meta property="og:url" content="https://sharpruntime.com/tutorials/negative-consumer-fixture.html">
+  <meta property="og:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sharp Runtime component architecture illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Add a Negative Consumer Fixture | Sharp Runtime">
+  <meta name="twitter:description" content="Prove forbidden Sharp Runtime consumer code remains rejected using clean baselines, isolated negative sites, diagnostic fragments, and component-derived includes.">
+  <meta name="twitter:image" content="https://sharpruntime.com/assets/og-card.png">
+  <meta name="twitter:image:alt" content="Sharp Runtime component architecture illustration">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <script>(function(){try{var t=localStorage.getItem('sharp-runtime-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(_){}})();</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "headline": "Add a Negative Consumer Fixture", "description": "Prove forbidden Sharp Runtime consumer code remains rejected using clean baselines, isolated negative sites, diagnostic fragments, and component-derived includes.", "url": "https://sharpruntime.com/tutorials/negative-consumer-fixture.html", "image": "https://sharpruntime.com/assets/og-card.png", "isPartOf": {"@id": "https://sharpruntime.com/#website"}}, {"@type": "WebSite", "@id": "https://sharpruntime.com/#website", "name": "Sharp Runtime", "url": "https://sharpruntime.com/", "potentialAction": {"@type": "SearchAction", "target": "https://sharpruntime.com/search.html?q={search_term_string}", "query-input": "required name=search_term_string"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://sharpruntime.com/"}, {"@type": "ListItem", "position": 2, "name": "Tutorials"}, {"@type": "ListItem", "position": 3, "name": "Add a Negative Consumer Fixture", "item": "https://sharpruntime.com/tutorials/negative-consumer-fixture.html"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<nav class="site-nav" aria-label="Primary"><div class="nav-inner">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span class="brand-word">Sharp Runtime</span></a>
+  <div class="nav-links" id="primary-navigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="../getting-started.html">Start</a><a class="nav-link" href="../guides/porting-csharp.html">Guides</a><a class="nav-link" href="../components/index.html">Components</a><a class="nav-link" href="../api/index.html">API</a><a class="nav-link" href="index.html" aria-current="page">Tutorials</a><a class="nav-link" href="../search.html">Search</a><a class="nav-link nav-link--github" href="https://github.com/openeggbert/sharp-runtime">GitHub</a></div>
+  <button class="nav-toggle" type="button" aria-label="Open navigation" aria-controls="primary-navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-actions"><button class="icon-button theme-toggle" type="button" aria-label="Switch theme"><svg class="theme-icon-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.5 4.9l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm13.5 13.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zM19.1 3.5l1.4 1.4-2.1 2.1-1.4-1.4 2.1-2.1zM5.6 17 7 18.4l-2.1 2.1-1.4-1.4L5.6 17zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/></svg><svg class="theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.3 22a10 10 0 0 1-1.6-19.9c.6-.1 1 .5.8 1a7.9 7.9 0 0 0 9.7 10.6c.5-.2 1 .3.9.8A10 10 0 0 1 12.3 22z"/></svg></button></div>
+</div></nav>
+<main id="main-content"><div class="docs-shell docs-shell--with-toc"><aside class="docs-sidebar"><button class="docs-toggle" type="button" aria-controls="documentation-navigation" aria-expanded="false">Browse documentation</button><div class="docs-sidebar-title">Documentation</div><nav class="docs-nav" id="documentation-navigation" aria-label="Documentation"><div class="docs-nav-group">Overview</div><a href="../overview.html">What is Sharp Runtime?</a><a href="../architecture.html">Architecture</a><a href="../runtime-overview.html">Runtime model</a><a href="../compatibility.html">Compatibility</a><a href="../platform-layer.html">Platforms</a><div class="docs-nav-group">Get started</div><a href="../getting-started.html">Getting Started</a><a href="../build.html">Build & integration</a><a href="../running-tests.html">Testing & verification</a><div class="docs-nav-group">Guides</div><a href="../guides/porting-csharp.html">Port C# to C++</a><a href="../memory-management.html">Memory & ownership</a><a href="../exceptions.html">Exceptions</a><a href="../cna-integration.html">CNA integration</a><a href="../development/known-limitations.html">Known limitations</a><div class="docs-nav-group">Components</div><a href="../components/index.html">Complete catalogue</a><a href="../components/core.html">Core & collections</a><a href="../components/text-data.html">Text, JSON & XML</a><a href="../components/io-storage.html">I/O & storage</a><a href="../components/networking.html">Networking</a><a href="../components/concurrency.html">Concurrency</a><a href="../components/numerics-globalization.html">Numerics & globalization</a><div class="docs-nav-group">Concepts</div><a href="../type-system.html">Type system</a><a href="../strings.html">Strings</a><a href="../arrays.html">Arrays & memory</a><a href="../delegates.html">Delegates & events</a><a href="../reflection.html">Reflection</a><a href="../io.html">I/O overview</a><a href="../docs/io/streams.html">Streams & readers</a><a href="../docs/io/filesystem.html">Filesystem</a><a href="../docs/io/filesystem-watcher.html">FileSystemWatcher</a><a href="../threading.html">Threading & tasks</a><div class="docs-nav-group">Develop</div><a href="../development/index.html">Development guide</a><a href="../project-structure.html">Project structure</a><a href="../development/adding-runtime-features.html">Adding features</a><a href="../development/debugging.html">Debugging</a><a href="../internals/index.html">Internals</a></nav></aside><article class="docs-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span>/</span><span>Tutorials</span><span>/</span><span aria-current="page">Add a Negative Consumer Fixture</span></nav><h1>Add a Negative Consumer Fixture</h1><p class="lead">Make a compile-time boundary failure specific, reproducible, and impossible to pass for an unrelated reason.</p><div class="page-meta"><span>Contributor</span><span>Compile-time contract</span><span>Serial checker</span></div>
+<h2 id="what-a-negative-fixture-proves">What a negative fixture proves</h2>
+<p>A negative consumer fixture proves that deliberately invalid public-consumer code is rejected for the intended reason. It is appropriate for private seams, deleted operations, template requirements, forbidden conversions, or a header that must not enter a component’s public include closure.</p>
+<div class="callout"><div class="callout-title">Compilation failure alone is not evidence</div><p>An unrelated broken include can make every forbidden line appear protected. Sharp Runtime compiles an all-sites-off baseline and then enables one numbered site at a time, checking that diagnostics point into that site and contain a declared fragment.</p></div>
+
+<h2 id="create-the-fixture">Create the fixture</h2>
+<pre><code class="language-cpp">// NEGATIVE-FIXTURE: component=Collections.Core
+#include "System/Collections/Generic/List.hpp"
+
+#ifndef SHARP_RUNTIME_NEGATIVE_SITE
+#define SHARP_RUNTIME_NEGATIVE_SITE 0
+#endif
+
+int main() {
+    System::Collections::Generic::List&lt;int&gt; values;
+
+#if SHARP_RUNTIME_NEGATIVE_SITE == 1
+    // NEGATIVE(copy-from-const-view): expected diagnostic fragment
+    //     | second accepted compiler diagnostic fragment
+    deliberately_invalid_expression(values);
+#else
+    values.Add(1); // migrated/valid spelling keeps baseline compilable
+#endif
+    return 0;
+}</code></pre>
+<p>This is a scaffold, not a ready repository fixture: replace both the marker id and diagnostic fragments with the actual compiler output for the contract under test. Site numbers must be contiguous from 1, marker ids unique, and every enabled site must add—not remove—code relative to the clean baseline.</p>
+
+<h2 id="select-the-real-owning-component">Select the real owning component</h2>
+<p>The <code>NEGATIVE-FIXTURE</code> directive names a physical component registered in CMake. The checker derives that target’s public include directories, definitions, language features, options, and public dependency closure. It intentionally does not expose private dependencies, which is often exactly the boundary being tested.</p>
+
+<h2 id="write-stable-diagnostic-expectations">Write stable diagnostic expectations</h2>
+<p>Use one or more short semantic fragments from diagnostics, not a complete compiler paragraph with paths, line numbers, template backtraces, or toolchain-specific punctuation. The checker accepts a site only when at least one declared fragment appears and fixture-attributed diagnostics stay inside the enabled region.</p>
+<div class="table-wrap"><table><thead><tr><th>Fragile expectation</th><th>Better expectation</th></tr></thead><tbody>
+<tr><td>Complete GCC message with absolute paths</td><td><code>use of deleted function</code></td></tr>
+<tr><td>Exact template instantiation stack</td><td><code>constraints not satisfied</code></td></tr>
+<tr><td>Only “compilation failed”</td><td>A fragment identifying the protected contract</td></tr>
+</tbody></table></div>
+
+<h2 id="run-one-fixture-with-one-compiler-job">Run one fixture with one compiler job</h2>
+<pre><code class="language-bash">SHARP_RUNTIME_BUILD_JOBS=1 \
+python3 scripts/check_negative_consumer_fixtures.py \
+  --root /path/to/pinned/sharp-runtime \
+  --fixture 'collections_mutation_version_negative.cpp' \
+  --jobs 1 \
+  --no-ccache \
+  --verbose</code></pre>
+<p>The checker permits one or two jobs; explicit <code>--jobs 1</code> is the conservative choice on a memory-constrained host. Use <code>--list</code> first to inspect discovered fixtures and site identifiers without compiling them.</p>
+
+<h2 id="interpret-the-outcomes">Interpret the outcomes</h2>
+<ul>
+  <li><strong>Baseline fails:</strong> repair the fixture scaffolding or public include closure before trusting site results.</li>
+  <li><strong>Site compiles:</strong> the formerly forbidden expression is now legal; decide whether that is an intended API change.</li>
+  <li><strong>Site fails outside its region:</strong> the failure does not prove the intended contract.</li>
+  <li><strong>Expected fragment absent:</strong> review whether the compiler found a different, possibly earlier error.</li>
+  <li><strong>Unknown component:</strong> correct ownership rather than supplying ad hoc include paths.</li>
+</ul>
+
+<h2 id="keep-a-positive-migration-path">Keep a positive migration path</h2>
+<p>The all-sites-off branch should show the supported replacement when one exists. A private test seam may have no consumer migration; say so in the file and point users to the public observable behavior they can test instead. Avoid documenting private implementation names as if consumers may depend on them.</p>
+
+<h2 id="complete-boundary-validation">Complete boundary validation</h2>
+<p>Run the fixture checker alongside the repository’s module-boundary validator and ordinary positive consumer fixtures. The three answer different questions:</p>
+<ol>
+  <li>Can a valid consumer build and link?</li>
+  <li>Does a forbidden expression remain rejected for the intended reason?</li>
+  <li>Does the declared component graph expose exactly the intended headers and links?</li>
+</ol>
+<p>Record compiler identity and selected source SHA with results. A negative diagnostic validated on GCC is not automatically a current Clang or MSVC evidence claim.</p><nav class="next-links" aria-label="Previous and next pages"><a href="write-component-test.html"><span class="next-label">Previous</span>Write a Component Test</a></nav></article><aside class="in-page-toc" aria-label="On this page"><div class="in-page-toc-title">On this page</div><nav><a class="toc-level-2" href="#what-a-negative-fixture-proves">What a negative fixture proves</a><a class="toc-level-2" href="#create-the-fixture">Create the fixture</a><a class="toc-level-2" href="#select-the-real-owning-component">Select the real owning component</a><a class="toc-level-2" href="#write-stable-diagnostic-expectations">Write stable diagnostic expectations</a><a class="toc-level-2" href="#run-one-fixture-with-one-compiler-job">Run one fixture with one compiler job</a><a class="toc-level-2" href="#interpret-the-outcomes">Interpret the outcomes</a><a class="toc-level-2" href="#keep-a-positive-migration-path">Keep a positive migration path</a><a class="toc-level-2" href="#complete-boundary-validation">Complete boundary validation</a></nav></aside></div></main>
+<footer class="site-footer"><div class="container footer-grid">
+<div class="footer-brand"><a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">SR</span><span>Sharp Runtime</span></a><p>A practical, componentized subset of .NET System.* APIs implemented in native C++23.</p></div>
+<div><h2 class="footer-title">Documentation</h2><ul class="footer-links"><li><a href="../getting-started.html">Getting Started</a></li><li><a href="../components/index.html">Components</a></li><li><a href="../api/index.html">API discovery</a></li><li><a href="index.html">Tutorials</a></li></ul></div>
+<div><h2 class="footer-title">Project</h2><ul class="footer-links"><li><a href="../architecture.html">Architecture</a></li><li><a href="../platform-layer.html">Platforms</a></li><li><a href="../running-tests.html">Testing</a></li><li><a href="../development/known-limitations.html">Known limitations</a></li></ul></div>
+<div><h2 class="footer-title">Ecosystem</h2><ul class="footer-links"><li><a href="https://github.com/openeggbert/sharp-runtime">GitHub</a></li><li><a href="https://libcna.com/">CNA</a></li><li><a href="https://github.com/openeggbert">OpenEggbert</a></li></ul></div>
+</div><div class="container footer-bottom">Sharp Runtime is MIT licensed. Technical claims on this edition are pinned to runtime source <code>6d429559ce26</code>.</div></footer>
+<script src="../assets/script.js"></script>
+</body>
+</html>

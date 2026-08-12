@@ -1,0 +1,145 @@
+<h2 id="component-model">Four components, several execution models</h2>
+<p>Sharp Runtime groups familiar concurrency names into four physical components, but they do not sit on one CLR scheduler. Native threads, eager tasks, blocking channel operations, and timer callbacks each have their own ownership and shutdown rules. Select the narrow CMake target and design around the implementation behind it.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Component</th><th scope="col">CMake target</th><th scope="col">Primary surface</th><th scope="col">Dependency boundary</th></tr></thead>
+<tbody>
+<tr><td><code>Threading</code></td><td><code>SharpRuntime::Threading</code></td><td><code>Thread</code>, locks, monitors, wait primitives, cancellation, <code>ThreadPool</code>, <code>System::Threading::Timer</code>, <code>PeriodicTimer</code></td><td>Public dependency closure: <code>Core.Base</code>, <code>TimeZone</code></td></tr>
+<tr><td><code>Threading.Tasks</code></td><td><code>SharpRuntime::Threading.Tasks</code></td><td><code>Task</code>, <code>TaskT</code>, continuations, factories, completion sources, value-task shapes, parallel loops</td><td>Public dependency closure adds <code>Threading</code> and <code>Core.Base</code></td></tr>
+<tr><td><code>Threading.Channels</code></td><td><code>SharpRuntime::Threading.Channels</code></td><td>Bounded, unbounded, rendezvous, and prioritized producer/consumer channels</td><td>Header-only interface component; public closure adds <code>Threading.Tasks</code> and <code>Core.Base</code></td></tr>
+<tr><td><code>Timers</code></td><td><code>SharpRuntime::Timers</code></td><td><code>System::Timers::Timer</code> and elapsed-event types</td><td>Public: <code>ComponentModel</code>/<code>Core.Base</code>; private: <code>Threading</code></td></tr>
+</tbody>
+</table></div>
+
+<div class="callout"><div class="callout-title">A namespace is not a scheduler guarantee</div><p><code>Task</code> does not queue onto <code>ThreadPool</code>, channel waits do not suspend a coroutine, and <code>System::Timers::Timer</code> does not marshal onto a UI synchronization context. Treat each type’s documented execution path as part of its contract.</p></div>
+
+<h2 id="thread-lifecycle">Thread lifecycle and ownership</h2>
+<p><code>System::Threading::Thread</code> wraps <code>std::thread</code>. Construction validates and stores a parameterless callable but does not start it. <code>Start()</code> may be called exactly once; a second start or a join before start throws <code>ThreadStateException</code>. <code>Join()</code> blocks, while the timeout overload polls completion on a steady clock and then joins when the worker has finished.</p>
+<p>The destructor detaches a still-joinable thread rather than joining it. The implementation keeps its own finished/background/id state in a shared heap object captured by the worker, so destroying the <code>Thread</code> wrapper no longer makes those internal writes use freed memory. That repair does not extend the lifetime of references, pointers, or object addresses captured by the caller’s function. Use <code>Join</code> as the normal ownership boundary whenever work touches state owned by the initiating scope.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Member or property</th><th scope="col">Current behavior</th><th scope="col">Important difference</th></tr></thead>
+<tbody>
+<tr><td><code>Start()</code></td><td>Moves the stored callable into one native thread</td><td>The wrapper cannot be restarted</td></tr>
+<tr><td><code>Start(void*)</code></td><td>Starts the same parameterless callable; the supplied pointer is currently ignored</td><td>There is no implemented parameterized-callback constructor behind this overload</td></tr>
+<tr><td><code>Join(-1)</code></td><td>Waits indefinitely and joins</td><td><code>Interrupt()</code> is a no-op, so it cannot wake an infinite sleep</td></tr>
+<tr><td><code>Name</code>, <code>Priority</code></td><td>Stored and returned by the wrapper</td><td>Neither value is applied to the operating-system thread</td></tr>
+<tr><td><code>IsBackground</code></td><td>Stored in shared run state</td><td>It does not reproduce CLR foreground/background process-lifetime policy</td></tr>
+<tr><td><code>CurrentThread()</code></td><td>Returns the assigned ID/background state for a <code>Thread</code>-started worker</td><td>Main and externally created threads use the fallback managed ID 1</td></tr>
+<tr><td>Apartment state</td><td><code>Unknown</code>; setters are inert</td><td>No COM apartment model</td></tr>
+</tbody>
+</table></div>
+
+<p>The worker entry point does not catch exceptions. An exception escaping the supplied function reaches the native thread boundary and terminates the process. Catch and publish failures inside the worker, or use <code>Task</code> when storing and rethrowing a failure at <code>Wait</code> is the desired model.</p>
+
+<h2 id="synchronization">Locks, monitors, and waits</h2>
+<p><code>Lock</code> is an owning recursive timed mutex with owner/depth tracking. <code>EnterScope()</code> returns an RAII guard, making it the clearest choice when a lexical critical section is under your control. <code>Exit</code> rejects a caller that does not own the lock, and timed entry treats <code>-1</code> as an infinite wait.</p>
+<p><code>Monitor</code> solves a different porting problem. A CLR associates a sync block with every managed object; C++ objects have no equivalent header. Sharp Runtime therefore uses the caller-supplied pointer as a key in a process-global registry of recursive timed mutex/condition-variable states. It provides real reentrant <code>Enter</code>, <code>Exit</code>, <code>TryEnter</code>, <code>Wait</code>, <code>Pulse</code>, and <code>PulseAll</code> behavior, but registry entries are never reclaimed. The pointer must be a stable identity; this is not a universal lock automatically embedded in every C++ object.</p>
+<p>At the selected source pin, <code>Monitor::Wait</code> releases the complete recursion depth before sleeping and restores it after reacquiring. Older code released only one recursive level, which could leave the mutex held and prevent the signaling thread from entering to pulse. That former deadlock is fixed and must not remain as a current warning.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Need</th><th scope="col">Representative type</th><th scope="col">Boundary to remember</th></tr></thead>
+<tbody>
+<tr><td>Lexical mutual exclusion</td><td><code>Lock</code>, <code>Mutex</code>, <code>SpinLock</code></td><td>Prefer RAII; spin-based types are for very short, measured critical sections</td></tr>
+<tr><td>Object-identity-style wait set</td><td><code>Monitor</code></td><td>Global pointer-keyed registry, not a CLR object header</td></tr>
+<tr><td>Shared/exclusive access</td><td><code>ReaderWriterLockSlim</code></td><td>Choose and respect its recursion policy rather than mixing lock families</td></tr>
+<tr><td>Counting access</td><td><code>Semaphore</code>, <code>SemaphoreSlim</code></td><td>Release beyond the configured maximum is rejected</td></tr>
+<tr><td>Manual/automatic signals</td><td><code>ManualResetEvent</code>, <code>AutoResetEvent</code>, slim variants</td><td>These are blocking waits, not coroutine suspension</td></tr>
+<tr><td>Phases and countdown</td><td><code>Barrier</code>, <code>CountdownEvent</code></td><td>Disposal and participant/count invariants are explicit</td></tr>
+<tr><td>Multiple handles</td><td><code>WaitHandle::WaitAll/WaitAny</code></td><td><code>WaitAll</code> waits sequentially; <code>WaitAny</code> polls, rather than atomically multiplexing native handles</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="cancellation">Cancellation is cooperative and synchronous</h2>
+<p>A <code>CancellationTokenSource</code> owns shared cancellation state; token copies retain that state. Requesting cancellation sets the flag and invokes registered callbacks synchronously on the thread calling <code>Cancel()</code>, in reverse registration order. Every callback is attempted. If callbacks throw, their failures are collected and <code>Cancel</code> raises an <code>AggregateException</code> after delivery.</p>
+<p>Registering on an already-canceled token invokes the callback synchronously before <code>Register</code> returns. Disposing a registration removes a pending callback; if that callback is already executing on another thread, disposal waits for it to finish. Self-disposal from the callback is detected so it does not deadlock.</p>
+<p>Cancellation never forcibly stops a thread or native call. A task checks an already-canceled token before launching; after launch, its function must observe the copied token and ordinarily call <code>ThrowIfCancellationRequested()</code>. An escaping <code>OperationCanceledException</code> becomes the Canceled state only when that same token reports cancellation requested; otherwise it is a fault.</p>
+<p>The current source does not implement delayed cancellation constructors/<code>CancelAfter</code>, linked token sources, <code>CancelAsync</code>, <code>TryReset</code>, token wait handles, synchronization-context registration overloads, or token value equality. Build those policies explicitly rather than assuming the type name supplies them.</p>
+
+<h2 id="thread-pool">ThreadPool is a detached-thread facade</h2>
+<p><code>QueueUserWorkItem</code> does not enqueue into a persistent worker pool. Each accepted callback constructs a new <code>std::thread</code> and detaches it. The state overload captures the raw state pointer, and the unsafe work-item overload captures the raw <code>IThreadPoolWorkItem*</code>; neither extends caller-owned object lifetime. Callback exceptions are not caught at this boundary.</p>
+<p><code>GetMinThreads</code>/<code>SetMinThreads</code> and their maximum counterparts maintain process-global configuration and validate the relationship between the stored pairs. Those values are observable configuration only: they do not throttle or provision detached work-item threads. A burst of queued items can therefore create a burst of operating-system threads regardless of the reported maximum.</p>
+<p><code>RegisterWaitForSingleObject</code> also uses a dedicated background thread that polls the borrowed <code>WaitHandle*</code> in short slices. External <code>Unregister</code> joins that thread before returning so the caller can safely release the borrowed handle; self-unregister detaches to avoid joining itself.</p>
+
+<h2 id="tasks">Tasks: eager work, shared state, inline continuations</h2>
+<p><code>Task</code> and <code>TaskT&lt;TResult&gt;</code> start work immediately with <code>std::async(std::launch::async, ...)</code>. This is a thread-per-task design, not submission to <code>ThreadPool</code> and not a pluggable scheduler. <code>TaskScheduler::Default</code>/<code>Current</code> provide API-shaped objects, but tasks never consult them. Task creation flags such as fairness, parent attachment, scheduler hiding, and asynchronous-continuation forcing therefore do not alter execution.</p>
+<p>Task copies share completion state and a <code>shared_future</code>, so multiple consumers can wait safely. The worker stores success, cancellation, or an exception before signaling completion. <code>Wait()</code> and result access rethrow the stored fault directly; unlike .NET’s blocking <code>Task.Wait</code>, they do not wrap it in <code>AggregateException</code>. Cancellation produces <code>TaskCanceledException</code>.</p>
+<p><code>ContinueWith</code> registers a callback in the antecedent’s shared state. It runs inline on the thread that completes the antecedent, or immediately on the registering thread if the antecedent is already complete. Only the outcome-filter bits (<code>NotOn*</code>/<code>OnlyOn*</code>) change behavior; scheduler and parent-task options are accepted no-ops. A continuation excluded by its filter completes as canceled. A throwing continuation faults its returned task.</p>
+<p><code>WhenAll</code> still waits for every input after a fault. If several inputs fault, the first exception in input order is retained rather than an aggregate of every failure. If no input faults but one is canceled, waiting on the returned task throws <code>TaskCanceledException</code>; because this implementation builds the coordinator as an action-backed task, that coordinator currently reports Faulted rather than Canceled.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Operation</th><th scope="col">Current execution</th><th scope="col">Result/fault rule</th></tr></thead>
+<tbody>
+<tr><td><code>Task::Run</code> / task constructor</td><td>One eager <code>std::async</code> worker</td><td>Stores fault for direct rethrow at <code>Wait</code></td></tr>
+<tr><td><code>ContinueWith</code></td><td>Inline on completion/registration thread</td><td>Returned task records continuation outcome</td></tr>
+<tr><td><code>WhenAll</code></td><td>One task waits for every input</td><td>First fault in input order wins; it does not aggregate all faults</td></tr>
+<tr><td><code>WhenAny</code></td><td>Registers inline completion callbacks; no watcher thread per input</td><td>Wrapper succeeds with the first completed task, whose own outcome remains separate</td></tr>
+<tr><td><code>Task::Delay</code></td><td>One task sleeps</td><td><code>-1</code> is accepted but currently returns through negative <code>sleep_for</code>, not an infinite delay</td></tr>
+<tr><td><code>TaskCompletionSource</code></td><td>Bridges a promise through one async observer</td><td>Atomic <code>TrySet*</code>; unresolved destruction cancels the bridge</td></tr>
+</tbody>
+</table></div>
+
+<p>A <code>TaskCompletionSource</code> is ordinary C++ storage. It must remain alive while another thread may call <code>SetResult</code>, <code>SetException</code>, <code>SetCanceled</code>, or a <code>TrySet*</code> method. The task handed to consumers owns its own shared state, but it does not keep the producer object alive. Use shared ownership for a source completed by a background producer.</p>
+<p><code>ValueTask</code> and <code>ValueTaskT</code> can represent a completed value/fault or retain an underlying task. Their “awaiter” methods are blocking compatibility calls; Sharp Runtime does not add C# <code>await</code> syntax or a C++ coroutine scheduler. <code>ExecutionContext</code> does not flow ambient state across tasks: capture returns no context, while <code>AsyncLocal</code> is actual thread-local storage.</p>
+<p>The base <code>SynchronizationContext</code> keeps a thread-local <code>Current</code> pointer, executes <code>Send</code> inline, and implements <code>Post</code> through the detached-thread <code>ThreadPool</code> facade. Task creation and continuation do not capture or restore that context.</p>
+
+<h2 id="channels">Channels, backpressure, and completion</h2>
+<p><code>Channel&lt;T&gt;</code> returns shared reader and writer endpoints over a shared mutex/condition-variable state. The ordinary factories use a FIFO deque; the prioritized unbounded factory uses a multiset and removes the smallest item according to its comparer. The implementation is deliberately lock-based, not lock-free.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Channel form</th><th scope="col">Capacity behavior</th><th scope="col">Ordering</th></tr></thead>
+<tbody>
+<tr><td>Unbounded</td><td>Writes succeed until completion; memory growth is caller-controlled</td><td>FIFO</td></tr>
+<tr><td>Bounded, <code>Wait</code></td><td>Async write blocks until a reader frees space</td><td>FIFO</td></tr>
+<tr><td>Bounded drop modes</td><td>Drop incoming, newest buffered, or oldest buffered item as selected; the handled write reports success</td><td>FIFO among retained items</td></tr>
+<tr><td>Capacity zero</td><td>Rendezvous: a wait-mode write proceeds only while a reader is parked; drop modes discard without buffering</td><td>Direct producer/consumer handoff</td></tr>
+<tr><td>Prioritized unbounded</td><td>Writes do not block before completion</td><td>Comparer order, smallest first</td></tr>
+</tbody>
+</table></div>
+
+<p><code>TryRead</code>/<code>TryWrite</code> are immediate. The async-shaped methods construct tasks whose native workers block on condition variables; they do not suspend a coroutine. Each outstanding <code>ReadAsync</code>, <code>WriteAsync</code>, <code>WaitToReadAsync</code>, <code>WaitToWriteAsync</code>, or completion wait can therefore occupy a task thread.</p>
+<p>Factory endpoints and backing state use <code>shared_ptr</code>. Default reader/writer async methods also call <code>shared_from_this</code> to retain the endpoint for the operation, so custom endpoint subclasses using those defaults must themselves be created under shared ownership. This keeps channel internals alive; values or references captured inside <code>T</code> still follow their own C++ lifetime rules.</p>
+<p>Completion stops future writes but lets readers drain buffered items. Clean closure makes availability waits return false after the drain. Error completion faults <code>WaitToReadAsync</code>, <code>WaitToWriteAsync</code>, and the completion task with the producer error; <code>ReadAsync</code>/<code>WriteAsync</code> instead report <code>ChannelClosedException</code> with that error retained as the inner exception. There is no <code>ReadAllAsync</code>, async-enumerable integration, or cancellation-token overload. <code>SingleReader</code>, <code>SingleWriter</code>, and <code>AllowSynchronousContinuations</code> exist on option objects but the current factories do not use them to select an optimized or different execution path.</p>
+
+<h2 id="timers">Timer selection and teardown</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Type</th><th scope="col">Execution</th><th scope="col">Teardown and exception boundary</th></tr></thead>
+<tbody>
+<tr><td><code>System::Threading::Timer</code></td><td>One dedicated thread per timer; <code>Change</code> reschedules, <code>-1</code> pauses</td><td>Shared internal state avoids a dangling timer-state pointer, but <code>Dispose</code> signals then detaches instead of joining; an in-flight callback may continue, and an escaping callback exception terminates the process</td></tr>
+<tr><td><code>System::Threading::PeriodicTimer</code></td><td><code>WaitForNextTick</code> blocks the caller on a steady-clock deadline</td><td>No callback thread; <code>Dispose</code> wakes a pending wait, which returns false</td></tr>
+<tr><td><code>System::Timers::Timer</code></td><td>Wraps <code>System::Threading::Timer</code> and raises <code>Elapsed</code> on its background thread</td><td>Handler exceptions are caught and discarded, but the callback captures raw <code>this</code>; <code>Close</code>/destruction does not prove an in-flight callback has finished</td></tr>
+</tbody>
+</table></div>
+
+<p><code>System::Timers::Timer</code> does not derive from the full component/designer model and has no <code>SynchronizingObject</code> marshalling. Event sender is currently null. Keep the object alive across callback dispatch and add an external shutdown barrier if destruction can race a tick. Stopping prevents fresh cookie-matched delivery; it is not a join for work already inside the callback.</p>
+
+<h2 id="platforms-and-non-goals">Platforms and deliberate non-goals</h2>
+<p>On ordinary native targets these components are built primarily from the C++ standard threading library. Single-threaded Emscripten explicitly rejects task construction, task delay, thread-pool queuing, parallel loops, and <code>System::Threading::Timer</code>. Immediate channel operations are header-only synchronization code, but their async-shaped waits/reads/writes require the task path and therefore cannot run in that configuration; <code>System::Timers::Timer</code> inherits the lower timer dependency. An Emscripten pthread build enables the native paths but requires whole-program <code>-pthread</code> configuration and the browser isolation needed for Web Workers/shared memory.</p>
+<p>Processor-ID discovery has Win32 and Linux implementations, with zero as the Emscripten/other fallback. Thread name, priority, apartments, and CLR execution-context flow are not platform abstractions in this revision. Current build/runtime evidence by toolchain is tracked separately on <a href="platform-layer.html">Platforms and portability</a>.</p>
+
+<h2 id="csharp-comparison">C#/.NET comparison</h2>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">C# / .NET expectation</th><th scope="col">Sharp Runtime / C++</th><th scope="col">Porting consequence</th></tr></thead>
+<tbody>
+<tr><td>GC keeps callback targets alive</td><td>Captures obey C++ value/reference/pointer ownership</td><td>Retain owners explicitly and join/complete before release</td></tr>
+<tr><td>Foreground/background thread affects process exit</td><td>Background is a reported flag only</td><td>Design native process shutdown explicitly</td></tr>
+<tr><td>Object monitor lives in CLR object header</td><td>Pointer-keyed global monitor registry</td><td>Supply stable identities and accept process-lifetime registry entries</td></tr>
+<tr><td>ThreadPool reuses bounded workers</td><td>New detached thread per queued item</td><td>Do not use reported min/max values as a concurrency limiter</td></tr>
+<tr><td><code>Task.Run</code> uses the default scheduler</td><td>Eager dedicated <code>std::async</code> work</td><td>High task counts can mean high native thread counts</td></tr>
+<tr><td>Continuation placement follows options/scheduler/context</td><td>Inline on the completing thread; only outcome filters matter</td><td>Keep continuations short and do not assume UI/thread affinity</td></tr>
+<tr><td><code>await</code> suspends without blocking a thread</td><td>No C# await machinery; waits and channel async shapes use blocking native work</td><td>Choose native coroutines/event loops separately when scalability requires them</td></tr>
+<tr><td>Cancellation may be linked, delayed, or context-aware</td><td>Shared flag plus synchronous callbacks and cooperative checks</td><td>Build deadline/linking policies in application code</td></tr>
+<tr><td>Channel tuning flags select specialized implementations</td><td>One mutex/condition-variable family; only capacity/full mode/comparer alter behavior</td><td>Treat single-reader/writer flags as non-operative in this revision</td></tr>
+<tr><td>Timer disposal offers framework-specific completion options</td><td>Threading timer detaches; event timer retains a raw-owner callback hazard</td><td>Add an application-owned callback completion barrier</td></tr>
+</tbody>
+</table></div>
+
+<h2 id="related-reading">Related reading</h2>
+<div class="page-index">
+<a href="components/concurrency.html">Concurrency components<small>Physical ownership, dependencies, representative headers, and CMake selection.</small></a>
+<a href="tutorials/tasks-cancellation.html">Tasks and cancellation tutorial<small>A focused porting workflow for task state and cooperative cancellation.</small></a>
+<a href="development/porting-csharp-code.html">Porting C# code<small>Translate managed lifetime, delegates, tasks, and async-shaped control flow.</small></a>
+<a href="memory-management.html">Memory and ownership<small>RAII, borrowed references, shared ownership, and callback captures.</small></a>
+<a href="development/known-limitations.html">Known limitations<small>Current concurrency, platform, runtime-model, and teardown boundaries.</small></a>
+<a href="platform-layer.html">Platforms and portability<small>Separate source paths, builds, runtime evidence, and complete gates.</small></a>
+</div>
